@@ -6,6 +6,7 @@ use std::io::ErrorKind;
 use std::io::Result;
 use std::os::unix::fs::PermissionsExt;
 
+#[allow(dead_code)]
 struct GojoConfig {
   name: String,
   src_extension: String,
