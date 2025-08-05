@@ -5,6 +5,11 @@ use std::env;
 
 fn main() {
   let args: Vec<String> = env::args().collect();
+  if args.len() == 1 {
+    println!("{}", file_contents::WIN);
+    handlers::help();
+    return;
+  }
   let command = args[1].as_str();
   let mut result: std::io::Result<()> = std::io::Result::Ok(());
 
@@ -31,7 +36,7 @@ fn main() {
       result = handlers::check();
     }
     "help" => {
-      result = handlers::help();
+      handlers::help();
     }
     _ => {
       println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");

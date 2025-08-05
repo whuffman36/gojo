@@ -1,4 +1,5 @@
-pub const HELP: &str = "\x1b[1;32mgojo:\x1b[0m a modern build system for C++
+pub const HELP: &str = "\x1b[1;35m\"Throughout Heaven and Earth, I alone am the honored one\"\n\x1b[0m
+\x1b[1;32mgojo:\x1b[0m a modern build system for C++
 
 \x1b[1;32mUsage:\x1b[0m \x1b[1;36mgojo <COMMAND> [OPTIONS]\x1b[0m
 
@@ -15,43 +16,46 @@ pub const HELP: &str = "\x1b[1;32mgojo:\x1b[0m a modern build system for C++
 See '\x1b[1;36mgojo help <COMMAND>\x1b[0m' for more information on a specific command
 ";
 
-
 pub fn main_src(h_ext: &str) -> String {
-  format!("#include \"lib/hello_world.{h_ext}\"
+  format!(
+    "#include \"lib/hello_world.{h_ext}\"
 #include <iostream>
 
 int main() {{
   std::cout << hello_world() << \"\\n\";
   return 0;
 }}
-")
+"
+  )
 }
-
 
 pub fn hello_world_header(h_ext: &str) -> String {
   let upper_ext = h_ext.to_uppercase();
-  format!("#ifndef LIB_HELLO_WORLD_{upper_ext}
+  format!(
+    "#ifndef LIB_HELLO_WORLD_{upper_ext}
 #define LIB_HELLO_WORLD_{upper_ext}
 
 const char* hello_world();
 
 #endif
-")
+"
+  )
 }
 
-
 pub fn hello_world_src(h_ext: &str) -> String {
-  format!("#include \"hello_world.{h_ext}\"
+  format!(
+    "#include \"hello_world.{h_ext}\"
 
 const char* hello_world() {{
   return \"Hello World!\";
 }}
-")
+"
+  )
 }
 
-
 pub fn lib_cmake_lists_txt(src_ext: &str) -> String {
-  format!("add_library(
+  format!(
+    "add_library(
   lib
   STATIC
   hello_world.{src_ext}
@@ -67,24 +71,26 @@ target_link_libraries(
   lib
   PUBLIC
   # Add libraries here
-)")
+)"
+  )
 }
 
-
 pub fn test_hello_world_src(h_ext: &str) -> String {
-  format!("#include \"../src/lib/hello_world.{h_ext}\"
+  format!(
+    "#include \"../src/lib/hello_world.{h_ext}\"
 
 #include <gtest/gtest.h>
 
 TEST(HelloTest, BasicAssertions) {{
   EXPECT_EQ(hello_world(), \"Hello World!\");
 }}
-")
+"
+  )
 }
 
-
 pub fn test_cmake_lists_txt(src_ext: &str) -> String {
-  format!("enable_testing()
+  format!(
+    "enable_testing()
 set(CMAKE_CXX_CLANG_TIDY \"\")
 
 include(FetchContent)
@@ -108,14 +114,13 @@ target_link_libraries(
 )
 
 include(GoogleTest)
-gtest_discover_tests(test_hello_world)")
+gtest_discover_tests(test_hello_world)"
+  )
 }
-
 
 pub const CLANG_TIDY: &str =
 "Checks: \'abseil-*,bugprone-*,clang-analyzer-*,cppcoreguidelines-*,google-*,modernize-*,performance-*,-modernize-use-trailing-return-type\'
 WarningsAsErrors: \'bugprone-*,clang-analyzer-*,cppcoreguidelines-*\'";
-
 
 pub const GIT_IGNORE: &str = "CMakeLists.txt.user
 CMakeCache.txt
@@ -133,7 +138,6 @@ build
 .vscode
 .DS_Store";
 
-
 pub fn readme(project_name: &str) -> String {
   format!(
     "# {project_name}
@@ -143,13 +147,13 @@ TODO: write a readme...
   )
 }
 
-
 pub fn root_cmake_lists_txt(
   project_name: &str,
   compiler_option: Option<&String>,
   cpp_version_option: Option<&String>,
   description_option: Option<&String>,
-  src_ext_option: &str) -> String {
+  src_ext_option: &str,
+) -> String {
   let compiler = match compiler_option {
     Some(option) => {
       format!("set(CMAKE_CXX_COMPILER /usr/bin/{option})")
@@ -160,7 +164,8 @@ pub fn root_cmake_lists_txt(
   let description = description_option.unwrap_or(&String::default()).clone();
   let compile_options = compile_options(&cpp_version);
 
-  format!("cmake_minimum_required(VERSION 3.28)
+  format!(
+    "cmake_minimum_required(VERSION 3.28)
 
 {compiler}
 set(CMAKE_CXX_STANDARD {cpp_version})
@@ -209,19 +214,12 @@ endif()"
   )
 }
 
-
 fn compile_options(version: &str) -> String {
   let os = std::env::consts::OS;
   let std_lib = match os {
-    "linux" => {
-      "libstdc++"
-    },
-    "macos" => {
-      "libc++"
-    },
-    _ => {
-      ""
-    }
+    "linux" => "libstdc++",
+    "macos" => "libc++",
+    _ => "",
   };
 
   let mut extra_flags = "";
@@ -229,10 +227,46 @@ fn compile_options(version: &str) -> String {
     extra_flags = "\n\t-D__cpp_concepts=202002L
   -Wno-builtin-macro-redefined"
   }
-  
-  format!("add_compile_options(
+
+  format!(
+    "add_compile_options(
   -stdlib={std_lib}
   -Wall
   -Wextra{extra_flags}
-)")
+)"
+  )
 }
+
+pub const WIN: &str = "
+⠀⠀⠀⠀⠀⠀⢀⡀⠀⠀⠀⠀⠀⠀⣾⡳⣼⣆⠀⠀⢹⡄⠹⣷⣄⢠⠇⠻⣷⣶⢀⣸⣿⡾⡏⠀⠰⣿⣰⠏⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡀⣀⣀⣀⡹⣟⡪⢟⣷⠦⠬⣿⣦⣌⡙⠿⡆⠻⡌⠿⣦⣿⣿⣿⣿⣦⣿⡿⠟⠚⠉⠀⠉⠳⣄⡀⠀⠀⠁⠀
+⠀⠀⠀⠀⠀⠀⠀⡀⢀⣼⣟⠛⠛⠙⠛⠉⠻⢶⣮⢿⣯⡙⢶⡌⠲⢤⡑⠀⠈⠛⠟⢿⣿⠛⣿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣆⠀⠀⠀
+⠀⠀⠀⠀⠀⡸⠯⣙⠛⢉⣉⣙⣿⣿⡳⢶⣦⣝⢿⣆⠉⠻⣄⠈⢆⢵⡈⠀⠀⢰⡆⠀⣼⠓⠀⠀⠀ Nah,    ⠀⠈⣷⠀⠀
+⠀⠀⠀⠖⠉⠻⣟⡿⣿⣭⢽⣽⣶⣈⢛⣾⣿⣧⠀⠙⠓⠀⠑⢦⡀⠹⣧⢂⠀⣿⡇⢀⣿⠺⠇⠀  I'd        ⣿⠀⠀
+⠀⠀⠀⠀⠐⠈⠉⢛⣿⣿⣶⣤⣈⠉⣰⣗⡈⢛⣇⠀⣵⡀⠀⠘⣿⡄⢻⣤⠀⢻⡇⣼⣧⣿⡄⠀⠀ Win      ⠀⠀⡿⠀⠀
+⠀⠀⠀⠀⠀⣠⣾⣿⢍⡉⠛⠻⣷⡆⠨⣿⣭⣤⣍⠀⢹⣷⡀⠀⠹⣿⡄⠈⠀⢿⠁⣿⣿⠏⠀⠀⠀            ⣇⠀⠀
+⠀⣿⣇⣠⣾⣿⣛⣲⣿⠛⠀⠀⢀⣸⣿⣿⣟⣮⡻⣷⣤⡙⢟⡀⠀⠙⢧⠀⠀⠎⠀⠉⠁⠰⣿⠀⠀          ⢀⡿⠀⠀
+⠀⠈⢻⣿⣿⣽⣿⣿⣿⣴⡏⠚⢛⣈⣍⠛⠛⠿⢦⣌⢙⠻⡆⠁⠀⠀⠀⣴⣦⠀⠀⠀⠐⢳⢻⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠮⠀⠀⠀
+⠀⠀⠈⠙⣿⣧⣶⣿⠿⣧⣴⣿⢻⡉⠀⢀⣠⣴⣾⡟⠿⠃⠁⣠⣤⡶⣾⡟⠅⠀⣀⡄⠀⣾⢸⣿⣏⢻⢶⣦⣤⣤⣄⢶⣾⣿⣡⣤⡄⠀
+⠀⠀⣠⣞⣋⣿⣿⣾⣿⡿⡛⣹⡟⣤⢰⡿⠟⠉⣀⣀⣤⣤⡠⠙⢁⣾⡿⠂⠀⣿⠟⣁⠀⣹⠀⣹⣿⡟⣼⣿⣿⣌⣿⣞⣿⣿⠁⠀⠀⠀
+⠀⢠⡿⢛⢟⣿⣿⣿⣿⣿⣿⡟⣼⣿⣟⢓⠛⣿⣏⣿⣵⣗⣵⣴⣿⢟⡵⣣⣼⣿⢟⣵⣶⢻⣶⣿⠀⠀⣈⢻⣿⣿⣿⢿⣾⢿⣧⠀⠀⠀
+⠀⠘⠃⢸⣿⡾⣿⣿⣿⣿⣯⣿⣿⣿⣶⣿⣿⣟⣾⡿⣫⣿⣿⣿⣽⣿⣿⣿⣿⢫⣾⣿⣿⣿⣿⣿⣴⡆⣻⣿⡏⣿⢻⣧⣿⡿⣿⡆⠀⠀
+⠀⠀⠀⠜⣿⣾⢿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣭⣿⣖⣿⢿⣿⡿⣿⣿⣿⡿⢡⢯⣿⣿⣿⣿⣿⣿⣿⣧⡿⣾⣷⣿⣿⢿⣿⡇⠉⠁⠀⠀
+⠀⠀⠀⠀⣿⣥⣾⣿⣿⣿⣿⣿⣿⣿⡇⣭⣿⣿⣿⣿⠃⠞⠟⣸⣿⠏⣸⣧⣀⠿⢿⣿⣿⣟⣿⣿⣿⣿⣽⣿⢿⣿⣿⣿⣿⠁⠀⠀⠀⠀
+⠀⠀⠀⠈⠛⣹⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣟⣿⣿⡿⢶⣦⣄⣿⠏⠀⣿⣟⣿⣶⠾⣿⣟⣋⣛⣿⣿⣿⣿⡇⣻⣿⣿⣿⡏⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠟⠛⠫⣿⣿⣿⣿⣿⡿⣧⠛⣿⠛⣿⣿⣿⣷⡌⠹⡟⠀⠀⠉⡟⠋⢠⣾⣿⣿⣿⡟⣿⣿⣿⣿⢀⣿⣿⣿⣿⣧⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠘⠋⣾⣷⣿⣿⣧⠙⠀⠙⢣⠝⠛⠋⣽⣷⢦⠇⠀⠀⠘⠁⣤⣾⣿⠝⠛⠉⠘⢻⣿⣿⢿⣼⣷⡟⢻⣷⠉⠀⡀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠐⠟⢻⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠈⠛⠀⠀⠀⠀⠀⣾⠟⠀⢸⣷⣿⡇⠀⠛⠀⠀⠁⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠁⠀⢹⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⣿⡧⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠆⠀⠀⠀⠀⠀⠀⠈⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⢻⡿⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣇⠀⠀⠀⠀⠀⠀⠀⠀⠲⣄⠀⡄⠆⠀⠀⠀⠀⠀⠀⠀⠀⣼⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⣀⠀⠀⣠⣾⣿⠁⠀⠀⠀⠀⠀⣀⡄⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⢻⣆⠀⠛⠁⠶⣶⣶⣶⣶⣶⣶⡶⠆⠘⠋⣠⡾⢫⣾⡟⠀⠀⠀⠀⠀⠐⠉⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠛⠀⠙⣷⡀⠀⠀⠙⠛⠛⠛⠛⠋⠁⠀⢀⣴⠋⠀⣾⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣿⣰⣦⡀⠸⣿⣦⡀⠀⠀⠀⠀⠀⠀⢀⣴⡟⠁⠀⠐⢻⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣿⡄⢺⣿⡄⠹⣿⠻⢦⣤⣤⣤⣤⣶⣿⡟⢀⣀⠀⠀⢸⣿⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣮⣿⣿⡀⠹⡷⣦⣀⡀⡀⢸⣿⠏⢠⣾⣿⠀⠀⣾⣿⣿⣿⣿⣶⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀
+⣀⣤⣴⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠘⣷⣻⡟⠀⡼⠁⣴⣿⣿⣯⣥⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣤⣀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣯⣿⣤⣤⣤⣬⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣤⣄
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+";

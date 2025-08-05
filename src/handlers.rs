@@ -6,13 +6,11 @@ use std::io::ErrorKind;
 use std::io::Result;
 use std::os::unix::fs::PermissionsExt;
 
-
 struct GojoConfig {
   name: String,
   src_extension: String,
-  header_extension: String
+  header_extension: String,
 }
-
 
 pub fn init(args: &[String]) -> Result<()> {
   if args.len() < 3 {
@@ -118,7 +116,10 @@ pub fn init(args: &[String]) -> Result<()> {
   fs::create_dir("src")?;
   fs::create_dir("src/lib")?;
   fs::create_dir("build")?;
-  fs::write(format!("src/main.{src_ext}"), file_contents::main_src(h_ext.as_str()).as_bytes())?;
+  fs::write(
+    format!("src/main.{src_ext}"),
+    file_contents::main_src(h_ext.as_str()).as_bytes(),
+  )?;
   fs::write(
     "CMakeLists.txt",
     file_contents::root_cmake_lists_txt(name, compiler, cpp_version, description, src_ext.as_str()),
@@ -158,15 +159,17 @@ pub fn init(args: &[String]) -> Result<()> {
     fs::write(".gitignore", file_contents::GIT_IGNORE.as_bytes())?;
   }
 
-  fs::write("build/.gojo", format!(
-"name: {name}
+  fs::write(
+    "build/.gojo",
+    format!(
+      "name: {name}
 src_exension: {src_ext}
 header_extension: {h_ext}"
-  ))?;
+    ),
+  )?;
 
   Ok(())
 }
-
 
 pub fn build(args: &[String]) -> Result<()> {
   let mut options = args.iter();
@@ -203,7 +206,6 @@ pub fn build(args: &[String]) -> Result<()> {
     .output()?;
   Ok(())
 }
-
 
 pub fn run(args: &[String]) -> Result<()> {
   if !fs::exists("build")? {
@@ -272,7 +274,6 @@ pub fn run(args: &[String]) -> Result<()> {
   Ok(())
 }
 
-
 pub fn test() -> Result<()> {
   std::process::Command::new("cmake")
     .args(["-DBUILD_TESTING=ON", "-S", ".", "-B", "build"])
@@ -290,7 +291,6 @@ pub fn test() -> Result<()> {
   Ok(())
 }
 
-
 pub fn clean() -> Result<()> {
   fs::rename("build/_deps", "_deps")?;
   fs::rename("build/.gojo", ".gojo")?;
@@ -301,19 +301,38 @@ pub fn clean() -> Result<()> {
   Ok(())
 }
 
-
 pub fn fmt(args: &[String]) -> Result<()> {
   let mut style = "google";
   if args.len() > 2 {
     if args[2] != "--style" {
-      return Err(Error::new(ErrorKind::Other, "\x1b[31mincorrect usage:\x1b[0m \n\tgojo fmt --style <style>\n\tsee 'gojo help fmt'\n"));
+      return Err(Error::new(
+        ErrorKind::Other,
+        "\x1b[31mincorrect usage:\x1b[0m \n\tgojo fmt --style <style>\n\tsee 'gojo help fmt'\n",
+      ));
     }
-    if !["llvm", "google", "chromium", "mozilla", "webkit", "microsoft", "gnu"].contains(&args[3].as_str()) {
-      return Err(Error::new(ErrorKind::Other, format!("\x1b[31mincorrect usage:\x1b[0m \n\tstyle not found: {}\n\tsee 'gojo help fmt'\n", args[3])));
+    if ![
+      "llvm",
+      "google",
+      "chromium",
+      "mozilla",
+      "webkit",
+      "microsoft",
+      "gnu",
+    ]
+    .contains(&args[3].as_str())
+    {
+      return Err(Error::new(
+        ErrorKind::Other,
+        format!(
+          "\x1b[31mincorrect usage:\x1b[0m \n\tstyle not found: {}\n\tsee 'gojo help fmt'\n",
+          args[3]
+        ),
+      ));
     }
     style = args[3].as_str();
   }
-  let mut src_files: std::vec::Vec<String> = vec![String::from(format!("-style={style}")), String::from("-i")];
+  let mut src_files: std::vec::Vec<String> =
+    vec![String::from(format!("-style={style}")), String::from("-i")];
   collect_src_files(std::path::PathBuf::from("src"), &mut src_files);
   collect_src_files(std::path::PathBuf::from("test"), &mut src_files);
 
@@ -326,10 +345,16 @@ pub fn fmt(args: &[String]) -> Result<()> {
   Ok(())
 }
 
-
 pub fn check() -> Result<()> {
   std::process::Command::new("cmake")
-    .args(["-DBUILD_TESTING=ON", "-DSTATIC_CHECK=ON", "-S", ".", "-B", "build"])
+    .args([
+      "-DBUILD_TESTING=ON",
+      "-DSTATIC_CHECK=ON",
+      "-S",
+      ".",
+      "-B",
+      "build",
+    ])
     .stdout(std::process::Stdio::inherit())
     .stderr(std::process::Stdio::inherit())
     .output()?;
@@ -388,28 +413,22 @@ pub fn new_class(args: &[String]) -> Result<()> {
 }
 */
 
-pub fn help() -> Result<()> {
+pub fn help() {
   println!("{}", file_contents::HELP);
-  gojo_config();
-  Ok(())
 }
-
 
 fn collect_src_files(path: std::path::PathBuf, src_files: &mut std::vec::Vec<String>) {
   for entry in fs::read_dir(path).unwrap() {
     let entry = entry.unwrap();
     if entry.file_name().to_str().unwrap().ends_with(".cpp") {
       src_files.push(String::from(entry.path().to_str().unwrap()));
-    }
-    else if entry.file_name().to_str().unwrap().ends_with(".hpp") {
+    } else if entry.file_name().to_str().unwrap().ends_with(".hpp") {
       src_files.push(String::from(entry.path().to_str().unwrap()));
-    }
-    else if entry.file_type().unwrap().is_dir() {
+    } else if entry.file_type().unwrap().is_dir() {
       collect_src_files(entry.path(), src_files);
     }
   }
 }
-
 
 fn gojo_config() -> Option<GojoConfig> {
   let config_result = fs::read_to_string("build/.gojo");
@@ -426,11 +445,9 @@ fn gojo_config() -> Option<GojoConfig> {
   let src_ext = parsed_src_ext[1].trim_start().trim_end();
   let h_ext = parsed_h_ext[1].trim_start().trim_end();
 
-  Some(
-    GojoConfig {
-      name: String::from(name),
-      src_extension: String::from(src_ext),
-      header_extension: String::from(h_ext),
-    }
-  )
+  Some(GojoConfig {
+    name: String::from(name),
+    src_extension: String::from(src_ext),
+    header_extension: String::from(h_ext),
+  })
 }
