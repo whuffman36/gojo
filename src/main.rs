@@ -1,42 +1,68 @@
-mod file_contents;
-mod handlers;
+mod commands;
+mod plaintext;
+mod templates;
 
-use std::env;
+// TODO
+// * update command
+//    - maybe keep a copy of the repo in .gojo file? git pull it?
+// * download some dependencies upon init
+//    - cppcheck, cpplint, git, gcc, clang, cmake
+// * command to install specific libs that i like
+// * how to edit CMakeLists.txt file from rust?
+// * add a command to create a new PR
+
 
 fn main() {
-  let args: Vec<String> = env::args().collect();
+  let args: std::vec::Vec<String> = std::env::args().collect();
   if args.len() == 1 {
-    println!("{}", file_contents::WIN);
-    handlers::help();
+    println!("{}", plaintext::WIN);
+    commands::help();
     return;
   }
+
   let command = args[1].as_str();
+  let mut command_args: &[String] = &[];
+  if args.len() > 2 {
+    command_args = args[2..].iter().as_slice();
+  }
+
   let mut result: std::io::Result<()> = std::io::Result::Ok(());
 
   match command {
     "init" => {
-      result = handlers::init(args.as_slice());
+      result = commands::init(command_args);
     }
     "build" => {
-      result = handlers::build(args.as_slice());
+      result = commands::build(command_args);
     }
     "run" => {
-      result = handlers::run(args.as_slice());
+      result = commands::run(command_args);
     }
     "test" => {
-      result = handlers::test();
+      result = commands::test();
     }
     "clean" => {
-      result = handlers::clean();
+      result = commands::clean();
     }
     "fmt" => {
-      result = handlers::fmt(args.as_slice());
+      result = commands::fmt(command_args);
+    }
+    "lint" => {
+      println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");
     }
     "check" => {
-      result = handlers::check();
+      result = commands::check();
     }
-    "help" => {
-      handlers::help();
+    "new-pr" => {
+      println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");
+      // result = handlers::new_pr(command_args);
+    }
+    "install" => {
+      println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");
+      // result = handlers::install(command_args);
+    }
+    "help" | "--help" | "-h" => {
+      commands::help();
     }
     _ => {
       println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");
