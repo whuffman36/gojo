@@ -1,6 +1,7 @@
 mod commands;
 mod plaintext;
 mod templates;
+mod packages;
 
 // TODO
 // * update command
@@ -53,13 +54,11 @@ fn main() {
     "check" => {
       result = commands::check();
     }
-    "new-pr" => {
-      println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");
-      // result = handlers::new_pr(command_args);
+    "branch" => {
+      result = commands::branch(command_args);
     }
     "install" => {
-      println!("\x1b[31mincorrect usage:\x1b[0m \n\tcommand not recognized: {command}");
-      // result = handlers::install(command_args);
+      result = commands::install(command_args);
     }
     "help" | "--help" | "-h" => {
       commands::help();

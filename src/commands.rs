@@ -1,5 +1,6 @@
 use crate::plaintext;
 use crate::templates;
+use crate::packages;
 
 use std::collections::hash_map::HashMap;
 use std::fs;
@@ -46,6 +47,10 @@ pub fn init(args: &[String]) -> Result<()> {
   }
 
   let name = args[0].as_str();
+  if name == "--help" {
+    println!("Oops! This command hasn't been implemented yet...");
+    return Ok(());
+  }
   let project_root = std::env::current_dir()?.to_str().unwrap().to_string() + "/" + name;
   let mut std: Option<&str> = None;
   let mut src_extension: Option<&str> = None;
@@ -105,6 +110,7 @@ pub fn init(args: &[String]) -> Result<()> {
       }
       "--help" => {
         println!("Oops! This command hasn't been implemented yet...");
+        return Ok(());
       }
       _ => {
         return Err(Error::new(
@@ -249,6 +255,7 @@ pub fn build(args: &[String]) -> Result<()> {
       }
       "--help" => {
         println!("Oops! This command hasn't been implemented yet...");
+        return Ok(());
       }
       _ => {
         return Err(Error::new(
@@ -282,36 +289,68 @@ pub fn build(args: &[String]) -> Result<()> {
   let num_cores = num_cpus::get().to_string();
 
   if quiet {
-    Command::new("cmake")
+    let result = Command::new("cmake")
     .args([test, build_type, "-S", ".", "-B", build_dir.as_str()])
     .stdout(Stdio::null())
     .stderr(Stdio::inherit())
     .output()?;
-    Command::new("cmake")
+
+    let status = result.status;
+    if !status.success() {
+      return Err(Error::new(
+          ErrorKind::Other,
+          "\x1b[31mCMake failed to initialize build directory\x1b[0m\n\n"
+      ));
+    }
+
+    let build_result = Command::new("cmake")
       .args(["--build", "build", "-j", num_cores.as_str()])
       .stdout(Stdio::null())
       .stderr(Stdio::inherit())
       .output()?;
+
+    let build_status = build_result.status;
+    if !build_status.success() {
+      return Err(Error::new(
+          ErrorKind::Other,
+          "\x1b[31mCMake failed to build project\x1b[0m\n\n"
+      ));
+    }
     return Ok(())
   }
 
   print!("\n\x1b[0;35mInitliazing CMake in\x1b[0m {}\n", build_dir.as_str());
-  Command::new("cmake")
+  let result = Command::new("cmake")
     .args([test, build_type, "-S", ".", "-B", build_dir.as_str()])
     .stdout(Stdio::null())
     .stderr(Stdio::inherit())
     .output()?;
 
+  let status = result.status;
+  if !status.success() {
+    return Err(Error::new(
+          ErrorKind::Other,
+          "\x1b[31mCMake failed to initialize build directory\x1b[0m\n\n"
+    ));
+  }
+
   let mode: Vec<&str> = build_type.split("=").collect();
   print!("\x1b[1;35mCompiling\x1b[0m {} \x1b[1;35min\x1b[0m \x1b[1;36m{}\x1b[0m \x1b[1;35mmode\x1b[0m\n\n", name, mode[1]);
   let start = time::Instant::now();
-  Command::new("cmake")
+  let build_result = Command::new("cmake")
     .args(["--build", "build", "-j", num_cores.as_str()])
     .stdout(Stdio::inherit())
     .stderr(Stdio::inherit())
     .output()?;
 
   let total_time = start.elapsed();
+  let build_status = build_result.status;
+  if !build_status.success() {
+    return Err(Error::new(
+          ErrorKind::Other,
+          "\x1b[31mCMake failed to build project\x1b[0m\n\n"
+    ));
+  }
   print!("\n\x1b[1;32mBuild successful\x1b[0m ({}s)\n\n", total_time.as_secs());
   Ok(())
 }
@@ -335,6 +374,7 @@ pub fn run(args: &[String]) -> Result<()> {
 
   if !args.is_empty() && args[0] == "--help" {
     println!("Oops! This command hasn't been implemented yet...");
+    return Ok(());
   }
 
   // Check if name was supplied in argument list
@@ -460,6 +500,7 @@ pub fn fmt(args: &[String]) -> Result<()> {
       }
       "--help" => {
         println!("Oops! This command hasn't been implemented yet...");
+        return Ok(());
       }
       _ => {
         return Err(Error::new(
@@ -518,6 +559,8 @@ pub fn fmt(args: &[String]) -> Result<()> {
 
   Ok(())
 }
+
+// pub fn lint()...
 
 pub fn check() -> Result<()> {
   let mut config = config_default();
@@ -602,6 +645,64 @@ pub fn check() -> Result<()> {
 
     let total_time = start.elapsed();
     print!("\x1b[1;32mAll checks passed\x1b[0m ({}s)\n\n", total_time.as_secs());
+  Ok(())
+}
+
+pub fn branch(args: &[String]) -> Result<()> {
+  let arg_map = parse_arguments(&args);
+  if arg_map.is_empty() || arg_map.len() > 1 {
+    return Err(Error::new(
+      ErrorKind::Other,
+        "\x1b[31mincorrect usage:\x1b[0m\n\tno branch name supplied\n\tsee 'gojo fmt --help'\n"
+      )
+    );
+  }
+
+  if arg_map.contains_key("--help") {
+    println!("Oops! This command hasn't been implemented yet...");
+    return Ok(());
+  }
+
+  for (flag, _) in arg_map {
+    Command::new("git").arg("pull").stdout(Stdio::inherit()).stderr(Stdio::inherit()).output()?;
+    Command::new("git").args(["switch", "-c", flag]).stdout(Stdio::inherit()).stderr(Stdio::inherit()).output()?;
+    Command::new("git").args(["branch", "--set-upstream-to=origin/main", flag]).stdout(Stdio::inherit()).stderr(Stdio::inherit()).output()?;
+  }
+  Ok(())
+}
+
+pub fn install(args: &[String]) -> Result<()> {
+  if args.is_empty() {
+    return Err(Error::new(
+      ErrorKind::Other,
+      "\x1b[31mincorrect usage:\x1b[0m\n\tgojo install <package> [options]\n\tsee 'gojo install --list'\n",
+    ));
+  }
+
+  let package_list = ["gtest"];
+  let package_descriptions = ["Google testing framework"];
+  let arg_map = parse_arguments(&args);
+  for (key, _) in arg_map {
+    match key {
+      "gtest" | "googletest" => {
+        return packages::install_gtest();
+      }
+      "--list" | "-l" => {
+        print!("\x1b[1;35mUsage:\x1b[0m \x1b[0;35mgojo\x1b[0m \x1b[1;35minstall\x1b[0m \x1b[0;36m<package>\x1b[0m\n\n");
+        print!("\x1b[1;35mpackages:\x1b[0m\n\n");
+        for (idx, package) in package_list.iter().enumerate() {
+          print!("  * \x1b[1;36m{}\x1b[0m\t\t{}\n\n", package, package_descriptions[idx]);
+        }
+        return Ok(());
+      }
+      _ => {
+        return Err(Error::new(
+          ErrorKind::Other,
+          format!("\x1b[31mpackage not found:\x1b[0m{}\n\tsee 'gojo install --list'\n", key)
+        ));
+      }
+    }
+  }
   Ok(())
 }
 
