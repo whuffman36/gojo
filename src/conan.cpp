@@ -231,6 +231,9 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
     }
   }
 
+  std::println(MAGENTA("Installing conan dependencies...\n"));
+  std::fflush(stdout);
+
   constexpr std::string_view cmd_str { 
     "conan install . "
     "--deployer=full_deploy "
@@ -240,6 +243,23 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
     "-s build_type={}"
   };
 
+  std::string build_type {};
+  std::stringstream ss { cfg.dep_build_types };
+  while (std::getline(ss, build_type, ',')) {
+    const std::string cmd {
+      std::format(cmd_str, cfg.project_name, build_type)
+    };
+
+    std::filesystem::current_path(cfg.project_root);
+    auto result { utils::execute_command(cmd, !verbose) };
+    if (!result.success) {
+      return std::make_optional(
+        std::format("{}\nfailed to install conan dependencies",
+                    result.output)
+      );
+    }
+  }
+/*
   // In order to download the packages in debug and release mode, we have
   // to install two times, one for each build type.
   // Kinda sucks...
@@ -269,7 +289,7 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
                   rel_result.output)
     );
   }
-
+*/
   std::fflush(stdout);
   std::println(
     GREEN("\nDependencies installed successfully\n")

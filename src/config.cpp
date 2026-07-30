@@ -107,6 +107,7 @@ constexpr std::string_view GENERATOR      { "generator" };
 constexpr std::string_view MULTI_CONFIG   { "multi-config generator" };
 constexpr std::string_view BUILD_TYPE     { "build type" };
 constexpr std::string_view PKG_MAN        { "package manager" };
+constexpr std::string_view PKG_BUILD_TYPE { "dependency build types" };
 constexpr std::string_view SRC_EXT        { "source file extension" };
 constexpr std::string_view HDR_EXT        { "header file extension" };
 constexpr std::string_view FMT_STYLE      { "clang-format style" };
@@ -168,6 +169,10 @@ R"(---
 {}={}
 
 # Options: none, conan, vcpkg
+{}={}
+
+# Options: Debug, Release, RelWithDebInfo, MinSizeRel
+# Note: any of the above options can be combined in a comma separated list
 {}={}
 
 # Options   (C): c
@@ -391,6 +396,25 @@ read_from_file(const std::filesystem::path& cfg_file) {
       std::getline(ss, cfg.pkg_manager);
       result = validate_config_values(label, cfg.pkg_manager, PKG_MANAGERS);
     }
+    else if (label == PKG_BUILD_TYPE) {
+      if (cfg.pkg_manager == "none") {
+        cfg.dep_build_types = "";
+        continue;
+      }
+      
+      std::getline(ss, cfg.dep_build_types);
+      if (cfg.dep_build_types.empty()) {
+        cfg.dep_build_types = "Debug,Release";
+        result.success = true;
+      }
+      else {
+        std::stringstream ss2 { cfg.dep_build_types };
+        std::string build_type {};
+        while (std::getline(ss2, build_type, ',')) {
+          result = validate_config_values(PKG_BUILD_TYPE, build_type, BUILD_TYPES);
+        }
+      }
+    }
     else if (label == SRC_EXT) {
       std::getline(ss, cfg.src_ext);
       if (cfg.project_lang == "C++") {
@@ -514,6 +538,7 @@ std::optional<std::string> write_to_file(const GojoConfig& cfg,
     MULTI_CONFIG, cfg.multi_config ? "true" : "false",
     BUILD_TYPE, cfg.build_type,
     PKG_MAN, cfg.pkg_manager,
+    PKG_BUILD_TYPE, cfg.dep_build_types,
     SRC_EXT, cfg.src_ext,
     HDR_EXT, cfg.hdr_ext,
     FMT_STYLE, cfg.fmt_style,
@@ -566,6 +591,7 @@ create_template(const std::filesystem::path& project_root) {
     MULTI_CONFIG, "",
     BUILD_TYPE, "",
     PKG_MAN, "",
+    PKG_BUILD_TYPE, "",
     SRC_EXT, "",
     HDR_EXT, "",
     FMT_STYLE, "",

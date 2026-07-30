@@ -463,6 +463,17 @@ open source toolchains. Below is an explanation of each field:
     package manager is used, this value is set to '{3}none{0}'. The command
     {1}gojo{0} {4}install{0} has no effect if no package manager is used.
 
+  - {2}dependency build types{0}
+    This field determines the build type(s) that your dependendencies should
+    build with. If this field is left empty, and a package manager is being
+    used, the default value is '{3}Debug,Release{0}'. The value for this field
+    must be a comma separated list of one or more build types, the selection
+    being the same as the {2}build type{0} field. This is used to make
+    switching between build types easier - the dependencies are built with the
+    defined build_type(s) at installation time rather than when the project
+    switches its build type. Each dependency should be built with the same
+    build type as your project.
+
   - {2}source file extension{0}
     This field determines the file extension for C++ source code files. This
     field is not used for C projects. This field is only used during project
