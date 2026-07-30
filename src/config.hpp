@@ -30,6 +30,7 @@ struct GojoConfig {
   std::string generator;
   std::string build_type;
   std::string pkg_manager;
+  std::string dep_build_types;
   std::string src_ext;
   std::string hdr_ext;
   std::string fmt_style;
@@ -60,6 +61,7 @@ const GojoConfig DEFAULT = {
   .generator = "system default",
   .build_type = "Debug",
   .pkg_manager = "none",
+  .dep_build_types = "",
   .src_ext = "cpp",
   .hdr_ext = "hpp",
   .fmt_style = "google",

@@ -12,6 +12,7 @@
 #include "src/utils.hpp"
 
 
+// TODO: Create system to modify files in place
 constexpr std::string_view VERSION_STRING { "gojo version 1.0.0-beta" };
 
 int main(const int argc, const char* argv[]) {
@@ -64,7 +65,25 @@ int main(const int argc, const char* argv[]) {
   else if (command == "refresh") {
     result = commands::refresh(args, std::nullopt);
   }
+  else if (command == "dep") {
+    // TODO: Implement
+    // gojo dep search <pkg>
+    // gojo dep install <pkg> [version]
+    // gojo dep add <pkg> [version]
+    // gojo dep remove <pkg>
+    // gojo dep uninstall <pkg>
+  }
+  else if (command == "set") {
+    // TODO: Implement
+    // gojo set <config file field>
+  }
+  else if (command == "publish") {
+    // TODO: Implement
+    // gojo publish
+  }
   else if (command == "install") {
+    // TODO: refactor
+    // gojo install . [--replace|-r]
     result = commands::install(args);
   }
   else if (command == "profile") {
