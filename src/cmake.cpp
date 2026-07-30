@@ -16,6 +16,7 @@
 namespace cmake {
 
 std::optional<std::string> configure(const config::GojoConfig& cfg,
+                                     bool verbose,
                                      bool reconfigure) {
   std::string_view build_tests { "OFF" };
   if (cfg.testing_enabled) {
@@ -76,25 +77,39 @@ std::optional<std::string> configure(const config::GojoConfig& cfg,
     toolchain
   )};
 
-  std::println(MAGENTA("Configuring CMake...\n"));
-  std::fflush(stdout);
+  if (verbose) {
+    std::println(MAGENTA("Configuring CMake...\n"));
+    std::fflush(stdout);
 
-  std::filesystem::current_path(cfg.project_root);
-  auto result { utils::execute_command(cmd) };
+    std::filesystem::current_path(cfg.project_root);
+    auto result { utils::execute_command(cmd) };
 
-  if (!result.success) {
-    return std::make_optional("failed to configure CMake");
+    if (!result.success) {
+      return std::make_optional("failed to configure CMake");
+    }
+
+    std::fflush(stdout);
+    std::println(GREEN("\nCMake configured successfully"));
+    return std::nullopt;
   }
 
-  std::fflush(stdout);
-  std::println(GREEN("\nCMake configured successfully"));
+  std::filesystem::current_path(cfg.project_root);
+  auto result { utils::execute_command(cmd, true) };
+
+  if (!result.success) {
+    return std::make_optional(
+      std::format("failed to configure CMake: \n{}", result.output)
+    );
+  }
+
   return std::nullopt;
 }
 
 
 std::optional<std::string> build(const config::GojoConfig& cfg,
                                  std::string_view target,
-                                 bool clean) {
+                                 bool clean,
+                                 bool verbose) {
   std::string build_target {};
   if (!target.empty()) {
     build_target = std::format("--target {}", target);
@@ -123,7 +138,7 @@ std::optional<std::string> build(const config::GojoConfig& cfg,
   std::filesystem::current_path(cfg.project_root);
   auto begin { std::chrono::system_clock::now() };
 
-  auto result { utils::execute_command(cmd) };
+  auto result { utils::execute_command(cmd, !verbose) };
 
   if (!result.success) {
     return std::make_optional(

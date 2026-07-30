@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <optional>
 #include <print>
 #include <span>
@@ -20,7 +21,7 @@ int main(const int argc, const char* argv[]) {
                  utils::MAGENTA_BOLD,
                  utils::MAGENTA);
     commands::help();
-    return 0;
+    return EXIT_SUCCESS;
   }
 
   // clang-tidy doesn't like pointer arithmetic, but this is the only
@@ -87,8 +88,8 @@ int main(const int argc, const char* argv[]) {
   if (result.has_value()) {
     std::println(stderr, RED("[Error]: {}"), result.value());
     std::println(stderr, YELLOW("see gojo {} --help for more info"), command);
-    return 1;
+    return EXIT_FAILURE;
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }

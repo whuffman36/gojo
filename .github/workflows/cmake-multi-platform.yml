@@ -1,6 +1,6 @@
 # This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
-name: CMake on multiple platforms
+name: Cross-Platform CMake Build
 
 permissions:
   contents: read
@@ -32,7 +32,7 @@ jobs:
         build_type: [Release]
         include:
           - os: ubuntu-latest
-            compiler: g++-14
+            compiler: g++-16
           - os: macos-latest
             compiler: clang++
         exclude:
@@ -42,23 +42,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set reusable strings
+    - name: Set Reusable Strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: install updated gcc
+    - name: Install Updated gcc
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt install -y g++-14
+        sudo apt install -y g++-16
 
-    - name: Set up conan client
+    - name: Set Up Conan Client
       uses: conan-io/setup-conan@v1
 
-    - name: Install conan dependencies
+    - name: Install Conan Dependencies
       run: >
         conan install .
         --deployer=full_deploy

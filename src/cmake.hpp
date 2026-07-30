@@ -21,6 +21,7 @@ namespace cmake {
 /// @details This function can fail for any reason a CMake configuration can
 ///          fail.
 /// @param cfg Project config to base CMake configuration on.
+/// @param verbose If set to true, cmake output is forwarded to the user.
 /// @param reconfigure Optional. If set to true, CMake assumes the project has
 ///                    been previously configured and that several CMake files
 ///                    remain in the build directory. If set to false, CMake
@@ -28,6 +29,7 @@ namespace cmake {
 ///                    directory.
 /// @returns std::nullopt on success, an error message on failure.
 std::optional<std::string> configure(const config::GojoConfig& cfg,
+                                     bool verbose,
                                      bool reconfigure=false);
 
 
@@ -38,10 +40,12 @@ std::optional<std::string> configure(const config::GojoConfig& cfg,
 /// @param target Specific target to build. If this parameter is empty, the
 ///               entire project is built.
 /// @param clean Determines if the CMake cache is cleaned before building.
+/// @param verbose If set to true, cmake output is forwarded to the user.
 /// @returns std::nullopt on success, an error message on failure.
 std::optional<std::string> build(const config::GojoConfig& cfg,
                                  std::string_view target,
-                                 bool clean);
+                                 bool clean,
+                                 bool verbose);
 
 
 /// @brief Clean the cache of a CMake project.

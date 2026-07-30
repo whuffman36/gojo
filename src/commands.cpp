@@ -947,7 +947,7 @@ std::optional<std::string> init(std::span<std::string_view> args) {
 
   // init conan
   if (cfg.pkg_manager == "conan") {
-    auto conan_result { conan::install(cfg) };
+    auto conan_result { conan::install(cfg, false) };
     if (conan_result.has_value()) {
       return conan_result;
     }
@@ -958,7 +958,7 @@ std::optional<std::string> init(std::span<std::string_view> args) {
 
   // init cmake
   if (cfg.build_system == "CMake") {
-    auto cmake_result { cmake::configure(cfg) };
+    auto cmake_result { cmake::configure(cfg, false) };
     if (cmake_result.has_value()) {
       return cmake_result;
     }
@@ -981,48 +981,31 @@ std::optional<std::string> init(std::span<std::string_view> args) {
 
 
 std::optional<std::string> build(std::span<std::string_view> args) {
-  auto config_result { config::read_from_file(CONFIG_FILE) };
-  if (!config_result.has_value()) {
-    return std::make_optional(std::move(config_result.error()));
-  }
-
-  config::GojoConfig cfg { std::move(config_result.value()) };
-
+  std::string_view build_type {};
   std::string_view target {};
+  bool testing_enabled { false };
   bool clean { false };
   bool reconfigure { false };
+  bool verbose { false };
 
   for (const auto arg : args) {
     if (arg == "--release") {
-      if (cfg.build_type == "Debug") {
-        cfg.build_type = "Release";
-        if (!cfg.multi_config) {
-          reconfigure = true;
-        }
-      }
+      build_type = "Release";
     }
     else if (arg == "--debug") {
-      if (cfg.build_type == "Release") {
-        cfg.build_type = "Debug";
-        if (!cfg.multi_config) {
-          reconfigure = true;
-        }
-      }
+      build_type = "Debug";
     }
     else if (arg == "--tests") {
-      if (!cfg.testing_enabled) {
-        cfg.testing_enabled = true;
-        reconfigure = true;
-      }
+      testing_enabled = true;
     }
     else if (arg == "--no-tests") {
-      if (cfg.testing_enabled) {
-        cfg.testing_enabled = false;
-        reconfigure = true;
-      }
+      testing_enabled = false;
     }
     else if (arg == "--clean") {
       clean = true;
+    }
+    else if (arg == "--verbose" || arg == "-v") {
+      verbose = true;
     }
     else if (arg.starts_with("--target=")) {
       // Length of "--target="
@@ -1045,9 +1028,19 @@ std::optional<std::string> build(std::span<std::string_view> args) {
     }
   }
 
+  auto config_result { config::read_from_file(CONFIG_FILE) };
+  if (!config_result.has_value()) {
+    return std::make_optional(std::move(config_result.error()));
+  }
+
+  config::GojoConfig cfg { std::move(config_result.value()) };
+
+  reconfigure = ((cfg.build_type != build_type) && !cfg.multi_config) ||
+                (cfg.testing_enabled != testing_enabled);
+
   if (reconfigure) {
     if (cfg.build_system == "CMake") {
-      auto conf_result { cmake::configure(cfg, true) };
+      auto conf_result { cmake::configure(cfg, verbose, true) };
       if (conf_result.has_value()) {
         return conf_result;
       }
@@ -1061,10 +1054,10 @@ std::optional<std::string> build(std::span<std::string_view> args) {
     if (write_result.has_value()) {
       return write_result;
     };
-  } // config
+  } // reconfigure
 
   if (cfg.build_system == "CMake") {
-    auto build_result { cmake::build(cfg, target, clean) };
+    auto build_result { cmake::build(cfg, target, clean, verbose) };
     if (build_result.has_value()) {
       return build_result;
     }
@@ -1237,7 +1230,7 @@ std::optional<std::string> clean(std::span<std::string_view> args) {
     if (all) {
       // Delete entire build folder.
       clean_build_dir(cfg);
-      return cmake::configure(cfg);
+      return cmake::configure(cfg, false);
     }
     else {
       return cmake::clean(cfg, deep);
@@ -1402,9 +1395,15 @@ std::optional<std::string> check(std::span<std::string_view> args) {
                   cfg.clang_tidy_args) // {3}
     };
     std::filesystem::current_path(cfg.project_root);
+    if (verbose) {
+      std::println(MAGENTA("Running clang-tidy...\n"));
+    }
     auto cmd_result { utils::execute_command(cmd, !verbose) };
     if (!cmd_result.success) {
       return std::make_optional("failed clang-tidy checks");
+    }
+    if (verbose) {
+      std::println(GREEN("No problems found!"));
     }
   }
 
@@ -1438,9 +1437,15 @@ std::optional<std::string> check(std::span<std::string_view> args) {
                   cfg.cppcheck_args)   // {5}
     };
     std::filesystem::current_path(cfg.project_root);
-    auto cmd_result { utils::execute_command(cmd, verbose) };
+    if (verbose) {
+      std::println(MAGENTA("Running cppcheck...\n"));
+    }
+    auto cmd_result { utils::execute_command(cmd, !verbose) };
     if (!cmd_result.success) {
       return std::make_optional("failed cppcheck checks");
+    }
+    if (verbose) {
+      std::println(GREEN("No problems found!"));
     }
   }
 
@@ -1472,6 +1477,8 @@ std::optional<std::string> file_template(std::span<std::string_view> args) {
 std::optional<std::string> refresh(std::span<std::string_view> args,
                                    std::optional<config::GojoConfig> cfg_in) {
   std::string_view profile {};
+  bool verbose { false };
+
   for (const auto arg : args) {
     if (arg == "--help") {
       std::println(literals::REFRESH_HELP,
@@ -1481,6 +1488,9 @@ std::optional<std::string> refresh(std::span<std::string_view> args,
                    utils::YELLOW,
                    utils::CYAN);
       return std::nullopt;
+    }
+    else if ( arg == "--verbose" || arg == "-v") {
+      verbose = true;
     }
     else if (arg.starts_with("--profile=")) {
       // length of "--profile=".
@@ -1537,7 +1547,7 @@ std::optional<std::string> refresh(std::span<std::string_view> args,
 
   if (cfg.build_system == "CMake") {
     cfg.multi_config = config::is_multi_config(cfg.generator);
-    auto cfg_result { cmake::configure(cfg, reconfigure) };
+    auto cfg_result { cmake::configure(cfg, verbose, reconfigure) };
     if (cfg_result.has_value()) {
       return cfg_result;
     }
@@ -1552,6 +1562,7 @@ std::optional<std::string> refresh(std::span<std::string_view> args,
 
 
 std::optional<std::string> install(std::span<std::string_view> args) {
+  bool verbose { false };
   for (const auto arg : args) {
     if (arg == "--help") {
       std::println(literals::INSTALL_HELP,
@@ -1561,6 +1572,9 @@ std::optional<std::string> install(std::span<std::string_view> args) {
                    utils::YELLOW,
                    utils::CYAN);
       return std::nullopt;
+    }
+    else if (arg == "--verbose" || arg == "-v") {
+      verbose = true;
     }
     else {
       return std::make_optional(
@@ -1582,7 +1596,7 @@ std::optional<std::string> install(std::span<std::string_view> args) {
   clean_build_dir(cfg);
 
   if (cfg.pkg_manager == "conan") {
-    auto conan_result { conan::install(cfg) };
+    auto conan_result { conan::install(cfg, verbose) };
     if (conan_result.has_value()) {
       return conan_result;
     }

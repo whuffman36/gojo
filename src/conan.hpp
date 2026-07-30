@@ -37,8 +37,10 @@ struct Profile {
 ///          This function actually runs `conan install` twice, one for debug
 ///          mode and one for release mode.
 /// @param cfg Project config to base conan profiles off of.
+/// @param verbose If set to true, forwards conan output to the user.
 /// @returns std::nullopt on success, an error message on failure.
-std::optional<std::string> install(const config::GojoConfig& cfg);
+std::optional<std::string> install(const config::GojoConfig& cfg,
+                                   bool verbbose);
 
 }  // namespace conan
 

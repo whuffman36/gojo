@@ -219,7 +219,8 @@ std::optional<std::string> setup_profiles(const config::GojoConfig& cfg) {
 
 namespace conan {
 
-std::optional<std::string> install(const config::GojoConfig& cfg) {
+std::optional<std::string> install(const config::GojoConfig& cfg,
+                                   bool verbose) {
   const std::filesystem::path profile_file {
     std::format("{}/{}/{}", utils::get_home_dir(), PROFILES, cfg.project_name)
   };
@@ -240,7 +241,7 @@ std::optional<std::string> install(const config::GojoConfig& cfg) {
   };
 
   // In order to download the packages in debug and release mode, we have
-  // to install two times, one, for each build type.
+  // to install two times, one for each build type.
   // Kinda sucks...
   const std::string cmd_dbg {
     std::format(cmd_str, cfg.project_name, "Debug")
@@ -253,26 +254,32 @@ std::optional<std::string> install(const config::GojoConfig& cfg) {
   std::fflush(stdout);
 
   std::filesystem::current_path(cfg.project_root);
-  auto dbg_result { utils::execute_command(cmd_dbg) };
+  auto dbg_result { utils::execute_command(cmd_dbg, !verbose) };
   if (!dbg_result.success) {
-    return std::make_optional("failed to install conan dependencies");
+    return std::make_optional(
+      std::format("{}\nfailed to install conan dependencies",
+                  dbg_result.output)
+    );
   }
 
-  auto rel_result { utils::execute_command(cmd_rel) };
+  auto rel_result { utils::execute_command(cmd_rel, !verbose) };
   if (!rel_result.success) {
-    return std::make_optional("failed to install conan dependencies");
+    return std::make_optional(
+      std::format("{}\nfailed to install conan dependencies",
+                  rel_result.output)
+    );
   }
 
   std::fflush(stdout);
-  std::println(GREEN("\nDependencies installed successfully"));
   std::println(
+    GREEN("\nDependencies installed successfully\n")
     MAGENTA(
       "\nAdd the following line to your CMakeLists.txt"
       " in the root of the project:"
     )
+    CYAN("\tfind_package(<package_name> REQUIRED)\n")
+    MAGENTA("for each package installed.")
   );
-  std::println(CYAN("\tfind_package(<package_name> REQUIRED)"));
-  std::println(MAGENTA("for each package installed."));
   return std::nullopt;
 }
 

@@ -20,7 +20,11 @@ Checks: >
 #
 # Set any of the checks above to be treated as errors instead of warnings.
 # Must be in the list defined above.
-WarningsAsErrors: ''
+# '*' Sets all enabled checks to be errors
+# Leaving all checks as warnings causes clang-tidy to return successfully,
+# even if errors are found. Set these as errors, or use the --verbose flag
+# to see them when running 'gojo check'.
+WarningsAsErrors: '*'
 #
 # Header files to be checked. By default, only source files are checked 
 # by clang-tidy. For example:

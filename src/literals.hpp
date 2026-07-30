@@ -305,11 +305,8 @@ R"(
 Gojo is a CLI for C and C++ projects heavily inspired by rust's cargo CLI. It
 allows the freedom, complexity, and customizability of C/C++ projects while
 simplifying the repetitve development tasks to a few simple commands. Gojo
-does this by wrapping several open source C and C++ tools into one tool, each
-of which are opt in. While gojo relies on several tool dependencies, only one
-so called meta build sytem is required (for now, just CMake). If you don't want
-to install any further dependencies, gojo will still work, albeit without all
-of the bells and whistles. The following tools are used to make gojo work:
+does this by wrapping several open source C and C++ tools into one tool.
+Gojo relies on several tool dependencies:
 
   - {3}CMake (meta build system){0}
   - {3}clang-tidy (static analyzer){0}

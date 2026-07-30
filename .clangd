@@ -1,2 +1,9 @@
 CompileFlags:
   CompilationDatabase: "build/Debug"
+
+Index:
+  Background: Skip # Disables background indexing if it crashes during idle time
+
+Diagnostics:
+  ClangTidy:
+    Remove: ["*"] # Disables Clang-Tidy checks if a specific rule causes the crash
