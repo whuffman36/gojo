@@ -259,6 +259,19 @@ R"({1}Command:{0}
 };
 
 
+constexpr std::string_view DEP_HELP {
+R"({1}Command:{0}
+  gojo {2}dep{0} {4}[options]{0}
+
+{1}Summary:{0}
+  TODO
+
+{1}Options:{0}
+  TODO
+)"
+};
+
+
 constexpr std::string_view INSTALL_HELP {
 R"({1}Command:{0}
   gojo {2}install{0}

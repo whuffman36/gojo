@@ -1561,6 +1561,127 @@ std::optional<std::string> refresh(std::span<std::string_view> args,
 }
 
 
+std::optional<std::string> dep(std::span<std::string_view> args) {
+  if (args.empty()) {
+    return std::make_optional("gojo dep: missing option");
+  }
+
+  std::string_view dep_option = args.front();
+  if (dep_option == "--help") {
+    std::println(literals::DEP_HELP,
+                 utils::CLEAR,
+                 utils::MAGENTA_BOLD,
+                 utils::MAGENTA,
+                 utils::YELLOW,
+                 utils::CYAN);
+    return std::nullopt;
+  }
+  else if (dep_option == "search") {
+    if (args.size() > 2) {
+      return std::make_optional("gojo dep search: too many arguments");
+    }
+    auto result { config::read_from_file(CONFIG_FILE) };
+    if (!result.has_value()) {
+      return std::make_optional(std::move(result.error()));
+    }
+
+    config::GojoConfig cfg { std::move(result.value()) };
+
+    if (cfg.pkg_manager == "none") {
+      // Check for any local gojo packages.
+    }
+    if (cfg.pkg_manager == "conan") {
+      // clang tidy doesn't like the use of unchecked access in containers.
+      // There is literally no other way to access std::span in C++23.
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+      return conan::search(args[1]);
+    }
+    else if (cfg.pkg_manager == "vcpkg") {
+      // TODO: Implement vcpkg.
+    }
+  }
+  else if (dep_option == "install") {
+    auto result { config::read_from_file(CONFIG_FILE) };
+    if (!result.has_value()) {
+      return std::make_optional(std::move(result.error()));
+    }
+
+    config::GojoConfig cfg { std::move(result.value()) };
+
+    if (cfg.pkg_manager == "none") {
+      // Check for any local gojo packages.
+    }
+    else if (cfg.pkg_manager == "conan") {
+      // conan::search
+    }
+    else if (cfg.pkg_manager == "vcpkg") {
+      // TODO: Implement vcpkg.
+    }
+  }
+  else if (dep_option == "add") {
+    auto result { config::read_from_file(CONFIG_FILE) };
+    if (!result.has_value()) {
+      return std::make_optional(std::move(result.error()));
+    }
+
+    config::GojoConfig cfg { std::move(result.value()) };
+
+    if (cfg.pkg_manager == "none") {
+      // Check for any local gojo packages.
+    }
+    else if (cfg.pkg_manager == "conan") {
+      // conan::search
+    }
+    else if (cfg.pkg_manager == "vcpkg") {
+      // TODO: Implement vcpkg.
+    }
+  }
+  else if (dep_option == "remove") {
+    auto result { config::read_from_file(CONFIG_FILE) };
+    if (!result.has_value()) {
+      return std::make_optional(std::move(result.error()));
+    }
+
+    config::GojoConfig cfg { std::move(result.value()) };
+
+    if (cfg.pkg_manager == "none") {
+      // Check for any local gojo packages.
+    }
+    else if (cfg.pkg_manager == "conan") {
+      // conan::search
+    }
+    else if (cfg.pkg_manager == "vcpkg") {
+      // TODO: Implement vcpkg.
+    }
+  }
+  else if (dep_option == "uninstall") {
+    auto result { config::read_from_file(CONFIG_FILE) };
+    if (!result.has_value()) {
+      return std::make_optional(std::move(result.error()));
+    }
+
+    config::GojoConfig cfg { std::move(result.value()) };
+
+    if (cfg.pkg_manager == "none") {
+      // Check for any local gojo packages.
+    }
+    else if (cfg.pkg_manager == "conan") {
+      // conan::search
+    }
+    else if (cfg.pkg_manager == "vcpkg") {
+      // TODO: Implement vcpkg.
+    }
+  }
+  else {
+    return std::make_optional(
+      std::format("gojo dep: option not recognized: {}", dep_option)
+    );
+  }
+
+  return std::nullopt;
+}
+
+
 std::optional<std::string> install(std::span<std::string_view> args) {
   bool verbose { false };
   for (const auto arg : args) {

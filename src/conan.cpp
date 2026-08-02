@@ -51,26 +51,37 @@ read_profile(std::string_view profile_name) {
     };
   }
 
+  /*
   std::ifstream profile_stream(profile_file);
   if (!profile_stream.is_open()) {
     return std::unexpected {
       std::format("failed to open file: {}", profile_file.string())
     };
   }
+  */
+  auto result { utils::read_file_into_memory(profile_file) };
+  if (!result.has_value()) {
+    return std::unexpected {
+      std::format("failed to open file: {}", profile_file.string())
+    };
+  }
+
+  std::string file_contents { std::move(result.value()) };
+  std::stringstream ss_fc { std::move(file_contents) };
 
   conan::Profile profile {};
   std::string line {};
   std::string label {};
   std::string other_settings {};
 
-  while (std::getline(profile_stream, line)) {
+  while (std::getline(ss_fc, line)) {
     // Conan profiles typically start with a '[settings]' section.
     if (line.starts_with('[')) {
       continue;
     }
 
     // Split line by '='.
-    std::stringstream ss { line };
+    std::stringstream ss { std::move(line) };
     std::getline(ss, label, '=');
 
     if (label == "arch") {
@@ -219,6 +230,11 @@ std::optional<std::string> setup_profiles(const config::GojoConfig& cfg) {
 
 namespace conan {
 
+std::optional<std::string> search(std::string_view package) {
+  return std::nullopt;
+}
+
+
 std::optional<std::string> install(const config::GojoConfig& cfg,
                                    bool verbose) {
   const std::filesystem::path profile_file {
@@ -244,6 +260,7 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
   };
 
   std::string build_type {};
+  // Can't std::move cfg data, have to copy here.
   std::stringstream ss { cfg.dep_build_types };
   while (std::getline(ss, build_type, ',')) {
     const std::string cmd {
@@ -300,6 +317,21 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
     CYAN("\tfind_package(<package_name> REQUIRED)\n")
     MAGENTA("for each package installed.")
   );
+  return std::nullopt;
+}
+
+
+std::optional<std::string> uninstall(std::string_view package) {
+  return std::nullopt;
+}
+
+
+std::optional<std::string> add(std::string_view package) {
+  return std::nullopt;
+}
+
+
+std::optional<std::string> remove(std::string_view package) {
   return std::nullopt;
 }
 

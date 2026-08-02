@@ -11,6 +11,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "src/config.hpp"
 
@@ -30,6 +31,13 @@ struct Profile {
 };
 
 
+/// @brief Search the conan package repo for a specific package.
+/// @details This function can fail if conan is not installed on the system.
+/// @param package Package to be searched in the conan repo.
+/// @returns std::nullopt on success, an error message on failure.
+std::optional<std::string> search(std::string_view package);
+
+
 /// @brief Install project dependencies described in the conan config file.
 /// @details This function can fail if there is no conan config file found
 ///          in the project root, if there are syntax errors in the conan
@@ -40,7 +48,31 @@ struct Profile {
 /// @param verbose If set to true, forwards conan output to the user.
 /// @returns std::nullopt on success, an error message on failure.
 std::optional<std::string> install(const config::GojoConfig& cfg,
-                                   bool verbbose);
+                                   bool verbose);
+
+
+/// @brief Uninstall a conan package from the local cache.
+std::optional<std::string> uninstall(std::string_view package);
+
+
+/// @brief Add dependency to the current project.
+/// @details This function modifies the project root CMakeLists.txt and the
+///          conan config file (either conanfile.py or conanfile.txt). This
+///          function can fail if any of those files do not exist, or if the
+///          files are malformed.
+/// @param package Package to be added to the project.
+/// @returns std::nullopt on success, an error message on failure.
+std::optional<std::string> add(std::string_view package);
+
+
+/// @brief Remove dependency from the current project.
+/// @details This function modifies the project root CMakeLists.txt and the
+///          conan config file (either conanfile.py or conanfile.txt). This
+///          function can fail if any of these files do not exist, or if the
+///          files are malformed.
+/// @param package Package to be removed from the project.
+/// @returns std::nullopt on success, an error message on failure.
+std::optional<std::string> remove(std::string_view package);
 
 }  // namespace conan
 

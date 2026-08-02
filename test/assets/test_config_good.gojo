@@ -43,6 +43,10 @@ build type=Debug
 # Options: none, conan, vcpkg
 package manager=none
 
+# Options: Debug, Release, RelWithDebInfo, MinSizeRel
+# Note: any of the above options can be combined in a comma separated list
+dependency build types=Debug,Release
+
 # Options   (C): c
 # Options (C++): cpp, cc, cxx, c++
 source file extension=cpp

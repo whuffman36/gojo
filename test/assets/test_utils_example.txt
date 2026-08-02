@@ -1,0 +1,7 @@
+This is example text for a file to be read.
+
+Line 3 example
+
+Line 5 example
+
+Last Line
