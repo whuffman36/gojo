@@ -12,7 +12,21 @@
 #include "src/utils.hpp"
 
 
-// TODO: Create system to modify files in place
+// TODO:
+// * Switch std::optional<std::string> to an enum mapping system.
+//   - Create an enum GojoError with states for every possible error
+//   - Each function returns an optional<GojoError> or expeceted<T, GojoError>
+//   - Create a function/mapping of GojoError -> error string.
+//   - Have one globally accessible string to capture the error message if needed.
+//
+// * Change GojoConfig fields to be char arrays for those that can
+//
+// * Change GojoConfig fields to be enums where possible
+//
+// * Change utils::execute_command to take in a const char* or std::string_view
+//
+// * Reduce levels of std::string where possible
+
 constexpr std::string_view VERSION_STRING { "gojo version 1.0.0-beta" };
 
 int main(const int argc, const char* argv[]) {
@@ -72,11 +86,9 @@ int main(const int argc, const char* argv[]) {
     // gojo dep add <pkg> [version]
     // gojo dep remove <pkg>
     // gojo dep uninstall <pkg>
+    result = commands::dep(args);
   }
-  else if (command == "set") {
-    // TODO: Implement
-    // gojo set <config file field>
-  }
+  /*
   else if (command == "publish") {
     // TODO: Implement
     // gojo publish
@@ -86,6 +98,7 @@ int main(const int argc, const char* argv[]) {
     // gojo install . [--replace|-r]
     result = commands::install(args);
   }
+  */
   else if (command == "profile") {
     result = commands::profile(args);
   }

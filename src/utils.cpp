@@ -4,28 +4,35 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <format>
 #include <print>
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <sys/wait.h>
-#include <unistd.h>
 #include <utility>
 #include <vector>
 
 #if defined(__APPLE__)
+  #include <sys/fcntl.h>
   #include <sys/_types/_pid_t.h>
   #include <sys/_types/_ssize_t.h>
+  #include <sys/wait.h>
+  #include <unistd.h>
 #endif
 
 #if defined(__linux__)
+  #include <sys/fcntl.h>
   #include <sys/types.h>
+  #include <sys/wait.h>
+  #include <unistd.h>
 #endif
 
 
 namespace {
 
+// TODO: Change string to string_view
 std::vector<std::string> split_args(const std::string& args_str) {
   std::vector<std::string> args_vec {};
   std::string arg {};
@@ -119,17 +126,15 @@ CommandResult execute_command(const std::string& cmd, bool capture_output) {
     constexpr int BUFFER_SIZE { 4096 };
     std::array<char, BUFFER_SIZE> buffer {};
     std::string output {};
-    ssize_t bytes_read {};
+    ssize_t bytes_read { 0 };
 
     if (capture_output) {
-      while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE - 1)) > 0) {
-        buffer.at(BUFFER_SIZE - 1) = '\0';
-        output.append(buffer.data());
+      while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
+        output.append(buffer.data(), static_cast<size_t>(bytes_read));
       }
     }
     else {
-      while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE - 1)) > 0) {
-        buffer.at(BUFFER_SIZE - 1) = '\0';
+      while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
         std::print("{}", buffer.data());
       }
     }
@@ -159,6 +164,61 @@ CommandResult execute_command(const std::string& cmd, bool capture_output) {
   }
 
   std::unreachable();
+}
+
+
+std::optional<std::string>
+read_file_into_memory(const std::filesystem::path& file) {
+  if (!std::filesystem::exists(file)) {
+    return std::nullopt;
+  }
+
+  constexpr int BUFFER_SIZE { 1024 };
+  std::array<char, BUFFER_SIZE> buffer {};
+  std::string output {};
+  output.reserve(std::filesystem::file_size(file));
+  ssize_t bytes_read { 0 };
+
+  int fd { open(file.c_str(), O_RDONLY) };
+  if (fd == -1) {
+    std::perror("open");
+    return std::nullopt;
+  }
+
+  while ((bytes_read = read(fd, buffer.data(), BUFFER_SIZE)) > 0) {
+    output.append(buffer.data(), static_cast<size_t>(bytes_read));
+  }
+
+  return std::make_optional(std::move(output));
+}
+
+
+std::optional<std::string>
+append_file_at_line(const std::filesystem::path& file,
+                    std::string_view line_to_match,
+                    std::string_view contents) {
+  auto result { read_file_into_memory(file) };
+  if (!result.has_value()) {
+    return std::make_optional(std::format("file not found: {}", file.string()));
+  }
+
+  std::string current_contents { std::move(result.value()) };
+  std::size_t idx { current_contents.find(line_to_match) };
+  if (idx == std::string::npos) {
+    return std::make_optional(
+      std::format("line '{}' not found in file {}", line_to_match, file.string())
+    );
+  }
+  if (!line_to_match.ends_with('\n')) {
+    idx++;
+  }
+
+  // Insert at newline after the line is found.
+  current_contents.insert(idx + line_to_match.size(), contents);
+
+  std::ofstream fstream { file };
+  fstream << current_contents << std::flush;
+  return std::nullopt;
 }
 
 

@@ -102,6 +102,10 @@ std::optional<std::string> refresh(std::span<std::string_view> args,
                                    std::optional<config::GojoConfig> cfg_in);
 
 
+/// @brief Manage dependencies.
+std::optional<std::string> dep(std::span<std::string_view> args);
+
+
 /// @brief Install and build the dependencies of a gojo project.
 /// @details This function can fail if any of the arguemnts are malformed or
 ///          unrecognized, if the gojo config file cannot be found, if

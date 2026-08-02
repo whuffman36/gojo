@@ -281,12 +281,25 @@ read_from_file(const std::filesystem::path& cfg_file) {
     };
   }
 
+  /*
   std::ifstream cfg_stream(cfg_file);
   if (!cfg_stream.is_open()) {
     return std::unexpected {
       std::format("failed to open file: {}", cfg_file.string())
     };
   }
+  */
+
+  auto read_result { utils::read_file_into_memory(cfg_file) };
+  if (!read_result.has_value()) {
+    return std::unexpected {
+      std::format("failed to open file: {}", cfg_file.string())
+    };
+  }
+
+  std::string file_contents { std::move(read_result.value()) };
+  // Clang has not implemented std::spanstream yet...
+  std::stringstream ss_fc { std::move(file_contents) };
 
   GojoConfig cfg { DEFAULT };
   std::string line {};
@@ -294,14 +307,14 @@ read_from_file(const std::filesystem::path& cfg_file) {
   std::string value {};
   ValidationResult result {};
 
-  while (std::getline(cfg_stream, line)) {
+  while (std::getline(ss_fc, line)) {
     // Ignore comments and newlines.
     if (line.starts_with("#") || line.empty() || line == "---") {
       continue;
     }
 
     // Split line by '='.
-    std::stringstream ss { line };
+    std::stringstream ss { std::move(line) };
     std::getline(ss, label, '=');
 
     if (label == PROJECT_NAME) {
@@ -408,6 +421,7 @@ read_from_file(const std::filesystem::path& cfg_file) {
         result.success = true;
       }
       else {
+        // Can't std::move the cfg data, have to copy here.
         std::stringstream ss2 { cfg.dep_build_types };
         std::string build_type {};
         while (std::getline(ss2, build_type, ',')) {

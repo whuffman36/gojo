@@ -8,6 +8,8 @@
 #ifndef GOJO_SRC_UTILS_HPP
 #define GOJO_SRC_UTILS_HPP
 
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -108,6 +110,16 @@ struct CommandResult {
 ///          dependent on the `capture_output` parameter.
 CommandResult execute_command(const std::string& cmd,
                               bool capture_output=false);
+
+
+std::optional<std::string>
+read_file_into_memory(const std::filesystem::path& file);
+
+
+std::optional<std::string>
+append_file_at_line(const std::filesystem::path& file,
+                    std::string_view line_to_match,
+                    std::string_view contents);
 
 
 /// @brief Convert a string to uppercase.
