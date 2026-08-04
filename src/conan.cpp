@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <ios>
 #include <optional>
 #include <ostream>
 #include <print>
@@ -231,6 +232,19 @@ std::optional<std::string> setup_profiles(const config::GojoConfig& cfg) {
 namespace conan {
 
 std::optional<std::string> search(std::string_view package) {
+  constexpr std::string_view cmd_str {
+    "conan search {}"
+  };
+
+  const std::string cmd {
+    std::format(cmd_str, package)
+  };
+
+  auto result { utils::execute_command(cmd) };
+  if (!result.success) {
+    return std::make_optional("gojo dep search: package not found");
+  }
+
   return std::nullopt;
 }
 
@@ -255,6 +269,7 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
     "--deployer=full_deploy "
     "--output-folder=./deps "
     "--build=missing "
+    "-c tools.cmake.cmaketoolchain:user_presets=\"\" "
     "--profile={} "
     "-s build_type={}"
   };
@@ -322,16 +337,86 @@ std::optional<std::string> install(const config::GojoConfig& cfg,
 
 
 std::optional<std::string> uninstall(std::string_view package) {
+  constexpr std::string_view cmd_str {
+    "conan remove {}"
+  };
+
+  const std::string cmd {
+    std::format(cmd_str, package)
+  };
+
+  auto result { utils::execute_command(cmd) };
+  if (!result.success) {
+    return std::make_optional("gojo dep uninstall: package not found");
+  }
+
   return std::nullopt;
 }
 
 
-std::optional<std::string> add(std::string_view package) {
+std::optional<std::string> add(const std::filesystem::path& conanfile,
+                               std::string_view package,
+                               std::string_view version) {
+  std::string_view line_to_match {};
+  std::string contents {};
+  if (version == "latest") {
+    version = "[>]";
+  }
+  if (conanfile.string().ends_with("py")) {
+    line_to_match = "def requirements(self):";
+    // Have to match the python indentation.
+    contents = std::format("        self.requires({}/{})", package, version);
+  }
+  if (conanfile.string().ends_with("txt")) {
+    line_to_match = "[requires]";
+    contents = std::format("{}/{}", package, version);
+  }
+  auto result { 
+    utils::append_file_at_line(conanfile, line_to_match, contents)
+  };
+  if (result.has_value()) {
+    return result;
+  }
+  
   return std::nullopt;
 }
 
 
-std::optional<std::string> remove(std::string_view package) {
+std::optional<std::string> remove(const std::filesystem::path& conanfile,
+                                  std::string_view package) {
+  auto result { utils::read_file_into_memory(conanfile) };
+  if (result.has_value()) {
+    return result;
+  }
+
+  std:: string file_contents { std::move(result.value()) };
+  auto idx { file_contents.find(package) };
+
+  if (idx == std::string::npos) {
+    return std::make_optional(
+      std::format("package not found in conanfile: {}", package)
+    );
+  }
+
+  // Search left until a newline is found.
+  std::size_t left_idx { idx };
+  while (file_contents[left_idx] != '\n' && left_idx > 0) {
+    left_idx--;
+  }
+
+  // Search right until a newline is found.
+  std::size_t right_idx { idx };
+  while (file_contents[right_idx] != '\n' && right_idx < file_contents.size()) {
+    right_idx++;
+  }
+
+  // Remove line from the file.
+  file_contents.erase(left_idx, right_idx - left_idx);
+
+  // Write modified file back.
+  std::ofstream fstream { conanfile };
+  fstream.write(file_contents.c_str(), static_cast<std::streamsize>(file_contents.size()));
+
   return std::nullopt;
 }
 

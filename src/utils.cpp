@@ -167,6 +167,8 @@ CommandResult execute_command(const std::string& cmd, bool capture_output) {
 }
 
 
+// TODO: update to use mmap instead of read()
+// benchmark to see if it's faster
 std::optional<std::string>
 read_file_into_memory(const std::filesystem::path& file) {
   if (!std::filesystem::exists(file)) {
@@ -188,6 +190,8 @@ read_file_into_memory(const std::filesystem::path& file) {
   while ((bytes_read = read(fd, buffer.data(), BUFFER_SIZE)) > 0) {
     output.append(buffer.data(), static_cast<size_t>(bytes_read));
   }
+
+  close(fd);
 
   return std::make_optional(std::move(output));
 }

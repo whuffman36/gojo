@@ -26,8 +26,8 @@ check:
 	@run-clang-tidy -p build/Debug
 
 install:
-	@conan install . --deployer=full_deploy --output-folder=./deps --build=missing --profile=gojo -s build_type=Release
-	@conan install . --deployer=full_deploy --output-folder=./deps --build=missing --profile=gojo -s build_type=Debug
+	@conan install . --deployer=full_deploy --output-folder=./deps --build=missing --profile=gojo -s build_type=Release -c tools.cmake.cmaketoolchain:user_presets=""
+	@conan install . --deployer=full_deploy --output-folder=./deps --build=missing --profile=gojo -s build_type=Debug -c tools.cmake.cmaketoolchain:user_presets=""
 
 branch:
 	@git branch $(BRANCH)

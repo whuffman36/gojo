@@ -1612,13 +1612,23 @@ std::optional<std::string> dep(std::span<std::string_view> args) {
       // Check for any local gojo packages.
     }
     else if (cfg.pkg_manager == "conan") {
-      // conan::search
+      return conan::install(cfg, false);
     }
     else if (cfg.pkg_manager == "vcpkg") {
       // TODO: Implement vcpkg.
     }
   }
   else if (dep_option == "add") {
+    if (args.size() < 2) {
+      return std::make_optional("gojo dep add: missing argument");
+    }
+    if (args.size() > 3) {
+      return std::make_optional("gojo dep add: too many arguments");
+    }
+    std::string_view version { "latest" };
+    if (args.size() == 3) {
+      version = args[2];
+    }
     auto result { config::read_from_file(CONFIG_FILE) };
     if (!result.has_value()) {
       return std::make_optional(std::move(result.error()));
@@ -1630,13 +1640,30 @@ std::optional<std::string> dep(std::span<std::string_view> args) {
       // Check for any local gojo packages.
     }
     else if (cfg.pkg_manager == "conan") {
-      // conan::search
+      std::filesystem::path conanfile { cfg.project_root + "/conanfile.py" };
+      if (!std::filesystem::exists(conanfile)) {
+        conanfile = cfg.project_root + "/conanfile.txt";
+        if (!std::filesystem::exists(conanfile)) {
+          return std::make_optional(
+            std::format("file not found: {}", conanfile.string())
+          );
+        }
+      }
+
+      return conan::add(conanfile, args[1], version);
     }
     else if (cfg.pkg_manager == "vcpkg") {
       // TODO: Implement vcpkg.
     }
   }
   else if (dep_option == "remove") {
+    if (args.size() < 2) {
+      return std::make_optional("gojo dep remove: missing argument");
+    }
+    if (args.size() > 2) {
+      return std::make_optional("gojo dep remove: too many arguments");
+    }
+
     auto result { config::read_from_file(CONFIG_FILE) };
     if (!result.has_value()) {
       return std::make_optional(std::move(result.error()));
@@ -1644,17 +1671,34 @@ std::optional<std::string> dep(std::span<std::string_view> args) {
 
     config::GojoConfig cfg { std::move(result.value()) };
 
+    std::filesystem::path conanfile { cfg.project_root + "/conanfile.py" };
+    if (!std::filesystem::exists(conanfile)) {
+      conanfile = cfg.project_root + "/conanfile.txt";
+      if (!std::filesystem::exists(conanfile)) {
+        return std::make_optional(
+          std::format("file not found: {}", conanfile.string())
+        );
+      }
+    }
+
     if (cfg.pkg_manager == "none") {
       // Check for any local gojo packages.
     }
     else if (cfg.pkg_manager == "conan") {
-      // conan::search
+      return conan::remove(conanfile, args[1]);
     }
     else if (cfg.pkg_manager == "vcpkg") {
       // TODO: Implement vcpkg.
     }
   }
   else if (dep_option == "uninstall") {
+    if (args.size() < 2) {
+      return std::make_optional("gojo dep remove: missing argument");
+    }
+    if (args.size() > 2) {
+      return std::make_optional("gojo dep remove: too many arguments");
+    }
+
     auto result { config::read_from_file(CONFIG_FILE) };
     if (!result.has_value()) {
       return std::make_optional(std::move(result.error()));
@@ -1666,7 +1710,7 @@ std::optional<std::string> dep(std::span<std::string_view> args) {
       // Check for any local gojo packages.
     }
     else if (cfg.pkg_manager == "conan") {
-      // conan::search
+      return conan::uninstall(args[1]);
     }
     else if (cfg.pkg_manager == "vcpkg") {
       // TODO: Implement vcpkg.

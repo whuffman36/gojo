@@ -42,6 +42,7 @@ project({1})
 # clangd, .clang-tidy, .clang-format, and cppcheck
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Do not remove comments below.
 # Add dependencies here, ex:
 # find_package(<package_name> REQUIRED)
 

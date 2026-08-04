@@ -62,7 +62,9 @@ std::optional<std::string> uninstall(std::string_view package);
 ///          files are malformed.
 /// @param package Package to be added to the project.
 /// @returns std::nullopt on success, an error message on failure.
-std::optional<std::string> add(std::string_view package);
+std::optional<std::string> add(const std::filesystem::path& conanfile,
+                               std::string_view package,
+                               std::string_view version="latest");
 
 
 /// @brief Remove dependency from the current project.
@@ -72,7 +74,8 @@ std::optional<std::string> add(std::string_view package);
 ///          files are malformed.
 /// @param package Package to be removed from the project.
 /// @returns std::nullopt on success, an error message on failure.
-std::optional<std::string> remove(std::string_view package);
+std::optional<std::string> remove(const std::filesystem::path& conanfile,
+                                  std::string_view package);
 
 }  // namespace conan
 

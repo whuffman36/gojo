@@ -19,13 +19,29 @@
 //   - Create a function/mapping of GojoError -> error string.
 //   - Have one globally accessible string to capture the error message if needed.
 //
-// * Change GojoConfig fields to be char arrays for those that can
+// * Change GojoConfig fields to be char arrays for those that can be
 //
 // * Change GojoConfig fields to be enums where possible
 //
 // * Change utils::execute_command to take in a const char* or std::string_view
 //
 // * Reduce levels of std::string where possible
+//
+// * Change file reading to use mmap instead of read()
+//
+// * Investigate efficiency of ofstreeam << vs write() vs mmap
+//
+// * Create gojo package system
+//
+// * Have formats folder in .gojo to import
+//
+// * Create arguments system for custom arguments in config file
+//   - compiler=custom "/path/to/custom/compiler"
+//   - format=custom "format name in ~/.gojocli/formats/"
+//
+// * Change .gojo file to TOML file, something like gojo.conf
+//   - Also allows for ~/.gojo tu be used instead of ~/.gojocli
+//   - Check out https://conan.io/center/recipes/tomlplusplus?version=3.4.0 for parsing
 
 constexpr std::string_view VERSION_STRING { "gojo version 1.0.0-beta" };
 
@@ -80,12 +96,6 @@ int main(const int argc, const char* argv[]) {
     result = commands::refresh(args, std::nullopt);
   }
   else if (command == "dep") {
-    // TODO: Implement
-    // gojo dep search <pkg>
-    // gojo dep install <pkg> [version]
-    // gojo dep add <pkg> [version]
-    // gojo dep remove <pkg>
-    // gojo dep uninstall <pkg>
     result = commands::dep(args);
   }
   /*
