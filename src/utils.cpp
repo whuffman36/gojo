@@ -4,11 +4,13 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <format>
 #include <print>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -32,36 +34,50 @@
 
 namespace {
 
-// TODO: Change string to string_view
-std::vector<std::string> split_args(const std::string& args_str) {
-  std::vector<std::string> args_vec {};
-  std::string arg {};
-  std::stringstream ss { args_str };
-
-  while (std::getline(ss, arg, ' ')) {
-    args_vec.emplace_back(arg);
+std::vector<char*> split_args(const char* const args_str) {
+  std::vector<char*> args_vec {};
+  std::size_t args_len { std::strlen(args_str) };
+  // Because this is only ever called in a child process, the memory
+  // does not need to be freed manually since the OS will clean up
+  // the memory when exiting the process.
+  // Maybe not the best practice but if it works it works.
+  // Allocate room for and copy over the null byte.
+  char* args_str_copy { static_cast<char*>(std::malloc(args_len + 1)) };
+  std::strncpy(args_str_copy, args_str, args_len + 1);
+  std::size_t current_arg_start { 0 };
+  bool in_quotes { false };
+  for (std::size_t i { 0 }; i < args_len; ++i) {
+    if (args_str_copy[i] == '"') {
+      in_quotes = !in_quotes;
+    }
+    if (args_str_copy[i] == ' ' && !in_quotes) {
+      // Remove quotes from any arguments.
+      if (args_str_copy[current_arg_start] == '"' && args_str_copy[i - 1] == '"') {
+        current_arg_start += 1;
+        args_str_copy[i - 1] = '\0';
+      }
+      args_str_copy[i] = '\0';
+      args_vec.push_back(&args_str_copy[current_arg_start]);
+      current_arg_start = i + 1;
+    }
   }
+
+  // The last string must be added since there will be no space character
+  // found after.
+  args_vec.push_back(&args_str_copy[current_arg_start]);
+
+  // The last element of the array must be a nullptr so exec() knows when to
+  // stop.
+  args_vec.push_back(nullptr);
 
   return args_vec;
-}
-
-std::vector<char*> args_c_str(std::vector<std::string>& args) {
-  std::vector<char*> args_c_str {};
-  args_c_str.reserve(args.size());
-
-  for (auto& arg : args) {
-    args_c_str.emplace_back(arg.data());
-  }
-  args_c_str.emplace_back(nullptr);
-
-  return args_c_str;
 }
 
 }  // namespace
 
 namespace utils {
 
-CommandResult execute_command(const std::string& cmd, bool capture_output) {
+CommandResult execute_command(const char* const cmd, bool capture_output) noexcept {
   // Open pipe to pass data between parent and child process.
   std::array<int, 2> pipefd {};
   if (pipe(pipefd.data()) == -1) {
@@ -96,20 +112,7 @@ CommandResult execute_command(const std::string& cmd, bool capture_output) {
 
     // Write over this process' memory and execute the command in this
     // process.
-    // The reason the cmd is first parsed into string is because the char*
-    // need a reference to point to. If the vector of strings is destroyed,
-    // the char* will point to junk data and exec() will not work. And of
-    // course because it's a piece of shit C API it ONLY takes char* and
-    // an array of char*. It took me FOREVER to find this bug since
-    // originally I was creating a function local string and creating a char*
-    // from that string to place in the array. This results in an extra copy
-    // of the strings and an allocation of a new vector of pointers. I can't
-    // think of a way around it because several commands are not known until
-    // runtime, meaning they have to be allocated in strings. Maybe I can
-    // tweak this function to take in a vector of strings and just create
-    // a vector of char* to those strings, but for now I just want to be DONE.
-    auto args_str { split_args(cmd) };
-    const auto args { args_c_str(args_str) };
+    std::vector<char*> args { split_args(cmd) };
     execvp(args.at(0), args.data());
     std::perror("execvp");
 
@@ -130,7 +133,7 @@ CommandResult execute_command(const std::string& cmd, bool capture_output) {
 
     if (capture_output) {
       while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
-        output.append(buffer.data(), static_cast<size_t>(bytes_read));
+        output.append(buffer.data(), static_cast<std::size_t>(bytes_read));
       }
     }
     else {
@@ -167,66 +170,47 @@ CommandResult execute_command(const std::string& cmd, bool capture_output) {
 }
 
 
-// TODO: update to use mmap instead of read()
-// benchmark to see if it's faster
-std::optional<std::string>
-read_file_into_memory(const std::filesystem::path& file) {
+std::string get_file_contents(const std::filesystem::path& file) {
   if (!std::filesystem::exists(file)) {
-    return std::nullopt;
+    throw std::runtime_error { std::format("file not found: {}", file.string()) };
   }
 
-  constexpr int BUFFER_SIZE { 1024 };
-  std::array<char, BUFFER_SIZE> buffer {};
-  std::string output {};
-  output.reserve(std::filesystem::file_size(file));
-  ssize_t bytes_read { 0 };
+  std::ifstream filestream { file.string() };
+  std::stringstream stringstream {};
+  stringstream << filestream.rdbuf();
+  return stringstream.str();
 
-  int fd { open(file.c_str(), O_RDONLY) };
-  if (fd == -1) {
-    std::perror("open");
-    return std::nullopt;
-  }
-
-  while ((bytes_read = read(fd, buffer.data(), BUFFER_SIZE)) > 0) {
-    output.append(buffer.data(), static_cast<size_t>(bytes_read));
-  }
-
-  close(fd);
-
-  return std::make_optional(std::move(output));
+  // TODO: Benchmark
+  /*
+  std::ifstream filestream { file.string() };
+  auto size { std::filesystem::file_size(file) };
+  std::string contents {};
+  contents.reserve(size);
+  filestream.read(contents.data(), size);
+  return contents;
+  */
 }
 
 
-std::optional<std::string>
-append_file_at_line(const std::filesystem::path& file,
-                    std::string_view line_to_match,
-                    std::string_view contents) {
-  auto result { read_file_into_memory(file) };
-  if (!result.has_value()) {
-    return std::make_optional(std::format("file not found: {}", file.string()));
-  }
+void append_file_at_line(const std::filesystem::path& file, std::string_view line_to_match, std::string_view contents) {
+  std::string current_contents { get_file_contents(file) };
 
-  std::string current_contents { std::move(result.value()) };
   std::size_t idx { current_contents.find(line_to_match) };
   if (idx == std::string::npos) {
-    return std::make_optional(
-      std::format("line '{}' not found in file {}", line_to_match, file.string())
-    );
-  }
-  if (!line_to_match.ends_with('\n')) {
-    idx++;
+    throw std::runtime_error { std::format("'{}' not found in '{}'", line_to_match, file.string()) };
   }
 
+  std::string new_contents { std::format("\n{}\n", contents) };
+
   // Insert at newline after the line is found.
-  current_contents.insert(idx + line_to_match.size(), contents);
+  current_contents.insert(idx + line_to_match.size(), new_contents);
 
   std::ofstream fstream { file };
   fstream << current_contents << std::flush;
-  return std::nullopt;
 }
 
 
-std::string to_upper(std::string_view str) {
+std::string to_upper(std::string_view str) noexcept {
   std::string upper {};
   for (const char c : str) {
     upper.push_back(
@@ -239,7 +223,32 @@ std::string to_upper(std::string_view str) {
 }
 
 
-std::string to_lower(std::string_view str) {
+void print_status(std::string_view str) noexcept {
+  std::println(MAGENTA("{}"), str);
+}
+
+void print_success(std::string_view str) noexcept {
+  std::println(GREEN("{}"), str);
+}
+
+void print_error(std::string_view str) noexcept {
+  std::println(stderr, RED("[Error]: {}"), str);
+}
+
+void print_warning(std::string_view str) noexcept {
+  std::println(stderr, YELLOW("[Warning]: {}"), str);
+}
+
+void print_info(std::string_view str) noexcept {
+  std::println("{}", std::format("{}", str, utils::CLEAR,
+                   utils::MAGENTA_BOLD,
+                   utils::MAGENTA,
+                   utils::YELLOW,
+                   utils::CYAN));
+}
+
+
+std::string to_lower(std::string_view str) noexcept {
   std::string lower {};
   for (const char c : str) {
     lower.push_back(
@@ -250,17 +259,33 @@ std::string to_lower(std::string_view str) {
 }
 
 
-const std::string_view get_home_dir() {
-  const std::string_view HOME = std::getenv("HOME");
-  return HOME;
+const std::filesystem::path get_root_dir() noexcept {
+  const std::filesystem::path root_dir {
+    std::filesystem::current_path()
+  };
+  return std::filesystem::absolute(root_dir);
 }
 
 
-const std::string get_profiles_dir() {
-  const std::string profiles_dir {
-    std::format("{}/.gojocli/profiles", get_home_dir())
+const std::filesystem::path get_home_dir() noexcept {
+  const static std::filesystem::path HOME { std::getenv("HOME") };
+  return std::filesystem::absolute(HOME);
+}
+
+
+const std::filesystem::path get_profiles_dir() noexcept {
+  const static std::filesystem::path profiles_dir {
+    get_home_dir() / ".gojo" / "profiles"
   };
-  return profiles_dir;
+  return std::filesystem::absolute(profiles_dir);
+}
+
+
+const std::filesystem::path get_config_path() noexcept {
+  const static std::filesystem::path config_path {
+    get_root_dir() / "gojo.toml"
+  };
+  return std::filesystem::absolute(config_path);
 }
 
 }  // namespace utils

@@ -4,10 +4,10 @@ SHELL := /bin/zsh
 .PHONY: test
 
 config:
-	@cmake -S . -B build/Debug -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -fno-exceptions $(CPPFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(LDFLAGS)" -DCMAKE_TOOLCHAIN_FILE=deps/build/Debug/generators/conan_toolchain.cmake -DBUILD_TESTING=ON
+	@cmake -S . -B build/Debug -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow $(CPPFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(LDFLAGS)" -DCMAKE_TOOLCHAIN_FILE=deps/build/Debug/generators/conan_toolchain.cmake -DBUILD_TESTING=ON
 
 config-rel:
-	@cmake -S . -B build/Release -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -fno-exceptions $(CPPFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(LDFLAGS)" -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake -DBUILD_TESTING=ON
+	@cmake -S . -B build/Release -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow $(CPPFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(LDFLAGS)" -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake -DBUILD_TESTING=ON
 
 build:
 	@cmake --build build/Debug --parallel
@@ -34,6 +34,9 @@ branch:
 	@git checkout $(BRANCH)
 	@git branch --set-upstream-to=origin/main $(BRANCH)
 	@git pull
+
+#search:
+	#grep -rnw .....
 
 clean:
 	@rm -rf build

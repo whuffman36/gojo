@@ -1,0 +1,4 @@
+[project]
+name = "example"
+language = "C++"
+target = "binary"

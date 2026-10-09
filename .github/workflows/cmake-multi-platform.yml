@@ -76,7 +76,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
         -DCMAKE_CXX_STANDARD=23
         -DCMAKE_CXX_STANDARD_REQUIRED=ON
-        -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -fno-exceptions"
+        -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow"
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake
         -DBUILD_TESTING=ON

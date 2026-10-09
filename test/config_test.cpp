@@ -1,141 +1,181 @@
 #include <filesystem>
-#include <string>
+#include <stdexcept>
 #include <utility>
 
 #include <gtest/gtest.h>
 
-#include "src/config.hpp"
+#include "src/cfg/config.hpp"
+#include "src/cfg/enums.hpp"
 
 
 namespace {
 
 // This code is run from <PROJECT_ROOT>/build/Debug/test
-// The assets path is <PROJECT_ROOT>/test/assets
-const std::filesystem::path ASSETS_PATH {
-  "../../../test/assets"
-};
+// The assets path is <PROJECT_ROOT>/test/assets/config
+const std::filesystem::path ASSETS_PATH { "../../../test/assets/config" };
 
-const std::filesystem::path GOOD_GOJO_CONFIG {
-  ASSETS_PATH / "test_config_good.gojo"
-};
+const std::filesystem::path CONFIG_MINIMUM { ASSETS_PATH / "config_minimum.toml" };
 
-const std::filesystem::path BAD_GOJO_CONFIG {
-  ASSETS_PATH / "test_config_bad.gojo"
-};
+const std::filesystem::path CONFIG_FULL { ASSETS_PATH / "config_full.toml" };
+
+
+cfg::Compiler system_default_compiler() {
+  #if defined(__APPLE__)
+    return cfg::Compiler::AppleClangPp;
+  #endif
+  #if defined(__linux__)
+    return cfg::Compiler::Gpp;
+  #endif
+  std::unreachable();
+}
+
+cfg::Generator system_default_generator() {
+  #if defined(__APPLE__)
+    return cfg::Generator::UnixMakefiles;
+  #endif
+  #if defined(__linux__)
+    return cfg::Generator::UnixMakefiles;
+  #endif
+  std::unreachable();
+}
 
 }  // namespace
 
 
-TEST(ConfigTest, IsMultiConfig) {
-  EXPECT_TRUE(config::is_multi_config("XCode"));
-  EXPECT_TRUE(config::is_multi_config("Ninja Multi-Config"));
-  EXPECT_TRUE(config::is_multi_config("Visual Studio 18 2026"));
-  EXPECT_TRUE(config::is_multi_config("Visual Studio 17 2022"));
+TEST(ConfigTest, FromFile) {
+  cfg::Config cfg_minimum {};
+  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(CONFIG_MINIMUM));
 
-  // Anything starting with "Visual Studio" is considered multi-config.
-  EXPECT_TRUE(config::is_multi_config("Visual Studio blah blah blah"));
+  EXPECT_EQ(cfg_minimum.name, "example");
+  EXPECT_EQ(cfg_minimum.language, cfg::Language::Cpp);
+  EXPECT_EQ(cfg_minimum.target, cfg::Target::Binary);
+  EXPECT_FALSE(cfg_minimum.language_server.has_value());
+  EXPECT_FALSE(cfg_minimum.language_standard.has_value());
+  EXPECT_FALSE(cfg_minimum.build_system.has_value());
+  EXPECT_FALSE(cfg_minimum.build_type.has_value());
+  EXPECT_FALSE(cfg_minimum.clang_format_style.has_value());
+  EXPECT_FALSE(cfg_minimum.clang_tidy_enabled.has_value());
+  EXPECT_FALSE(cfg_minimum.clang_tidy_args.has_value());
+  EXPECT_FALSE(cfg_minimum.cppcheck_enabled.has_value());
+  EXPECT_FALSE(cfg_minimum.cppcheck_checks.has_value());
+  EXPECT_FALSE(cfg_minimum.cppcheck_args.has_value());
+  EXPECT_FALSE(cfg_minimum.compiler.has_value());
+  EXPECT_FALSE(cfg_minimum.compiler_flags.has_value());
+  EXPECT_FALSE(cfg_minimum.generator.has_value());
+  EXPECT_FALSE(cfg_minimum.gnu_extensions_enabled.has_value());
+  EXPECT_FALSE(cfg_minimum.package_manager.has_value());
+  EXPECT_FALSE(cfg_minimum.test_framework.has_value());
+  EXPECT_FALSE(cfg_minimum.testing_enabled.has_value());
 
-  // Capitalization matters.
-  EXPECT_FALSE(config::is_multi_config("visual studio"));
 
-  // Windows default generator is multi-config.
-  #if defined (_WIN64) || (_WIN32)
-    EXPECT_TRUE(config::is_multi_config("system default"));
-  #else
-    EXPECT_FALSE(config::is_multi_config("system default"));
-  #endif
+  cfg::Config cfg_full {};
+  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(CONFIG_FULL));
 
+  EXPECT_EQ(cfg_full.name, "example");
+  EXPECT_EQ(cfg_full.language, cfg::Language::Cpp);
+  EXPECT_EQ(cfg_full.target, cfg::Target::Binary);
+  EXPECT_TRUE(cfg_full.language_server.has_value());
+  EXPECT_EQ(cfg_full.language_server.value(), "clangd");
+  EXPECT_TRUE(cfg_full.language_standard.has_value());
+  EXPECT_EQ(cfg_full.language_standard.value(), cfg::LanguageStandard::Cpp23);
+  EXPECT_TRUE(cfg_full.build_system.has_value());
+  EXPECT_EQ(cfg_full.build_system.value(), cfg::BuildSystem::CMake);
+  EXPECT_TRUE(cfg_full.build_type.has_value());
+  EXPECT_EQ(cfg_full.build_type.value(), cfg::BuildType::Debug);
+  EXPECT_TRUE(cfg_full.clang_format_style.has_value());
+  EXPECT_EQ(cfg_full.clang_format_style.value(), cfg::FormatStyle::Google);
+  EXPECT_TRUE(cfg_full.clang_tidy_enabled.has_value());
+  EXPECT_EQ(cfg_full.clang_tidy_enabled.value(), true);
+  EXPECT_TRUE(cfg_full.clang_tidy_args.has_value());
+  EXPECT_EQ(cfg_full.clang_tidy_args.value(), "example args");
+  EXPECT_TRUE(cfg_full.cppcheck_enabled.has_value());
+  EXPECT_EQ(cfg_full.cppcheck_enabled.value(), true);
+  EXPECT_TRUE(cfg_full.cppcheck_checks.has_value());
+  EXPECT_EQ(cfg_full.cppcheck_checks.value(), "example checks");
+  EXPECT_TRUE(cfg_full.cppcheck_args.has_value());
+  EXPECT_EQ(cfg_full.cppcheck_args.value(), "example cppcheck args");
+  EXPECT_TRUE(cfg_full.compiler.has_value());
+  EXPECT_EQ(cfg_full.compiler.value(), cfg::Compiler::Default);
+  EXPECT_TRUE(cfg_full.compiler_flags.has_value());
+  EXPECT_EQ(cfg_full.compiler_flags.value(), "-Wall");
+  EXPECT_TRUE(cfg_full.generator.has_value());
+  EXPECT_EQ(cfg_full.generator.value(), cfg::Generator::Ninja);
+  EXPECT_TRUE(cfg_full.gnu_extensions_enabled.has_value());
+  EXPECT_EQ(cfg_full.gnu_extensions_enabled.value(), true);
+  EXPECT_TRUE(cfg_full.package_manager.has_value());
+  EXPECT_EQ(cfg_full.package_manager.value(), cfg::PackageManager::Conan);
+  EXPECT_TRUE(cfg_full.test_framework.has_value());
+  EXPECT_EQ(cfg_full.test_framework.value(), cfg::TestFramework::GoogleTest);
+  EXPECT_TRUE(cfg_full.testing_enabled.has_value());
+  EXPECT_EQ(cfg_full.testing_enabled.value(), true);
 
-  EXPECT_FALSE(config::is_multi_config("any random string"));
+  const std::filesystem::path CONFIG_NO_NAME { ASSETS_PATH / "config_no_name.toml" };
+  EXPECT_THROW(const cfg::Config cfg_no_name { cfg::Config::from_file(CONFIG_NO_NAME) }, std::runtime_error);
+
+  const std::filesystem::path CONFIG_NO_LANGUAGE { ASSETS_PATH / "config_no_language.toml" };
+  EXPECT_THROW(const cfg::Config cfg_no_language { cfg::Config::from_file(CONFIG_NO_LANGUAGE) }, std::runtime_error);
+
+  const std::filesystem::path CONFIG_NO_TARGET { ASSETS_PATH / "config_no_target.toml" };
+  EXPECT_THROW(const cfg::Config cfg_no_target { cfg::Config::from_file(CONFIG_NO_TARGET) }, std::runtime_error);
+
+  const std::filesystem::path CONFIG_MALFORMED { ASSETS_PATH / "config_malformed.toml" };
+  EXPECT_THROW(const cfg::Config cfg_malformed { cfg::Config::from_file(CONFIG_MALFORMED) }, std::runtime_error);
 }
 
 
-TEST(ConfigTest, ReadFromFile) {
-  auto good_result { config::read_from_file(GOOD_GOJO_CONFIG) };
-  ASSERT_TRUE(good_result.has_value());
+TEST(ConfigTest, ToFile) {
+  const std::filesystem::path tmp1 { ASSETS_PATH / "tmp1.toml" };
 
-  const config::GojoConfig cfg { std::move(good_result.value()) };
+  cfg::Config cfg_full {};
+  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(CONFIG_FULL));
+  EXPECT_NO_THROW(cfg_full.to_file(tmp1));
 
-  EXPECT_EQ(cfg.project_name, "example");
-  EXPECT_FALSE(cfg.is_library);
-  EXPECT_EQ(cfg.project_root, std::filesystem::current_path());
-  EXPECT_EQ(cfg.executable_name, "example");
-  EXPECT_EQ(cfg.project_lang, "C++");
-  EXPECT_EQ(cfg.lang_standard, 23);
-  EXPECT_TRUE(cfg.gnu_extensions);
-  EXPECT_EQ(cfg.compiler, "system default");
-  EXPECT_EQ(cfg.compiler_flags, "-Wall -Werror");
-  EXPECT_EQ(cfg.build_system, "CMake");
-  EXPECT_EQ(cfg.generator, "system default");
-  EXPECT_FALSE(cfg.multi_config);
-  EXPECT_EQ(cfg.build_type, "Debug");
-  EXPECT_EQ(cfg.pkg_manager, "none");
-  EXPECT_EQ(cfg.src_ext, "cpp");
-  EXPECT_EQ(cfg.hdr_ext, "hpp");
-  EXPECT_EQ(cfg.fmt_style, "llvm");
-  EXPECT_TRUE(cfg.clangd_enabled);
-  EXPECT_TRUE(cfg.clang_tidy_enabled);
-  EXPECT_TRUE(cfg.clang_tidy_args.empty());
-  EXPECT_FALSE(cfg.cppcheck_enabled);
-  EXPECT_TRUE(cfg.cppcheck_checks.empty());
-  EXPECT_TRUE(cfg.cppcheck_args.empty());
-  EXPECT_TRUE(cfg.testing_enabled);
-  EXPECT_EQ(cfg.testing_framework, "none");
-  EXPECT_FALSE(cfg.git_repo);
+  cfg::Config cfg_tmp {};
+  EXPECT_NO_THROW(cfg_tmp = cfg::Config::from_file(tmp1));
+  ASSERT_EQ(cfg_full.name, cfg_tmp.name);
+  EXPECT_TRUE(std::filesystem::remove(tmp1));
 
-  const auto bad_result { config::read_from_file(BAD_GOJO_CONFIG) };
-  EXPECT_FALSE(bad_result.has_value());
-  EXPECT_TRUE(
-    bad_result
-      .error()
-      .starts_with(
-        "label 'project target' must be one of the following values:"
-      )
-  );
+  const std::filesystem::path tmp2 { ASSETS_PATH / "tmp2.toml" };
+  cfg::Config cfg_minimum {};
+  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(CONFIG_MINIMUM));
 
-  // TODO: Test other failure states...gonna be a HUGE pain in the ass...
+  EXPECT_NO_THROW(cfg_minimum.to_file(tmp2));
+  EXPECT_NO_THROW(cfg_tmp = cfg::Config::from_file(tmp2));
+  ASSERT_EQ(cfg_minimum.name, cfg_tmp.name);
+  std::filesystem::remove(tmp2);
 }
 
 
-TEST(ConfigTest, WriteToFile) {
-  config::GojoConfig cfg { config::DEFAULT };
-  cfg.project_name = "example";
-  cfg.project_root = ASSETS_PATH.string();
-  cfg.executable_name = "example";
-  const auto write_result { config::write_to_file(cfg) };
-  EXPECT_FALSE(write_result.has_value());
+TEST(ConfigTest, Getters) {
+  cfg::Config cfg_full {};
+  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(CONFIG_FULL));
 
-  std::string cfg_path { ASSETS_PATH.string() };
-  cfg_path.append("/.gojo");
-  EXPECT_TRUE(std::filesystem::exists(cfg_path));
+  EXPECT_NE(cfg_full.get_compiler(), cfg::Compiler::Default);
+  EXPECT_EQ(cfg_full.get_generator(), cfg::Generator::Ninja);
+  EXPECT_EQ(cfg_full.get_language_standard(), cfg::LanguageStandard::Cpp23);
+  EXPECT_EQ(cfg_full.get_build_system(), cfg::BuildSystem::CMake);
+  EXPECT_EQ(cfg_full.get_build_type(), cfg::BuildType::Debug);
+  EXPECT_EQ(cfg_full.get_header_extension(), "hpp");
+  EXPECT_EQ(cfg_full.get_source_extension(), "cpp");
+  EXPECT_FALSE(cfg_full.is_multi_config());
+  EXPECT_TRUE(cfg_full.are_gnu_extensions_enabled());
+  EXPECT_TRUE(cfg_full.is_testing_enabled());
+  EXPECT_TRUE(cfg_full.is_clang_tidy_enabled());
+  EXPECT_TRUE(cfg_full.is_cppcheck_enabled());
 
-  auto read_result { config::read_from_file(cfg_path) };
-  ASSERT_TRUE(read_result.has_value());
+  cfg::Config cfg_minimum {};
+  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(CONFIG_MINIMUM));
 
-  cfg = std::move(read_result.value());
-  ASSERT_EQ(cfg.project_name, "example");
-  ASSERT_EQ(cfg.project_root, ASSETS_PATH.string());
-  ASSERT_EQ(cfg.executable_name, "example");
-  ASSERT_EQ(cfg.compiler, config::DEFAULT.compiler);
-  ASSERT_EQ(cfg.lang_standard, config::DEFAULT.lang_standard);
-  ASSERT_EQ(cfg.compiler_flags, config::DEFAULT.compiler_flags);
-  // TODO: check all other fields...should I even bother?
-
-  ASSERT_TRUE(std::filesystem::remove(cfg_path));
-}
-
-
-TEST(ConfigTest, CreateTemplate) {
-  const auto create_result { config::create_template(ASSETS_PATH) };
-  ASSERT_FALSE(create_result.has_value());
-
-  std::string cfg_path { ASSETS_PATH.string() };
-  cfg_path.append("/.gojo");
-  ASSERT_TRUE(std::filesystem::exists(cfg_path));
-
-  // All fields are empty, should fail on a read.
-  const auto read_result { config::read_from_file(cfg_path) };
-  EXPECT_TRUE(!read_result.has_value());
-
-  ASSERT_TRUE(std::filesystem::remove(cfg_path));
+  EXPECT_EQ(cfg_minimum.get_compiler(), system_default_compiler());
+  EXPECT_EQ(cfg_minimum.get_generator(), system_default_generator());
+  EXPECT_EQ(cfg_minimum.get_language_standard(), cfg::LanguageStandard::Cpp23);
+  EXPECT_EQ(cfg_minimum.get_build_system(), cfg::BuildSystem::CMake);
+  EXPECT_EQ(cfg_minimum.get_build_type(), cfg::BuildType::Debug);
+  EXPECT_EQ(cfg_minimum.get_header_extension(), "hpp");
+  EXPECT_EQ(cfg_minimum.get_source_extension(), "cpp");
+  EXPECT_FALSE(cfg_minimum.is_multi_config());
+  EXPECT_FALSE(cfg_minimum.are_gnu_extensions_enabled());
+  EXPECT_FALSE(cfg_minimum.is_testing_enabled());
+  EXPECT_FALSE(cfg_minimum.is_clang_tidy_enabled());
+  EXPECT_FALSE(cfg_minimum.is_cppcheck_enabled());
 }

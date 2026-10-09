@@ -1,0 +1,29 @@
+[project]
+name = "example"
+language = "C++"
+
+[build]
+language_standard = 23
+compiler = "clang++"
+compiler_flags = ["example", "compiler", "flags"]
+gnu_extensions_enabled = true
+build_system = "CMake"
+generator = "Ninja"
+build_type = "Debug"
+
+[checks]
+clang_format_style = "google"
+language_server = "clangd"
+clang_tidy_enabled = true
+clang_tidy_args = ["example", "clang-tidy", "args"]
+cppcheck_enabled = true
+cppcheck_checks = ["example", "checks"]
+cppcheck_args = ["example", "cppcheck", "args"]
+
+[tests]
+testing_enabled = true
+test_framework = "GoogleTest"
+
+[dependencies]
+package_manager = "conan"
+build_types = []
