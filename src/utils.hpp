@@ -29,7 +29,7 @@ constexpr std::string_view MAGENTA_BOLD { "\033[1;35m" };
 
 constexpr std::string_view CYAN { "\033[0;36m" };
 
-constexpr std::string CLEAR { "\033[0m" };
+constexpr std::string_view CLEAR { "\033[0m" };
 
 struct CommandResult {
   std::string output;

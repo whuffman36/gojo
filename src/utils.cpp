@@ -156,8 +156,12 @@ CommandResult execute_command(const char* const cmd, bool capture_output) noexce
         // process exited in failure state
         return CommandResult { .output=output, .success=false };
       }
-      if (WEXITSTATUS(status) == EXIT_SUCCESS) {
+      else if (WEXITSTATUS(status) == EXIT_SUCCESS) {
         return CommandResult { .output=output, .success=true };
+      }
+      else {
+        // Unknown exit code...
+        return CommandResult { .output=output, .success=false };
       }
     }
     else {

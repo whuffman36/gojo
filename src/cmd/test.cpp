@@ -39,7 +39,7 @@ void test(std::span<std::string_view> args) {
     if (arg.starts_with("--target=")) {
       // Length of "--target="
       constexpr std::size_t target_arg_len { 9 };
-      target = std::format("-R \"{}\"", arg.substr(target_arg_len));
+      target = std::format(" -R \"{}\"", arg.substr(target_arg_len));
     }
     else if (arg == "--help") {
       utils::print_info(HELP);
@@ -62,7 +62,7 @@ void test(std::span<std::string_view> args) {
 
   if (cfg.is_multi_config()) {
     build /= "test";
-    build_type_arg = std::format("-C {}", build_type);
+    build_type_arg = std::format(" -C {}", build_type);
   }
   else {
     build /= build_type;
@@ -75,7 +75,7 @@ void test(std::span<std::string_view> args) {
 
   std::filesystem::current_path(build);
   const std::string cmd {
-    std::format("ctest {} {}", build_type_arg, target)
+    std::format("ctest --output-on-failure{}{}", build_type_arg, target)
   };
   auto cmd_result { utils::execute_command(cmd.c_str()) };
   if (!cmd_result.success) {

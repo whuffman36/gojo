@@ -267,11 +267,12 @@ std::string source_file(const cfg::Config& cfg) {
     if (cfg.language == cfg::Language::Cpp) {
       str = std::format(
 R"(#include "{0}/{0}.{1}"
+#include <string>
 
 
 namespace {0} {{
 
-const char* hello_world() {{
+std::string hello_world() {{
   return "Hello world!";
 }}
 
@@ -342,11 +343,13 @@ std::string header_file(const cfg::Config& cfg) {
 R"(#ifndef {0}_{0}_{1}
 #define {0}_{0}_{1}
 
+#include <string>
+
 
 namespace {0} {{
 
 // Returns "Hello world!".
-const char* hello_world();
+std::string hello_world();
 
 }}  // namespace {0}
 
