@@ -32,7 +32,7 @@ jobs:
         build_type: [Release]
         include:
           - os: ubuntu-latest
-            compiler: g++-16
+            compiler: g++
           - os: macos-latest
             compiler: clang++
         exclude:
@@ -67,7 +67,7 @@ jobs:
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt update
         sudo apt install -y g++-16 build-essential
-        export CXX=g++-16
+        alias g++="g++-16"
 
     - name: Set Up Conan Client
       uses: conan-io/setup-conan@v1
