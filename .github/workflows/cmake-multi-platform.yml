@@ -49,9 +49,21 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Install static analyzers linux
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update
+        sudo apt install -y clang-tidy cppcheck
+
+    - name: Install static analyzers macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install clang-tidy cppcheck
+
     - name: Install Updated gcc
       if: runner.os == 'Linux'
       run: |
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt update
         sudo apt install -y g++-16
 

@@ -22,7 +22,7 @@ const std::filesystem::path PATH {
 
 
 TEST(CommandsTest, InitTestCpp) {
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   std::vector<std::string_view> args { "example" };
   EXPECT_NO_THROW(cmd::init(args));
@@ -39,7 +39,7 @@ TEST(CommandsTest, InitTestCpp) {
 
 TEST(CommandsTest, InitTestCppLib) {
   std::vector<std::string_view> args { "example" };
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   args.push_back("--lib");
   EXPECT_NO_THROW(cmd::init(args));
@@ -58,7 +58,7 @@ TEST(CommandsTest, InitTestCppLib) {
 
 
 TEST(CommandsTest, InitTestC) {
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   std::vector<std::string_view> args { "example" };
   args.push_back("--lang=c");
@@ -76,7 +76,7 @@ TEST(CommandsTest, InitTestC) {
 
 TEST(CommandsTest, InitTestCLib) {
   std::vector<std::string_view> args { "example" };
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   args.push_back("--lib");
   args.push_back("--lang=c");
@@ -100,7 +100,7 @@ TEST(CommandsTest, InitTestProfileCpp) {
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_full.toml")));
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-  ASSERT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  ASSERT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   std::vector<std::string_view> args { "example", "--profile=test" };
   EXPECT_NO_THROW(cmd::init(args));
@@ -125,7 +125,7 @@ TEST(CommandsTest, InitTestLibProfileCpp) {
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_full.toml")));
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   std::vector<std::string_view> args { "example", "--profile=test", "--lib" };
   EXPECT_NO_THROW(cmd::init(args));
@@ -155,7 +155,7 @@ TEST(CommandsTest, InitTestProfileC) {
   cfg.test_framework = cfg::TestFramework::Unity;
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   std::vector<std::string_view> args { "example", "--profile=test" };
   EXPECT_NO_THROW(cmd::init(args));
@@ -182,7 +182,7 @@ TEST(CommandsTest, InitTestLibProfileC) {
   cfg.test_framework = cfg::TestFramework::Unity;
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-  EXPECT_TRUE(std::filesystem::create_directory(PATH / "init"));
+  EXPECT_TRUE(std::filesystem::create_directories(PATH / "init"));
   std::filesystem::current_path(PATH / "init");
   std::vector<std::string_view> args { "example", "--profile=test", "--lang=c" };
   EXPECT_NO_THROW(cmd::init(args));
