@@ -53,12 +53,12 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt install -y clang-tidy cppcheck
+        sudo apt install -y clang-tidy cppcheck clang-format
 
     - name: Install static analyzers macOS
       if: runner.os == 'macOS'
       run: |
-        brew install clang-tidy cppcheck
+        brew install llvm cppcheck clang-format
 
     - name: Install Updated gcc
       if: runner.os == 'Linux'

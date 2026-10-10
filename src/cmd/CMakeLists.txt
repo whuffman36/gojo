@@ -22,3 +22,12 @@ target_include_directories(
   PRIVATE
   ${CMAKE_SOURCE_DIR}
 )
+
+target_link_libraries(
+  cmd
+  PRIVATE
+  build_systems
+  cfg
+  package_managers
+  utils
+)
