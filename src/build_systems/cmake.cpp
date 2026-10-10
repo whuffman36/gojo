@@ -193,7 +193,7 @@ std::string_view get_version() {
   // Version 4.0 cutoff support for version 3.5 and under and
   // was released in March 2025.
   // Most recent version (July 2026): 4.3.4
-  return "4.0...4.3.4";
+  return "3.31.6...4.3.4";
 }
 
 }  // namespace cmake
