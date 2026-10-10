@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            compiler: g++-14
+            compiler: g++-16
             artifact_name: gojo
           - os: macos-latest
             compiler: clang++
@@ -29,7 +29,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install -y g++-14
+          sudo apt install -y g++-16
 
       - name: Configure CMake
         run: >
@@ -37,7 +37,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
           -DCMAKE_CXX_STANDARD=23
           -DCMAKE_CXX_STANDARD_REQUIRED=ON
-          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -fno-exceptions -s"
+          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -s"
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_TESTING=OFF
           -S ${{ github.workspace }}

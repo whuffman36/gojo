@@ -31,7 +31,7 @@ bool init_test_gojo_project(const std::filesystem::path filepath, std::span<std:
     std::filesystem::remove_all(filepath);
   }
 
-  if (!std::filesystem::create_directory(filepath)) {
+  if (!std::filesystem::create_directories(filepath)) {
     return false;
   }
   std::filesystem::current_path(filepath);

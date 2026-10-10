@@ -32,7 +32,7 @@ jobs:
         build_type: [Release]
         include:
           - os: ubuntu-latest
-            compiler: g++-14
+            compiler: g++-16
           - os: macos-latest
             compiler: clang++
         exclude:
@@ -53,7 +53,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt install -y g++-14
+        sudo apt install -y g++-16
 
     - name: Set Up Conan Client
       uses: conan-io/setup-conan@v1
