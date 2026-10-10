@@ -540,12 +540,30 @@ int main(void) {
 
 
 std::string clangd(const cfg::Config& cfg) {
+  std::string_view remove {};
+  switch (cfg.get_compiler()) {
+    case cfg::Compiler::Gcc:
+    case cfg::Compiler::Gpp:
+    case cfg::Compiler::HomebrewGcc:
+    case cfg::Compiler::HomebrewGpp:
+      remove =
+R"(Remove:
+    - -fmodules-ts
+    - -fmodule-mapper=*
+    - -fdeps-format=*
+)";
+      break;
+    default:
+      break;
+  }
   constexpr std::string_view template_str {
 R"(CompileFlags:
-  CompilationDatabase: "{}")"
+  CompilationDatabase: "{}"
+  {}
+  )"
   };
 
-  return std::format(template_str, cfg.get_build_dir().string());
+  return std::format(template_str, cfg.get_build_dir().string(), remove);
 }
 
 
