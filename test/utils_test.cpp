@@ -1,29 +1,33 @@
+#include <filesystem>
+#include <format>
 #include <fstream>
+#include <ios>
+#include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
 #include <gtest/gtest.h>
 
 #include "src/utils.hpp"
+#include "test/utils.hpp"
 
 
 namespace {
 
-// This code is run from <PROJECT_ROOT>/build/Debug/test
-// The assets path is <PROJECT_ROOT>/test/assets
-const std::filesystem::path ASSETS_PATH {
-  "../../../test/assets"
+const std::filesystem::path PATH {
+  get_assets_path() / "utils"
 };
 
 const std::filesystem::path TEST_FILE {
-  ASSETS_PATH / "test_utils_example.txt"
+  PATH / "example.txt"
 };
 
 }  // namespace
 
 
 TEST(UtilsTest, ExecuteCommand) {
-  const std::string cmd { "ls" };
+  const char* cmd { "ls" };
 
   const auto result1 { utils::execute_command(cmd) };
   EXPECT_TRUE(result1.output.empty());
@@ -33,7 +37,7 @@ TEST(UtilsTest, ExecuteCommand) {
   EXPECT_FALSE(result2.output.empty());
   EXPECT_TRUE(result2.success);
 
-  const std::string bad_cmd { "bad-cmd" };
+  const char* bad_cmd { "bad-cmd" };
 
   const auto result3 { utils::execute_command(bad_cmd) };
   EXPECT_TRUE(result3.output.empty());
@@ -46,63 +50,63 @@ TEST(UtilsTest, ExecuteCommand) {
   const auto result5 { utils::execute_command(bad_cmd, true) };
   EXPECT_FALSE(result5.output.empty());
   EXPECT_FALSE(result5.success);
+
+  const std::filesystem::path new_file { PATH / "execute_command.txt" };
+  const std::string touch_cmd { std::format("touch {}", new_file.string()) };
+  const auto result6 { utils::execute_command(touch_cmd.c_str()) };
+  EXPECT_TRUE(result6.success);
+  EXPECT_TRUE(std::filesystem::exists(new_file));
+  EXPECT_TRUE(std::filesystem::remove(new_file));
 }
 
 
-TEST(UtilsTest, ReadFileIntoMemory) {
-  const auto result1 { utils::read_file_into_memory(TEST_FILE) };
-  EXPECT_TRUE(result1.has_value());
-  EXPECT_TRUE(result1.value().starts_with("This is example text for a file to be read."));
-  EXPECT_TRUE(result1->ends_with("Last Line"));
-  EXPECT_TRUE(result1->contains("Line 3 example"));
-  EXPECT_TRUE(result1->contains("Line 5 example"));
+TEST(UtilsTest, GetFileContents) {
+  std::string contents {};
+  EXPECT_NO_THROW(contents = utils::get_file_contents(TEST_FILE));
 
-  const auto result2 { utils::read_file_into_memory("example.txt") };
-  EXPECT_FALSE(result2.has_value());
+  EXPECT_TRUE(contents.starts_with("This is example text for a file to be read."));
+  EXPECT_TRUE(contents.ends_with("Last Line"));
+  EXPECT_EQ(std::filesystem::file_size(TEST_FILE), contents.size());
 }
 
 
 TEST(UtilsTest, AppendFileAtLine) {
-  const auto result1 { utils::read_file_into_memory(TEST_FILE) };
-  ASSERT_TRUE(result1.has_value());
-  const std::string original_file_contents { std::move(result1.value()) };
+  std::string original_file_contents {};
+  EXPECT_NO_THROW(original_file_contents = utils::get_file_contents(TEST_FILE));
 
   constexpr std::string_view line_to_match { "Line 3 example" };
   constexpr std::string_view contents { "Line 4 example" };
+  utils::append_file_at_line(TEST_FILE, line_to_match, contents);
 
-  const auto result2 { utils::append_file_at_line(TEST_FILE, line_to_match, contents) };
-  EXPECT_FALSE(result2.has_value());
-
-  const auto result3 { utils::read_file_into_memory(TEST_FILE) };
-  ASSERT_TRUE(result3.has_value());
-  EXPECT_TRUE(result3.value().starts_with("This is example text for a file to be read."));
-  EXPECT_TRUE(result3->ends_with("Last Line"));
-  EXPECT_TRUE(result3->contains("Line 3 example"));
-  EXPECT_TRUE(result3->contains("Line 4 example"));
-  EXPECT_TRUE(result3->contains("Line 5 example"));
+  std::string new_contents {};
+  EXPECT_NO_THROW(new_contents = utils::get_file_contents(TEST_FILE));
+  EXPECT_TRUE(new_contents.starts_with("This is example text for a file to be read.\n"));
+  EXPECT_TRUE(new_contents.ends_with("Last Line"));
+  EXPECT_TRUE(new_contents.contains("Line 3 example\n"));
+  EXPECT_TRUE(new_contents.contains("Line 4 example\n"));
+  EXPECT_TRUE(new_contents.contains("Line 5 example\n"));
 
   constexpr std::string_view line_to_match2 { "Line 4 example" };
-  constexpr std::string_view contents2 { "\nLine 4.5 example" };
+  constexpr std::string_view contents2 { "Line 4.5 example" };
+  utils::append_file_at_line(TEST_FILE, line_to_match2, contents2);
 
-  const auto result4 { utils::append_file_at_line(TEST_FILE, line_to_match2, contents2) };
-  EXPECT_FALSE(result4.has_value());
+  std::string new_contents2 {};
+  EXPECT_NO_THROW(new_contents2 = utils::get_file_contents(TEST_FILE));
+  EXPECT_TRUE(new_contents2.starts_with("This is example text for a file to be read."));
+  EXPECT_TRUE(new_contents2.ends_with("Last Line"));
+  EXPECT_TRUE(new_contents2.contains("Line 3 example\n"));
+  EXPECT_TRUE(new_contents2.contains("Line 4 example\n"));
+  EXPECT_TRUE(new_contents2.contains("Line 4.5 example\n"));
+  EXPECT_TRUE(new_contents2.contains("Line 5 example\n"));
 
-  const auto result5 { utils::read_file_into_memory(TEST_FILE) };
-  ASSERT_TRUE(result5.has_value());
-  EXPECT_TRUE(result5.value().starts_with("This is example text for a file to be read."));
-  EXPECT_TRUE(result5->ends_with("Last Line"));
-  EXPECT_TRUE(result5->contains("Line 3 example"));
-  EXPECT_TRUE(result5->contains("Line 4 example"));
-  EXPECT_TRUE(result5->contains("Line 4.5 example"));
-  EXPECT_TRUE(result5->contains("Line 5 example"));
-
-  const auto result6 { utils::append_file_at_line(TEST_FILE, "does not exist", contents) };
-  EXPECT_TRUE(result6.has_value());
+  EXPECT_THROW(utils::append_file_at_line(TEST_FILE, "does not exist", contents), std::runtime_error);
 
   // Rewrite test file to have original contents.
-  std::ofstream test_file { TEST_FILE, std::ios::trunc };
-  ASSERT_TRUE(test_file.is_open());
-  test_file << original_file_contents << std::flush;
+  if (!original_file_contents.empty()) {
+    std::ofstream test_file { TEST_FILE, std::ios::trunc };
+    ASSERT_TRUE(test_file.is_open());
+    test_file << original_file_contents << std::flush;
+  }
 }
 
 

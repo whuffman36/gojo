@@ -98,7 +98,7 @@ install_macos() {
         xcode-select --install
     fi
     
-    brew install cmake clang-tidy clang-format cppcheck conan
+    brew install cmake llvm clang-format cppcheck conan
 
     success "Dependencies installed\n"
 

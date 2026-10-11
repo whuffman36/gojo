@@ -32,7 +32,7 @@ jobs:
         build_type: [Release]
         include:
           - os: ubuntu-latest
-            compiler: g++-14
+            compiler: g++-16
           - os: macos-latest
             compiler: clang++
         exclude:
@@ -49,11 +49,24 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install Updated gcc
+    - name: Install static analyzers linux
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt install -y g++-14
+        sudo apt install -y clang-tidy cppcheck clang-format
+
+    - name: Install static analyzers macOS
+      if: runner.os == 'macOS'
+      run: |
+        brew install llvm cppcheck clang-format
+        echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+
+    - name: Install Updated gcc
+      if: runner.os == 'Linux'
+      run: |
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        sudo apt update
+        sudo apt install -y g++-16 build-essential
 
     - name: Set Up Conan Client
       uses: conan-io/setup-conan@v1
@@ -76,7 +89,7 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
         -DCMAKE_CXX_STANDARD=23
         -DCMAKE_CXX_STANDARD_REQUIRED=ON
-        -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -fno-exceptions"
+        -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -std=c++23"
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake
         -DBUILD_TESTING=ON

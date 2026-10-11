@@ -1,5 +1,6 @@
 [requires]
 gtest/1.17.0
+tomlplusplus/3.4.0
 
 [generators]
 CMakeDeps
