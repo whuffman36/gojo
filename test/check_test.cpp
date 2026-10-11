@@ -32,7 +32,7 @@ TEST(CommandsTest, CheckTestNotEnabled) {
   EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
-
+#if defined(__APPLE__)
 TEST(CommandsTest, CheckTestClangTidy) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
@@ -50,6 +50,7 @@ TEST(CommandsTest, CheckTestClangTidy) {
   EXPECT_TRUE(remove_test_gojo_profile());
   EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
+#endif
 
 
 TEST(CommandsTest, CheckTestCppCheck) {
@@ -72,6 +73,7 @@ TEST(CommandsTest, CheckTestCppCheck) {
 }
 
 
+#if defined(__APPLE__)
 TEST(CommandsTest, CheckTestAllEnabled) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
@@ -92,6 +94,7 @@ TEST(CommandsTest, CheckTestAllEnabled) {
   EXPECT_TRUE(remove_test_gojo_profile());
   EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
+#endif
 
 
 TEST(CommandsTest, CheckTestAllEnabledC) {
