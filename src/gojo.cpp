@@ -16,15 +16,11 @@
 //
 // * Have formats folder in .gojo to import
 //
-// * reaserach arg forwarding for print functions
-//
 // * test refresh
 //
 // * test dep
 //
 // * test profile
-//
-// * Fix clang-tidy errors...ooooof
 //
 // * Write outputs to a file in ~/.gojo/<project>/cmake/out.txt
 //   - Let verbose toggle writing to stdout instead
@@ -36,14 +32,9 @@
 //   - compiler=custom "/path/to/custom/compiler"
 //   - format=custom "format name in ~/.gojocli/formats/"
 
+namespace {
 
 constexpr std::string_view VERSION_STRING { "gojo version 1.0.0-beta" };
-
-// {0} CLEAR
-// {1} MAGENTA_BOLD
-// {2} MAGENTA
-// {3} YELLOW
-// {4} CYAN
 
 constexpr std::string_view WIN {
 R"({2}
@@ -84,62 +75,72 @@ R"({2}
 };
 
 
-int main(const int argc, const char* const argv[]) {
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+std::vector<std::string_view> extract_arguments(int argc, const char* const argv[]) {
+  std::vector<std::string_view> args {};
+  args.reserve(static_cast<std::size_t>(argc));
+  // NOLINTNEXTLINE(modernize-use-integer-sign-comparison)
+  for (std::size_t i {0}; i < static_cast<std::size_t>(argc); i++) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    args.emplace_back(argv[i]);
+  }
+
+  return args;
+}
+
+}
+
+// NOLINTBEGIN(bugprone-exception-escape)
+int main(int argc, const char* const argv[]) {
   if (argc == 1) {
-    std::println(WIN,
-                 utils::CLEAR,
-                 utils::MAGENTA_BOLD,
-                 utils::MAGENTA);
+    utils::gojo_print(utils::LogLevel::Info, WIN, INFO_COLORS);
     cmd::help();
     return EXIT_SUCCESS;
   }
 
-  // clang-tidy doesn't like pointer arithmetic, but this is the only
-  // way to construct the vector. Also, I don't think pointer arithmetic
-  // is that bad...
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-  std::vector<std::string_view> args_vec(argv, argv + argc);
-  std::span<std::string_view> args { args_vec };
+  std::vector<std::string_view> program_args { extract_arguments(argc, argv) };
+  std::span<std::string_view> command_args { program_args };
 
   // Remove gojo <command> from argument list.
-  args = args.subspan(2);
+  command_args = command_args.subspan(2);
 
-  auto command { cmd::command_map.find(args_vec.at(1)) };
-  if (command == cmd::command_map.end()) {
-    std::println(stderr, RED("[Error]: command not recognized: 'gojo {}'"), args_vec.at(1));
+  auto command { cmd::command_from_str(program_args.at(1)) };
+  if (!command.has_value()) {
+    utils::gojo_print(utils::LogLevel::Error, "command not recognized: 'gojo {}'", program_args.at(1));
+    return EXIT_FAILURE;
   }
 
   try {
-    switch (command->second) {
+    switch (command.value()) {
       case cmd::Command::Init:
-        cmd::init(args);
+        cmd::init(command_args);
         break;
       case cmd::Command::Build:
-        cmd::build(args);
+        cmd::build(command_args);
         break;
       case cmd::Command::Run:
-        cmd::run(args);
+        cmd::run(command_args);
         break;
       case cmd::Command::Test:
-        cmd::test(args);
+        cmd::test(command_args);
         break;
       case cmd::Command::Clean:
-        cmd::clean(args);
+        cmd::clean(command_args);
         break;
       case cmd::Command::Format:
-        cmd::fmt(args);
+        cmd::fmt(command_args);
         break;
       case cmd::Command::Check:
-        cmd::check(args);
+        cmd::check(command_args);
         break;
       case cmd::Command::Refresh:
-        cmd::refresh(args);
+        cmd::refresh(command_args);
         break;
       case cmd::Command::Dep:
-        cmd::dep(args);
+        cmd::dep(command_args);
         break;
       case cmd::Command::Profile:
-        cmd::profile(args);
+        cmd::profile(command_args);
         break;
       case cmd::Command::Info:
         cmd::info();
@@ -153,10 +154,11 @@ int main(const int argc, const char* const argv[]) {
     }
   }
   catch (const std::exception& e) {
-    utils::print_error(e.what());
-    std::println(stderr, YELLOW("see gojo {} --help for more info"), args_vec.at(1));
+    utils::gojo_print(utils::LogLevel::Error, "{}", e.what());
+    utils::gojo_print(utils::LogLevel::Warning, "see gojo {} --help for more info", program_args.at(1));
     return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;
 }
+// NOLINTEND(bugprone-exception-escape)

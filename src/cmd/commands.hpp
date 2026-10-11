@@ -5,8 +5,8 @@
 /// @copyright MIT License
 
 
-#ifndef GOJO_SRC_COMMANDS_COMMANDS_HPP
-#define GOJO_SRC_COMMANDS_COMMANDS_HPP
+#ifndef GOJO_SRC_CMD_COMMANDS_HPP
+#define GOJO_SRC_CMD_COMMANDS_HPP
 
 #include <span>
 #include <string>

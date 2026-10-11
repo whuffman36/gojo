@@ -10,80 +10,83 @@
 
 namespace {
 
-const std::filesystem::path PATH {
-  get_assets_path() / "commands" / "clean"
-};
+const std::filesystem::path& test_root_path() {
+  static const std::filesystem::path path {
+    get_assets_path() / "commands" / "clean"
+  };
+  return path;
+}
 
 }
 
 
 TEST(CommandsTest, CleanTest) {
   std::vector<std::string_view> args { "cleantest" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   ASSERT_NO_THROW(cmd::build(args));
 
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "src" / "cleantest"));
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "CMakeCache.txt"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "cleantest"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "CMakeCache.txt"));
 
   args.clear();
   EXPECT_NO_THROW(cmd::clean(args));
-  EXPECT_FALSE(std::filesystem::exists(PATH / "build" / "Debug" / "src" / "cleantest"));
+  EXPECT_FALSE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "cleantest"));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
 
 TEST(CommandsTest, CleanTestLib) {
   std::vector<std::string_view> args { "cleantest", "--lib" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   ASSERT_NO_THROW(cmd::build(args));
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "CMakeCache.txt"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "CMakeCache.txt"));
 
   args.clear();
   EXPECT_NO_THROW(cmd::clean(args));
   // Idk how to test this was successfull...
 
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
 
 TEST(CommandsTest, CleanTestDeep) {
   std::vector<std::string_view> args { "cleantest" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   ASSERT_NO_THROW(cmd::build(args));
 
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "src" / "cleantest"));
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "CMakeCache.txt"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "cleantest"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "CMakeCache.txt"));
 
   args.clear();
-  args.push_back("--deep");
+  args.emplace_back("--deep");
   EXPECT_NO_THROW(cmd::clean(args));
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "src" / "cleantest"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "cleantest"));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
 
 TEST(CommandsTest, CleanTestAll) {
   std::vector<std::string_view> args { "cleantest" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   ASSERT_NO_THROW(cmd::build(args));
 
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "src" / "cleantest"));
-  EXPECT_TRUE(std::filesystem::exists(PATH / "build" / "Debug" / "CMakeCache.txt"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "cleantest"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "CMakeCache.txt"));
 
   args.clear();
-  args.push_back("--all");
+  args.emplace_back("--all");
   EXPECT_NO_THROW(cmd::clean(args));
-  EXPECT_FALSE(std::filesystem::exists(PATH / "build" / "Debug" / "src" / "cleantest"));
+  EXPECT_FALSE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "cleantest"));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }

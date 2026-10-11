@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <flat_map>
 #include <format>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -38,13 +39,22 @@ enum class Subcommand : std::uint8_t {
 };
 
 
-const std::flat_map<std::string_view, Subcommand> subcommand_map {
-  { "search", Subcommand::Search },
-  { "install", Subcommand::Install },
-  { "add", Subcommand::Add },
-  { "remove", Subcommand::Remove },
-  { "uninstall", Subcommand::Uninstall },
-};
+std::optional<Subcommand> subcommand_from_str(std::string_view str) {
+  static const std::flat_map<std::string_view, Subcommand> map {
+    { "search", Subcommand::Search },
+    { "install", Subcommand::Install },
+    { "add", Subcommand::Add },
+    { "remove", Subcommand::Remove },
+    { "uninstall", Subcommand::Uninstall },
+  };
+
+  auto result { map.find(str) };
+  if (result == map.end()) {
+    return std::nullopt;
+  }
+
+  return result->second;
+}
 
 }
 
@@ -58,21 +68,22 @@ void dep(std::span<std::string_view> args) {
 
   std::string_view dep_option = args.front();
   if (dep_option == "--help") {
-    utils::print_info(HELP);
+    utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
     return;
   }
   
-  auto subcommand_result { subcommand_map.find(dep_option) };
-  if (subcommand_result == subcommand_map.end()) {
+  auto subcommand { subcommand_from_str(dep_option) };
+  if (!subcommand.has_value()) {
     throw std::runtime_error { std::format("gojo dep: option not recognized: {}", dep_option) };
   }
 
   cfg::Config cfg { cfg::Config::this_project() };
-  if (cfg.package_manager.has_value()) {
+  if (!cfg.package_manager.has_value()) {
     throw std::runtime_error { "gojo dep: no package manager enabled" };
   }
 
-  switch (subcommand_result->second) {
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+  switch (subcommand.value()) {
     case Subcommand::Search:
       if (args.size() > 2) {
         throw std::runtime_error { "gojo dep search: too many arguments" };
@@ -169,6 +180,7 @@ void dep(std::span<std::string_view> args) {
       }
       break;
   }
+  // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 }
 
 }

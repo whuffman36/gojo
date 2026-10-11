@@ -96,7 +96,7 @@ void build(std::span<std::string_view> args) {
       target = arg.substr(target_arg_len);
     }
     else if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
     else {
@@ -116,6 +116,9 @@ void build(std::span<std::string_view> args) {
     std::size_t empty_idx { cfg.build_types.size() };
     for (std::size_t idx {0}; idx < cfg.build_types.size(); idx++) {
       if (cfg.build_types.at(idx).has_value()) {
+        // For some reason clang-tidy can't see the optional check in the
+        // previous line.
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
         exists_in_dep_build_types = cfg.build_types.at(idx).value() == build_type;
       }
       else {

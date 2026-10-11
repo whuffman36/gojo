@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <format>
 #include <optional>
-#include <print>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -25,11 +24,11 @@ void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
     fresh_build = "--fresh ";
   }
 
-  std::string_view build_type { cfg::to_string(cfg.get_build_type()) };
+  std::string_view build_type { cfg::to_str(cfg.get_build_type()) };
 
   const std::string build_dir { cfg.get_build_dir().string() };
 
-  std::string_view generator { cfg::to_string(cfg.get_generator()) };
+  std::string_view generator { cfg::to_str(cfg.get_generator()) };
 
   std::string_view language {};
   switch (cfg.language) {
@@ -45,7 +44,7 @@ void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
 
   std::string_view language_standard {};
   if (cfg.language_standard.has_value()) {
-    language_standard = cfg::to_string(cfg.language_standard.value());
+    language_standard = cfg::to_str(cfg.language_standard.value());
   }
   else {
     language_standard = "23";
@@ -107,8 +106,8 @@ void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
   )};
 
   if (verbose) {
-    utils::print_status("Configuring CMake...\n");
-    std::println("command: {}\n", cmd);
+    utils::gojo_print(utils::LogLevel::Status, "Configuring CMake...\n");
+    utils::gojo_print(utils::LogLevel::Info, "command: {}\n", cmd);
     std::fflush(stdout);
 
     auto result { utils::execute_command(cmd.c_str()) };
@@ -118,7 +117,7 @@ void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
     }
 
     std::fflush(stdout);
-    utils::print_success("\nCMake configured successfully");
+    utils::gojo_print(utils::LogLevel::Success, "\nCMake configured successfully");
     return;
   }
 
@@ -138,7 +137,7 @@ void build(const cfg::Config& cfg, std::string_view target, bool clean, bool ver
 
   std::string_view clean_flag { clean ? " --clean-first" : "" };
 
-  std::string_view build_type { cfg::to_string(cfg.get_build_type()) };
+  std::string_view build_type { cfg::to_str(cfg.get_build_type()) };
 
   std::string build_dir { cfg.get_build_dir().string() };
   std::string config {};
@@ -154,7 +153,7 @@ void build(const cfg::Config& cfg, std::string_view target, bool clean, bool ver
                 clean_flag)
   };
 
-  std::println(MAGENTA("Building project {}...\n"), cfg.name);
+  utils::gojo_print(utils::LogLevel::Status, "Building project {}...\n", cfg.name);
   std::fflush(stdout);
 
   auto begin { std::chrono::system_clock::now() };
@@ -162,7 +161,7 @@ void build(const cfg::Config& cfg, std::string_view target, bool clean, bool ver
   auto result { utils::execute_command(cmd.c_str(), !verbose) };
 
   if (!result.success) {
-    std::println("{}", result.output);
+    utils::gojo_print(utils::LogLevel::Info, "{}", result.output);
     throw std::runtime_error { "failed to build CMake project" };
   }
 
@@ -170,9 +169,7 @@ void build(const cfg::Config& cfg, std::string_view target, bool clean, bool ver
   const std::chrono::duration<float> total_time { end - begin };
 
   std::fflush(stdout);
-  std::println(
-    GREEN("\nSuccessfully built in {} seconds"), total_time.count()
-  );
+  utils::gojo_print(utils::LogLevel::Success, "\nSuccessfully built in {} seconds", total_time.count());
 }
 
 
@@ -181,7 +178,6 @@ void clean(const cfg::Config& cfg, bool deep) {
     return cmake::configure(cfg, false, true);
   }
 
-  // turn into format string with cfg.get_build_dir()
   const std::string cmd { std::format("cmake --build {} --target clean", cfg.get_build_dir().string()) };
   auto result { utils::execute_command(cmd.c_str()) };
   if (!result.success) {
@@ -189,12 +185,4 @@ void clean(const cfg::Config& cfg, bool deep) {
   }
 }
 
-
-std::string_view get_version() {
-  // Version 4.0 cutoff support for version 3.5 and under and
-  // was released in March 2025.
-  // Most recent version (July 2026): 4.3.4
-  return "3.31.6...4.3.4";
 }
-
-}  // namespace cmake

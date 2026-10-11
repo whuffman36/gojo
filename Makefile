@@ -35,9 +35,6 @@ branch:
 	@git branch --set-upstream-to=origin/main $(BRANCH)
 	@git pull
 
-#search:
-	#grep -rnw .....
-
 clean:
 	@rm -rf build
 	@mkdir -p build

@@ -18,7 +18,6 @@
 #include <vector>
 
 #if defined(__APPLE__)
-  #include <sys/fcntl.h>
   #include <sys/_types/_pid_t.h>
   #include <sys/_types/_ssize_t.h>
   #include <sys/wait.h>
@@ -26,7 +25,6 @@
 #endif
 
 #if defined(__linux__)
-  #include <sys/fcntl.h>
   #include <sys/types.h>
   #include <sys/wait.h>
   #include <unistd.h>
@@ -37,16 +35,19 @@ namespace {
 
 std::vector<char*> split_args(const char* const args_str) {
   std::vector<char*> args_vec {};
-  std::size_t args_len { std::strlen(args_str) };
+  const std::size_t args_len { std::strlen(args_str) };
   // Because this is only ever called in a child process, the memory
   // does not need to be freed manually since the OS will clean up
   // the memory when exiting the process.
   // Maybe not the best practice but if it works it works.
   // Allocate room for and copy over the null byte.
+  // NOLINTNEXTLINE(cppcoreguidelines-no-malloc)
   char* args_str_copy { static_cast<char*>(std::malloc(args_len + 1)) };
   std::strncpy(args_str_copy, args_str, args_len + 1);
   std::size_t current_arg_start { 0 };
   bool in_quotes { false };
+
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   for (std::size_t i { 0 }; i < args_len; ++i) {
     if (args_str_copy[i] == '"') {
       in_quotes = !in_quotes;
@@ -67,6 +68,8 @@ std::vector<char*> split_args(const char* const args_str) {
   // found after.
   args_vec.push_back(&args_str_copy[current_arg_start]);
 
+  // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
   // The last element of the array must be a nullptr so exec() knows when to
   // stop.
   args_vec.push_back(nullptr);
@@ -78,7 +81,7 @@ std::vector<char*> split_args(const char* const args_str) {
 
 namespace utils {
 
-CommandResult execute_command(const char* const cmd, bool capture_output) noexcept {
+CommandResult execute_command(const char* const cmd, bool capture_output) {
   // Open pipe to pass data between parent and child process.
   std::array<int, 2> pipefd {};
   if (pipe(pipefd.data()) == -1) {
@@ -153,11 +156,8 @@ CommandResult execute_command(const char* const cmd, bool capture_output) noexce
     }
 
     if (WIFEXITED(status)) {
-      if (WEXITSTATUS(status) == EXIT_FAILURE) {
+      if (WEXITSTATUS(status) == EXIT_SUCCESS) {
         // process exited in failure state
-        return CommandResult { .output=output, .success=false };
-      }
-      else if (WEXITSTATUS(status) == EXIT_SUCCESS) {
         return CommandResult { .output=output, .success=true };
       }
       else {
@@ -180,7 +180,7 @@ std::string get_file_contents(const std::filesystem::path& file) {
     throw std::runtime_error { std::format("file not found: {}", file.string()) };
   }
 
-  std::ifstream filestream { file.string() };
+  const std::ifstream filestream { file.string() };
   std::stringstream stringstream {};
   stringstream << filestream.rdbuf();
   return stringstream.str();
@@ -200,12 +200,12 @@ std::string get_file_contents(const std::filesystem::path& file) {
 void append_file_at_line(const std::filesystem::path& file, std::string_view line_to_match, std::string_view contents) {
   std::string current_contents { get_file_contents(file) };
 
-  std::size_t idx { current_contents.find(line_to_match) };
+  const std::size_t idx { current_contents.find(line_to_match) };
   if (idx == std::string::npos) {
     throw std::runtime_error { std::format("'{}' not found in '{}'", line_to_match, file.string()) };
   }
 
-  std::string new_contents { std::format("\n{}\n", contents) };
+  const std::string new_contents { std::format("\n{}\n", contents) };
 
   // Insert at newline after the line is found.
   current_contents.insert(idx + line_to_match.size(), new_contents);
@@ -215,7 +215,7 @@ void append_file_at_line(const std::filesystem::path& file, std::string_view lin
 }
 
 
-std::string to_upper(std::string_view str) noexcept {
+std::string to_upper(std::string_view str) {
   std::string upper {};
   for (const char c : str) {
     upper.push_back(
@@ -228,32 +228,7 @@ std::string to_upper(std::string_view str) noexcept {
 }
 
 
-void print_status(std::string_view str) noexcept {
-  std::println(MAGENTA("{}"), str);
-}
-
-void print_success(std::string_view str) noexcept {
-  std::println(GREEN("{}"), str);
-}
-
-void print_error(std::string_view str) noexcept {
-  std::println(stderr, RED("[Error]: {}"), str);
-}
-
-void print_warning(std::string_view str) noexcept {
-  std::println(stderr, YELLOW("[Warning]: {}"), str);
-}
-
-void print_info(std::string_view str) noexcept {
-  std::println("{}", std::format("{}", str, utils::CLEAR,
-                   utils::MAGENTA_BOLD,
-                   utils::MAGENTA,
-                   utils::YELLOW,
-                   utils::CYAN));
-}
-
-
-std::string to_lower(std::string_view str) noexcept {
+std::string to_lower(std::string_view str) {
   std::string lower {};
   for (const char c : str) {
     lower.push_back(
@@ -264,7 +239,7 @@ std::string to_lower(std::string_view str) noexcept {
 }
 
 
-const std::filesystem::path get_root_dir() noexcept {
+const std::filesystem::path get_root_dir() {
   const std::filesystem::path root_dir {
     std::filesystem::current_path()
   };
@@ -272,13 +247,13 @@ const std::filesystem::path get_root_dir() noexcept {
 }
 
 
-const std::filesystem::path get_home_dir() noexcept {
+const std::filesystem::path get_home_dir() {
   const static std::filesystem::path HOME { std::getenv("HOME") };
   return std::filesystem::absolute(HOME);
 }
 
 
-const std::filesystem::path get_profiles_dir() noexcept {
+const std::filesystem::path get_profiles_dir() {
   const static std::filesystem::path profiles_dir {
     get_home_dir() / ".gojo" / "profiles"
   };
@@ -286,7 +261,7 @@ const std::filesystem::path get_profiles_dir() noexcept {
 }
 
 
-const std::filesystem::path get_config_path() noexcept {
+const std::filesystem::path get_config_path() {
   const static std::filesystem::path config_path {
     get_root_dir() / "gojo.toml"
   };

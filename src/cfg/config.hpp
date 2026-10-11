@@ -6,8 +6,8 @@
 /// @copyright MIT License
 
 
-#ifndef GOJO_SRC_CONFIG_HPP
-#define GOJO_SRC_CONFIG_HPP
+#ifndef GOJO_SRC_CFG_CONFIG_HPP
+#define GOJO_SRC_CFG_CONFIG_HPP
 
 #include <array>
 #include <filesystem>
@@ -19,8 +19,7 @@
 
 namespace cfg {
 
-class Config {
-public:
+struct Config {
   Config() = default;
   Config(Config&&) = default;
   Config& operator=(Config&&) = default;
@@ -35,40 +34,40 @@ public:
 
   void to_file(const std::filesystem::path& file) const;
 
-  Compiler get_compiler() const;
+  [[nodiscard]] Compiler get_compiler() const;
 
-  Generator get_generator() const;
+  [[nodiscard]] Generator get_generator() const;
 
-  LanguageStandard get_language_standard() const;
+  [[nodiscard]] LanguageStandard get_language_standard() const;
 
-  BuildSystem get_build_system() const;
+  [[nodiscard]] BuildSystem get_build_system() const;
 
-  BuildType get_build_type() const;
+  [[nodiscard]] BuildType get_build_type() const;
 
-  const std::filesystem::path get_build_dir() const;
+  [[nodiscard]] const std::filesystem::path get_build_dir() const;
 
-  const std::string_view get_header_extension() const;
+  [[nodiscard]] const std::string_view get_header_extension() const;
 
-  const std::string_view get_source_extension() const;
+  [[nodiscard]] const std::string_view get_source_extension() const;
 
-  bool is_multi_config() const;
+  [[nodiscard]] bool is_multi_config() const;
 
-  bool are_gnu_extensions_enabled() const;
+  [[nodiscard]] bool are_gnu_extensions_enabled() const;
 
-  bool is_testing_enabled() const;
+  [[nodiscard]] bool is_testing_enabled() const;
 
-  bool is_clang_tidy_enabled() const;
+  [[nodiscard]] bool is_clang_tidy_enabled() const;
 
-  bool is_cppcheck_enabled() const;
+  [[nodiscard]] bool is_cppcheck_enabled() const;
 
-
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   std::optional<std::string> compiler_flags;
   std::optional<std::string> clang_tidy_args;
   std::optional<std::string> cppcheck_checks;
   std::optional<std::string> cppcheck_args;
   std::optional<std::string> language_server;
 
-  std::string name;
+  std::string name {};
 
   std::array<std::optional<BuildType>, 4> build_types;
   std::optional<LanguageStandard> language_standard;
@@ -85,10 +84,11 @@ public:
   std::optional<bool> clang_tidy_enabled;
   std::optional<bool> cppcheck_enabled;
 
-  Language language;
-  Target target;
+  Language language { Language::Cpp };
+  Target target { Target::Binary };
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
-}  // namespace config
+}
 
 #endif

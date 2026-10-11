@@ -11,6 +11,14 @@
 #include "src/utils.hpp"
 
 
+constexpr std::string_view CONFIG_MIN {
+  "config_minimum.toml"
+};
+
+constexpr std::string_view CONFIG_FULL {
+  "config_full.toml"
+};
+
 const std::filesystem::path get_assets_path() {
   // This code is run from <PROJECT_ROOT>/build/Debug/test
   // The assets path is <PROJECT_ROOT>/test/assets

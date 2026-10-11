@@ -1,7 +1,6 @@
 #include "src/cmd/commands.hpp"
 
 #include <format>
-#include <print>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -44,7 +43,7 @@ void fmt(std::span<std::string_view> args) {
 
   for (const auto arg : args) {
     if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
     else {
@@ -62,7 +61,7 @@ void fmt(std::span<std::string_view> args) {
     }
     else {
       style = " style=";
-      style.append(cfg::to_string(cfg.clang_format_style.value()));
+      style.append(cfg::to_str(cfg.clang_format_style.value()));
     }
   }
 

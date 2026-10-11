@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <flat_map>
 #include <format>
-#include <print>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -47,12 +47,21 @@ enum class Subcommand : std::uint8_t {
 };
 
 
-const std::flat_map<std::string_view, Subcommand> subcommand_map {
-  { "create", Subcommand::Create },
-  { "List", Subcommand::List },
-  { "Show", Subcommand::Show },
-  { "delete", Subcommand::Delete },
-};
+std::optional<Subcommand> subcommand_from_str(std::string_view str) {
+  static const std::flat_map<std::string_view, Subcommand> map {
+    { "create", Subcommand::Create },
+    { "List", Subcommand::List },
+    { "Show", Subcommand::Show },
+    { "delete", Subcommand::Delete },
+  };
+
+  auto result { map.find(str) };
+  if (result == map.end()) {
+    return std::nullopt;
+  }
+
+  return result->second;
+}
 
 }
 
@@ -66,16 +75,16 @@ void profile(std::span<std::string_view> args) {
 
   std::string_view profile_subcommand = args.front();
   if (profile_subcommand == "--help") {
-    utils::print_info(HELP);
+    utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
     return;
   }
 
-  auto subcommand_result { subcommand_map.find(profile_subcommand) };
-  if (subcommand_result == subcommand_map.end()) {
+  auto subcommand { subcommand_from_str(profile_subcommand) };
+  if (!subcommand.has_value()) {
     throw std::runtime_error { std::format("gojo profile: option not recognized: {}", profile_subcommand) };
   }
 
-  switch (subcommand_result->second) {
+  switch (subcommand.value()) {
     case Subcommand::Create: {
       if (args.size() == 1) {
         throw std::runtime_error { "gojo profile create: missing name argument" };
@@ -86,7 +95,7 @@ void profile(std::span<std::string_view> args) {
       // clang tidy doesn't like the use of unchecked access in containers.
       // There is literally no other way to access std::span in C++23.
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-      std::string_view name { args[1] };
+      const std::string_view name { args[1] };
       cfg::Config::this_project().to_file(utils::get_profiles_dir() / name);
       break;
     }
@@ -95,9 +104,8 @@ void profile(std::span<std::string_view> args) {
         throw std::runtime_error { "gojo profile list: too many arguments" };
       }
 
-      // list files in ~/.gojo/profiles
       for (const auto& profile : std::filesystem::directory_iterator{utils::get_profiles_dir()}) {
-        std::println("{}", profile.path().filename().string());
+        utils::gojo_print(utils::LogLevel::Info, "{}", profile.path().filename().string());
       }
       break;
     }
@@ -120,7 +128,7 @@ void profile(std::span<std::string_view> args) {
       else {
         profile_contents = utils::get_file_contents(utils::get_profiles_dir() / name);
       }
-      std::println("{}", profile_contents);
+      utils::gojo_print(utils::LogLevel::Info, "{}", profile_contents);
       break;
     }
     case Subcommand::Delete:
@@ -136,7 +144,6 @@ void profile(std::span<std::string_view> args) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
       const std::string_view name { args[1] };
       if (name == "all") {
-        // Delete all current profiles.
         std::filesystem::remove_all(utils::get_profiles_dir());
         std::filesystem::create_directory(utils::get_profiles_dir());
       }

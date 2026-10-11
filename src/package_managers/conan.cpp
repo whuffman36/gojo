@@ -6,7 +6,6 @@
 #include <fstream>
 #include <ios>
 #include <ostream>
-#include <print>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -20,9 +19,9 @@
 
 namespace {
 
-const std::string_view get_profiles_dir() {
-  static const std::string profile_dir {
-    std::format("{}/.conan2/profiles", utils::get_home_dir().string())
+const std::filesystem::path get_profiles_dir() {
+  static const std::filesystem::path profile_dir {
+    utils::get_home_dir() / ".conan2" / "profiles"
   };
 
   return profile_dir;
@@ -49,12 +48,8 @@ std::string get_compiler_version(cfg::Compiler compiler) {
 
 void create_default_profile() {
   // Check for conan profile
-  const std::filesystem::path default_profile {
-    std::format("{}/default", get_profiles_dir())
-  };
-  if (!std::filesystem::exists(default_profile)) {
-    const char* const cmd { "conan profile detect --force" };
-    const auto result { utils::execute_command(cmd) };
+  if (!std::filesystem::exists(get_profiles_dir() / "default")) {
+    const auto result { utils::execute_command("conan profile detect --force") };
     if (!result.success) {
       throw std::runtime_error { "failed to detect default conan profile" };
     }
@@ -68,13 +63,13 @@ namespace conan {
 
 Profile Profile::from_file(std::string_view profile_name) {
   const std::filesystem::path profile_path {
-    std::format("{}/{}", get_profiles_dir(), profile_name)
+    get_profiles_dir() / profile_name
   };
   if (!std::filesystem::exists(profile_path)) {
     throw std::runtime_error { std::format("file not found: {}", profile_path.string()) };
   }
 
-  std::ifstream profile_file(profile_path);
+  const std::ifstream profile_file(profile_path);
   if (!profile_file.is_open()) {
     throw std::runtime_error { std::format("failed to open file: {}", profile_path.string()) };
   }
@@ -126,10 +121,7 @@ Profile Profile::from_file(std::string_view profile_name) {
     else {
       // Not a field that we need to care about, but we should still
       // copy it over to the profile for this project.
-      profile.other_settings.append(label);
-      profile.other_settings.push_back('=');
-      profile.other_settings.append(value);
-      profile.other_settings.push_back('\n');
+      profile.other_settings.append(std::format("{}={}\n", label, value));
     }
   }
 
@@ -139,7 +131,7 @@ Profile Profile::from_file(std::string_view profile_name) {
 
 void Profile::to_file(const cfg::Config& cfg) {
   const std::filesystem::path profile_path {
-    std::format("{}/{}", get_profiles_dir(), cfg.name)
+    get_profiles_dir() / cfg.name
   };
 
   std::ofstream profile_file(profile_path, std::ios::trunc);
@@ -147,9 +139,9 @@ void Profile::to_file(const cfg::Config& cfg) {
     throw std::runtime_error { std::format("failed to open file: {}", profile_path.string()) };
   }
 
-  std::string_view cfg_build_type { cfg::to_string(cfg.get_build_type()) };
+  std::string_view cfg_build_type { cfg::to_str(cfg.get_build_type()) };
 
-  cfg::Compiler cfg_compiler { cfg.get_compiler() };
+  const cfg::Compiler cfg_compiler { cfg.get_compiler() };
 
   std::string_view compiler_str {};
 
@@ -188,7 +180,7 @@ void Profile::to_file(const cfg::Config& cfg) {
   if (cfg.are_gnu_extensions_enabled()) {
     language_standard.append("gnu");
   }
-  language_standard.append(cfg::to_string(cfg.get_language_standard()));
+  language_standard.append(cfg::to_str(cfg.get_language_standard()));
 
   const std::string updated_profile { std::format(
 R"([settings]
@@ -200,14 +192,14 @@ compiler.libcxx={4}
 compiler.version={5}
 os={6}
 {7})",
-      arch,            // {0}
-      cfg_build_type,              // {1}
-      compiler_str,            // {2}
-      language_standard,       // {3}
-      lib,             // {4}
-      get_compiler_version(cfg_compiler),        // {5}
-      os,              // {6}
-      other_settings)  // {7}
+      arch,                               // {0}
+      cfg_build_type,                     // {1}
+      compiler_str,                       // {2}
+      language_standard,                  // {3}
+      lib,                                // {4}
+      get_compiler_version(cfg_compiler), // {5}
+      os,                                 // {6}
+      other_settings)                     // {7}
   };
 
   profile_file << updated_profile << std::flush;
@@ -228,14 +220,14 @@ void search(std::string_view package) {
 
 void install(const cfg::Config& cfg, bool verbose) {
   const std::filesystem::path profile_path {
-    std::format("{}/{}", get_profiles_dir(), cfg.name)
+    get_profiles_dir() / cfg.name
   };
   if (!std::filesystem::exists(profile_path)) {
     create_default_profile();
     Profile::from_file("default").to_file(cfg);
   }
 
-  utils::print_status("Installing conan dependencies...\n");
+  utils::gojo_print(utils::LogLevel::Status, "Installing conan dependencies...\n");
   std::fflush(stdout);
 
   constexpr std::string_view cmd_str { 
@@ -253,7 +245,10 @@ void install(const cfg::Config& cfg, bool verbose) {
   for (std::size_t idx { 0 }; idx < cfg.build_types.size(); ++idx) {
     if (cfg.build_types.at(idx).has_value()) {
       num_build_types_specified++;
-      cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_string(cfg.build_types.at(idx).value()));
+      // clang-tidy can't detect that build_types[idx] is being checked in
+      // the if statement.
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+      cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_str(cfg.build_types.at(idx).value()));
       auto result { utils::execute_command(cmd.c_str(), !verbose) };
       if (!result.success) {
         throw std::runtime_error { std::format("{}\nfailed to install conan dependencies", result.output) };
@@ -262,7 +257,7 @@ void install(const cfg::Config& cfg, bool verbose) {
   }
 
   if (num_build_types_specified == 0) {
-    cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_string(cfg::BuildType::Debug));
+    cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_str(cfg::BuildType::Debug));
     auto result { utils::execute_command(cmd.c_str(), !verbose) };
     if (!result.success) {
       throw std::runtime_error { std::format("{}\nfailed to install conan dependencies", result.output) };
@@ -270,25 +265,16 @@ void install(const cfg::Config& cfg, bool verbose) {
   }
 
   std::fflush(stdout);
-  std::println(
-    GREEN("\nDependencies installed successfully\n")
-    MAGENTA(
-      "\nAdd the following line to your CMakeLists.txt"
-      " in the root of the project:\n"
-    )
-    CYAN("\tfind_package(<package_name> REQUIRED)\n")
-    MAGENTA("for each package installed.")
-  );
+  utils::gojo_print(utils::LogLevel::Success, "\nDependencies installed successfully");
+  utils::gojo_print(utils::LogLevel::Status, "\nAdd the following line to your CMakeLists.txt in the root of the project:");
+  utils::gojo_print(utils::LogLevel::Info, "\tfind_package(<package_name> REQUIRED)\n");
+  utils::gojo_print(utils::LogLevel::Status, "for each package installed.");
 }
 
 
 void uninstall(std::string_view package) {
-  constexpr std::string_view cmd_str {
-    "conan remove {}"
-  };
-
   const std::string cmd {
-    std::format(cmd_str, package)
+    std::format("conan remove {}", package)
   };
 
   auto result { utils::execute_command(cmd.c_str()) };
@@ -327,13 +313,13 @@ void remove(const std::filesystem::path& conanfile, std::string_view package) {
 
   // Search left until a newline is found.
   std::size_t left_idx { idx };
-  while (file_contents[left_idx] != '\n' && left_idx > 0) {
+  while (file_contents.at(left_idx) != '\n' && left_idx > 0) {
     left_idx--;
   }
 
   // Search right until a newline is found.
   std::size_t right_idx { idx };
-  while (file_contents[right_idx] != '\n' && right_idx < file_contents.size()) {
+  while (file_contents.at(right_idx) != '\n' && right_idx < file_contents.size()) {
     right_idx++;
   }
 
@@ -345,4 +331,4 @@ void remove(const std::filesystem::path& conanfile, std::string_view package) {
   fstream << file_contents;
 }
 
-}  // namespace conan
+}

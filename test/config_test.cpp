@@ -6,18 +6,10 @@
 
 #include "src/cfg/config.hpp"
 #include "src/cfg/enums.hpp"
+#include "test/utils.hpp"
 
 
 namespace {
-
-// This code is run from <PROJECT_ROOT>/build/Debug/test
-// The assets path is <PROJECT_ROOT>/test/assets/config
-const std::filesystem::path ASSETS_PATH { "../../../test/assets/config" };
-
-const std::filesystem::path CONFIG_MINIMUM { ASSETS_PATH / "config_minimum.toml" };
-
-const std::filesystem::path CONFIG_FULL { ASSETS_PATH / "config_full.toml" };
-
 
 cfg::Compiler system_default_compiler() {
   #if defined(__APPLE__)
@@ -44,7 +36,7 @@ cfg::Generator system_default_generator() {
 
 TEST(ConfigTest, FromFile) {
   cfg::Config cfg_minimum {};
-  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(CONFIG_MINIMUM));
+  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(get_config(CONFIG_MIN)));
 
   EXPECT_EQ(cfg_minimum.name, "example");
   EXPECT_EQ(cfg_minimum.language, cfg::Language::Cpp);
@@ -69,7 +61,7 @@ TEST(ConfigTest, FromFile) {
 
 
   cfg::Config cfg_full {};
-  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(CONFIG_FULL));
+  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(get_config(CONFIG_FULL)));
 
   EXPECT_EQ(cfg_full.name, "example");
   EXPECT_EQ(cfg_full.language, cfg::Language::Cpp);
@@ -109,35 +101,29 @@ TEST(ConfigTest, FromFile) {
   EXPECT_TRUE(cfg_full.testing_enabled.has_value());
   EXPECT_EQ(cfg_full.testing_enabled.value(), true);
 
-  const std::filesystem::path CONFIG_NO_NAME { ASSETS_PATH / "config_no_name.toml" };
-  EXPECT_THROW(const cfg::Config cfg_no_name { cfg::Config::from_file(CONFIG_NO_NAME) }, std::runtime_error);
+  EXPECT_THROW(const cfg::Config cfg_no_name { cfg::Config::from_file(get_config("config_no_name.toml")) }, std::runtime_error);
 
-  const std::filesystem::path CONFIG_NO_LANGUAGE { ASSETS_PATH / "config_no_language.toml" };
-  EXPECT_THROW(const cfg::Config cfg_no_language { cfg::Config::from_file(CONFIG_NO_LANGUAGE) }, std::runtime_error);
+  EXPECT_THROW(const cfg::Config cfg_no_language { cfg::Config::from_file(get_config("config_no_language.toml")) }, std::runtime_error);
 
-  const std::filesystem::path CONFIG_NO_TARGET { ASSETS_PATH / "config_no_target.toml" };
-  EXPECT_THROW(const cfg::Config cfg_no_target { cfg::Config::from_file(CONFIG_NO_TARGET) }, std::runtime_error);
+  EXPECT_THROW(const cfg::Config cfg_no_target { cfg::Config::from_file(get_config("config_no_target.toml")) }, std::runtime_error);
 
-  const std::filesystem::path CONFIG_MALFORMED { ASSETS_PATH / "config_malformed.toml" };
-  EXPECT_THROW(const cfg::Config cfg_malformed { cfg::Config::from_file(CONFIG_MALFORMED) }, std::runtime_error);
+  EXPECT_THROW(const cfg::Config cfg_malformed { cfg::Config::from_file(get_config("config_malformed.toml")) }, std::runtime_error);
 }
 
 
 TEST(ConfigTest, ToFile) {
-  const std::filesystem::path tmp1 { ASSETS_PATH / "tmp1.toml" };
-
   cfg::Config cfg_full {};
-  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(CONFIG_FULL));
-  EXPECT_NO_THROW(cfg_full.to_file(tmp1));
+  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(get_config(CONFIG_FULL)));
+  EXPECT_NO_THROW(cfg_full.to_file(get_config("tmp1.toml")));
 
   cfg::Config cfg_tmp {};
-  EXPECT_NO_THROW(cfg_tmp = cfg::Config::from_file(tmp1));
+  EXPECT_NO_THROW(cfg_tmp = cfg::Config::from_file(get_config("tmp1.toml")));
   ASSERT_EQ(cfg_full.name, cfg_tmp.name);
-  EXPECT_TRUE(std::filesystem::remove(tmp1));
+  EXPECT_TRUE(std::filesystem::remove(get_config("tmp1.toml")));
 
-  const std::filesystem::path tmp2 { ASSETS_PATH / "tmp2.toml" };
+  const std::filesystem::path tmp2 { get_config("tmp2.toml") };
   cfg::Config cfg_minimum {};
-  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(CONFIG_MINIMUM));
+  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(get_config(CONFIG_MIN)));
 
   EXPECT_NO_THROW(cfg_minimum.to_file(tmp2));
   EXPECT_NO_THROW(cfg_tmp = cfg::Config::from_file(tmp2));
@@ -148,7 +134,7 @@ TEST(ConfigTest, ToFile) {
 
 TEST(ConfigTest, Getters) {
   cfg::Config cfg_full {};
-  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(CONFIG_FULL));
+  EXPECT_NO_THROW(cfg_full = cfg::Config::from_file(get_config(CONFIG_FULL)));
 
   EXPECT_NE(cfg_full.get_compiler(), cfg::Compiler::Default);
   EXPECT_EQ(cfg_full.get_generator(), cfg::Generator::Ninja);
@@ -164,7 +150,7 @@ TEST(ConfigTest, Getters) {
   EXPECT_TRUE(cfg_full.is_cppcheck_enabled());
 
   cfg::Config cfg_minimum {};
-  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(CONFIG_MINIMUM));
+  EXPECT_NO_THROW(cfg_minimum = cfg::Config::from_file(get_config(CONFIG_MIN)));
 
   EXPECT_EQ(cfg_minimum.get_compiler(), system_default_compiler());
   EXPECT_EQ(cfg_minimum.get_generator(), system_default_generator());

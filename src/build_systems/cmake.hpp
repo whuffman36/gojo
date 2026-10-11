@@ -24,7 +24,11 @@ void build(const cfg::Config& cfg, std::string_view target, bool clean, bool ver
 void clean(const cfg::Config& cfg, bool deep);
 
 
-std::string_view get_version();
+consteval std::string_view get_version() {
+  // Version 3.31.6 is the default version of cmake on github actions.
+  // Most recent version (July 2026): 4.3.4
+  return "3.31.6...4.3.4";
+}
 
 }  // namespace cmake
 

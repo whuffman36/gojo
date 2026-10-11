@@ -37,7 +37,7 @@ See 'gojo {2}<command>{0} {4}--help{0}' for more information on a specific comma
 namespace cmd {
 
 void help() {
-  utils::print_info(HELP);
+  utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
 }
 
 }
