@@ -11,8 +11,11 @@
 #include <span>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 
 #include "src/build_systems/cmake.hpp"
+#include "src/cfg/config.hpp"
+#include "src/cfg/enums.hpp"
 #include "src/package_managers/conan.hpp"
 #include "src/utils.hpp"
 

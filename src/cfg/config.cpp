@@ -1,15 +1,22 @@
 #include "src/cfg/config.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <ios>
 #include <optional>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 
 #include <toml++/toml.hpp>
+#include <toml++/impl/array.hpp>
+#include <toml++/impl/parser.hpp>
+#include <toml++/impl/table.hpp>
 #define TOML_IMPLEMENTATION
 
 #include "src/cfg/enums.hpp"

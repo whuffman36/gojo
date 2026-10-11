@@ -1,11 +1,13 @@
 #include "src/cmd/commands.hpp"
 
 #include <cstdint>
+#include <filesystem>
 #include <flat_map>
 #include <format>
 #include <print>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 #include "src/cfg/config.hpp"

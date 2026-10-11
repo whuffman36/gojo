@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <fstream>
 #include <format>
+#include <ostream>
 #include <print>
 #include <sstream>
 #include <stdexcept>

@@ -1,6 +1,8 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <ios>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>

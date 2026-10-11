@@ -1,6 +1,7 @@
 #include "src/cmd/commands.hpp"
 
 #include <cstdint>
+#include <filesystem>
 #include <flat_map>
 #include <format>
 #include <span>

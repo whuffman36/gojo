@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -55,7 +56,6 @@ TEST(CommandsTest, CheckTestCppCheck) {
   cfg.cppcheck_enabled = true;
   cfg.cppcheck_checks = "performance";
   cfg.cppcheck_args = std::nullopt;
-  std::println("checks: {}", cfg.cppcheck_checks.value());
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test" };

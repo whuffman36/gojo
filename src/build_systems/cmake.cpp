@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "src/cfg/config.hpp"
+#include "src/cfg/enums.hpp"
 #include "src/utils.hpp"
 
 
