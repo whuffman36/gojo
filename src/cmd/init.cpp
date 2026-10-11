@@ -298,18 +298,7 @@ const char* hello_world(void) {{
   } // is_library
   else {
     if (cfg.language == cfg::Language::Cpp) {
-      if (cfg.get_language_standard() == cfg::LanguageStandard::Cpp23 || cfg.get_language_standard() == cfg::LanguageStandard::Cpp26) {
-        str =
-R"(#include <print>
-
-int main() {
-  std::println("Hello world!");
-  return 0;
-}
-)";
-      } // std >= 23
-      else {
-        str =
+      str =
 R"(#include <iostream>
 
 int main() {
@@ -317,7 +306,6 @@ int main() {
   return 0;
 }
 )";        
-      } // std < 23
     } // project_lang == C++
     else if (cfg.language == cfg::Language::C) {
       str =
