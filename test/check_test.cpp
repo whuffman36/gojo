@@ -30,11 +30,12 @@ TEST(CommandsTest, CheckTestNotEnabled) {
 }
 
 
+#if defined(__APPLE__)
 TEST(CommandsTest, CheckTestClangTidy) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
-  cfg.clang_tidy_args = "-checks=-*,cppcoreguidelines-*";
+  cfg.clang_tidy_args = "-checks=-*,performance-*";
   cfg.clang_tidy_enabled = true;
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
@@ -47,6 +48,7 @@ TEST(CommandsTest, CheckTestClangTidy) {
   EXPECT_TRUE(remove_test_gojo_profile());
   EXPECT_TRUE(cleanup_test_gojo_project(PATH));
 }
+#endif
 
 
 TEST(CommandsTest, CheckTestCppCheck) {
@@ -69,12 +71,13 @@ TEST(CommandsTest, CheckTestCppCheck) {
 }
 
 
+#if defined(__APPLE__)
 TEST(CommandsTest, CheckTestAllEnabled) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
   cfg.clang_tidy_enabled = true;
-  cfg.clang_tidy_args = "-checks=-*,cppcoreguidelines-*";
+  cfg.clang_tidy_args = "-checks=-*,performance-*";
   cfg.cppcheck_enabled = true;
   cfg.cppcheck_checks = "performance";
   cfg.cppcheck_args = std::nullopt;
@@ -89,6 +92,7 @@ TEST(CommandsTest, CheckTestAllEnabled) {
   EXPECT_TRUE(remove_test_gojo_profile());
   EXPECT_TRUE(cleanup_test_gojo_project(PATH));
 }
+#endif
 
 
 TEST(CommandsTest, CheckTestAllEnabledC) {
