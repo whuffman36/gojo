@@ -7,6 +7,7 @@ target_sources(
   check.cpp
   clean.cpp
   deps.cpp
+  enums.cpp
   fmt.cpp
   help.cpp
   info.cpp

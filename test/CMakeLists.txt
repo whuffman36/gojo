@@ -24,6 +24,7 @@ target_link_libraries(
   config_test
   PRIVATE
   cfg
+  cmd
 )
 
 

@@ -43,7 +43,7 @@ void test(std::span<std::string_view> args) {
       target = std::format(" -R \"{}\"", arg.substr(target_arg_len));
     }
     else if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
     else {
@@ -56,9 +56,8 @@ void test(std::span<std::string_view> args) {
     return;
   }
 
-  std::filesystem::path build { utils::get_root_dir() };
-  build /= "build";
-  std::string_view build_type { cfg::to_string(cfg.get_build_type()) };
+  std::filesystem::path build { utils::get_root_dir() / "build" };
+  std::string_view build_type { cfg::to_str(cfg.get_build_type()) };
   std::string build_type_arg {};
 
   if (cfg.is_multi_config()) {

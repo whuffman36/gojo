@@ -2,7 +2,6 @@
 
 #include <filesystem>
 #include <format>
-#include <print>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -55,7 +54,7 @@ void check(std::span<std::string_view> args) {
       verbose = true;
     }
     else if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
     else {
@@ -109,28 +108,27 @@ void check(std::span<std::string_view> args) {
     const std::string cmd {
       std::format(cmd_str,
                   cfg.get_build_dir().string(), // {0}
-                  ignore,              // {2}
-                  clang_tidy_args)     // {3}
+                  ignore,                       // {2}
+                  clang_tidy_args)              // {3}
     };
 
     if (verbose) {
-      utils::print_status("Running clang-tidy...\n");
+      utils::gojo_print(utils::LogLevel::Status, "Running clang-tidy...\n");
     }
     auto cmd_result { utils::execute_command(cmd.c_str(), !verbose) };
     if (!cmd_result.success) {
-      std::println("{}", cmd_result.output);
+      utils::gojo_print(utils::LogLevel::Info, "{}", cmd_result.output);
       throw std::runtime_error { "failed clang-tidy checks" };
     }
     if (verbose) {
-      utils::print_success("No problems found!");
+      utils::gojo_print(utils::LogLevel::Success, "No problems found!");
     }
   }
 
   if (cfg.is_cppcheck_enabled()) {
-    std::string language_standard_arg { utils::to_lower(cfg::to_string(cfg.language)) };
+    std::string language_standard_arg { utils::to_lower(cfg::to_str(cfg.language)) };
     
-    cfg::LanguageStandard language_standard { cfg.get_language_standard() };
-    switch (language_standard) {
+    switch (cfg.get_language_standard()) {
       case cfg::LanguageStandard::C99:
         language_standard_arg.append("99");
         break;
@@ -142,7 +140,7 @@ void check(std::span<std::string_view> args) {
       case cfg::LanguageStandard::Cpp11:
       case cfg::LanguageStandard::Cpp14:
       case cfg::LanguageStandard::Cpp17:
-        language_standard_arg.append(cfg::to_string(cfg.language_standard.value()));
+        language_standard_arg.append(cfg::to_str(cfg.get_language_standard()));
         break;
       case cfg::LanguageStandard::Cpp20:
       case cfg::LanguageStandard::Cpp23:
@@ -170,22 +168,21 @@ void check(std::span<std::string_view> args) {
     };
     const std::string cmd {
       std::format(cmd_str,
-                  cfg.get_build_dir().string(),     // {0}
-                  language_standard_arg,   // {1}
-                  cppcheck_checks,         // {2}
-                  cppcheck_args)           // {3}
+                  cfg.get_build_dir().string(),  // {0}
+                  language_standard_arg,         // {1}
+                  cppcheck_checks,               // {2}
+                  cppcheck_args)                 // {3}
     };
     if (verbose) {
-      utils::print_status("Running cppcheck...\n");
+      utils::gojo_print(utils::LogLevel::Status, "Running cppcheck...\n");
     }
     auto cmd_result { utils::execute_command(cmd.c_str(), !verbose) };
     if (!cmd_result.success) {
-      std::println("Command: {}", cmd);
-      std::println("{}", cmd_result.output);
+      utils::gojo_print(utils::LogLevel::Info, "{}", cmd_result.output);
       throw std::runtime_error { "failed cppcheck checks" };
     }
     if (verbose) {
-      utils::print_success("No problems found!");
+      utils::gojo_print(utils::LogLevel::Success, "No problems found!");
     }
   }
 }

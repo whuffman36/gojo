@@ -709,13 +709,13 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
     else if (arg.starts_with("--profile=")) {
       // length of "--profile=".
       constexpr size_t profile_arg_len { 10 };
-      std::string_view profile_name { arg.substr(profile_arg_len) };
-      std::string_view tmp_name { cfg.name };
+      const std::string_view profile_name { arg.substr(profile_arg_len) };
+      const std::string_view tmp_name { cfg.name };
       cfg = cfg::Config::from_file(utils::get_profiles_dir() / profile_name);
       cfg.name = tmp_name;
     }
     else if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return std::nullopt;
     }
     else if (arg.starts_with("--") || arg.starts_with("-")) {
@@ -730,7 +730,7 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
 }
 
 
-void create_file(std::filesystem::path filepath, std::string_view contents) {
+void create_file(const std::filesystem::path& filepath, std::string_view contents) {
   std::filesystem::create_directories(filepath.parent_path());
   std::ofstream file(filepath);
   if (!file.is_open()) {

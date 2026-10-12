@@ -13,11 +13,6 @@
 
 namespace {
 
-const std::filesystem::path CONAN_PATH {
-  get_assets_path() / "conan"
-};
-
-
 constexpr std::string_view TEST_PROFILE_CONTENTS {
 R"([settings]
 arch=armv8
@@ -41,7 +36,7 @@ const std::filesystem::path get_profiles_dir() {
 
 
 TEST(ConanTest, ProfileFromFile) {
-  std::filesystem::path profile_path { get_profiles_dir() };
+  const std::filesystem::path profile_path { get_profiles_dir() };
   EXPECT_TRUE(std::filesystem::exists(profile_path));
   std::ofstream profile_file { profile_path / "test" };
   EXPECT_TRUE(profile_file.is_open());

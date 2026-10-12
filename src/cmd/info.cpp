@@ -281,7 +281,7 @@ repository, as well as become a contributor:
 namespace cmd {
 
 void info() {
-  utils::print_info(INFO);
+  utils::gojo_print(utils::LogLevel::Info, INFO, INFO_COLORS);
 }
 
 }

@@ -51,7 +51,7 @@ void clean(std::span<std::string_view> args) {
       break;
     }
     else if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
     else {

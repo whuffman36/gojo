@@ -12,23 +12,25 @@
 
 namespace {
 
-const std::filesystem::path PATH {
-  get_assets_path() / "commands" / "check"
-};
+const std::filesystem::path& test_root_path() {
+  static const std::filesystem::path PATH {
+    get_assets_path() / "commands" / "check"
+  };
+  return PATH;
+}
 
 }
 
 
 TEST(CommandsTest, CheckTestNotEnabled) {
   std::vector<std::string_view> args { "check" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
-
 
 #if defined(__APPLE__)
 TEST(CommandsTest, CheckTestClangTidy) {
@@ -40,13 +42,13 @@ TEST(CommandsTest, CheckTestClangTidy) {
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
   EXPECT_TRUE(remove_test_gojo_profile());
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 #endif
 
@@ -61,13 +63,13 @@ TEST(CommandsTest, CheckTestCppCheck) {
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
   EXPECT_TRUE(remove_test_gojo_profile());
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
 
@@ -84,13 +86,13 @@ TEST(CommandsTest, CheckTestAllEnabled) {
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
   EXPECT_TRUE(remove_test_gojo_profile());
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 #endif
 
@@ -107,13 +109,13 @@ TEST(CommandsTest, CheckTestAllEnabledC) {
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test", "--lang=c" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
   EXPECT_TRUE(remove_test_gojo_profile());
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
 
@@ -129,13 +131,13 @@ TEST(CommandsTest, CheckTestAllEnabledLib) {
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test", "--lib" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
   EXPECT_TRUE(remove_test_gojo_profile());
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
 
@@ -151,11 +153,11 @@ TEST(CommandsTest, CheckTestAllEnabledLibC) {
   ASSERT_TRUE(create_test_gojo_profile(cfg));
 
   std::vector<std::string_view> args { "check", "--profile=test", "--lang=c", "--lib" };
-  ASSERT_TRUE(init_test_gojo_project(PATH, args));
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
   args.clear();
   EXPECT_NO_THROW(cmd::check(args));
 
   EXPECT_TRUE(remove_test_gojo_profile());
-  EXPECT_TRUE(cleanup_test_gojo_project(PATH));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }

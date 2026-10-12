@@ -17,7 +17,6 @@
 
 namespace conan{
 
-/// @brief Represents a conan profile.
 class Profile {
 public:
   Profile() = default;

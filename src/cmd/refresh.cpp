@@ -46,7 +46,7 @@ void refresh(std::span<std::string_view> args) {
 
   for (const auto arg : args) {
     if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
     else if ( arg == "--verbose" || arg == "-v") {
@@ -57,7 +57,7 @@ void refresh(std::span<std::string_view> args) {
     }
   }
 
-  cfg::Config cfg { cfg::Config::this_project() };
+  const cfg::Config cfg { cfg::Config::this_project() };
 
   switch (cfg.get_build_system()) {
     case cfg::BuildSystem::CMake:

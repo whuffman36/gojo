@@ -37,14 +37,14 @@ namespace cmd {
 void run(std::span<std::string_view> args) {
   for (const auto arg : args) {
     if (arg == "--help") {
-      utils::print_info(HELP);
+      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return;
     }
   }
 
   const cfg::Config cfg { cfg::Config::this_project() };
   if (cfg.target == cfg::Target::Library) {
-    utils::print_warning("Cannot run a library target. See 'gojo run --help' for more information");
+    utils::gojo_print(utils::LogLevel::Warning, "Cannot run a library target. See 'gojo run --help' for more information");
     return;
   }
 
@@ -55,13 +55,13 @@ void run(std::span<std::string_view> args) {
   std::string cmd {};
   if (cfg.is_multi_config()) {
     cmd = std::format("./build/src/{}/{} {}",
-                      cfg::to_string(cfg.get_build_type()),
+                      cfg::to_str(cfg.get_build_type()),
                       cfg.name,
                       args_to_string(args));
   }
   else {
     cmd = std::format("./build/{}/src/{} {}",
-                      cfg::to_string(cfg.get_build_type()),
+                      cfg::to_str(cfg.get_build_type()),
                       cfg.name,
                       args_to_string(args));
   }

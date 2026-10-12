@@ -13,6 +13,7 @@
 #include <string_view>
 #include <utility>
 
+// NOLINTNEXTLINE(misc-include-cleaner)
 #include <toml++/toml.hpp>
 #include <toml++/impl/array.hpp>
 #include <toml++/impl/parser.hpp>
@@ -79,6 +80,7 @@ toml::array split_string(const std::string& str) {
 }
 
 
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,-warnings-as-errors)
 void validate_project_section(cfg::Config& cfg, const toml::table& table) {
   auto sv_result { table[PROJECT][PROJECT_NAME].value<std::string_view>() };
   if (!sv_result.has_value()) {
@@ -90,21 +92,21 @@ void validate_project_section(cfg::Config& cfg, const toml::table& table) {
   if (!sv_result.has_value()) {
     throw std::runtime_error { "project.language field missing in gojo.toml" };
   }
-  const auto language { cfg::language_map.find(sv_result.value()) };
-  if (language == cfg::language_map.end()) {
+  const auto language { cfg::language_from_str(sv_result.value()) };
+  if (!language.has_value()) {
     throw std::runtime_error { std::format("project.language not recognized: {}", sv_result.value()) };
   }
-  cfg.language = language->second;
+  cfg.language = language.value();
 
   sv_result = table[PROJECT][PROJECT_TARGET].value<std::string_view>();
   if (!sv_result.has_value()) {
     throw std::runtime_error { "project.target field missing in gojo.toml" };
   }
-  const auto target { cfg::target_map.find(sv_result.value()) };
-  if (target == cfg::target_map.end()) {
+  const auto target { cfg::target_from_str(sv_result.value()) };
+  if (!target.has_value()) {
     throw std::runtime_error { std::format("project.target not recognized: {}", sv_result.value()) };
   }
-  cfg.target = target->second;
+  cfg.target = target.value();
 }
 
 
@@ -114,24 +116,11 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.language_standard = std::nullopt;
   }
   else {
-    switch (cfg.language) {
-      case cfg::Language::C: {
-        const auto language_standard { cfg::c_language_standard_map.find(int_result.value()) };
-        if (language_standard == cfg::c_language_standard_map.end()) {
-          throw std::runtime_error { std::format("build.language_standard not recognized: {}", int_result.value()) };
-        }
-        cfg.language_standard = language_standard->second;
-        break;
-      }
-      case cfg::Language::Cpp: {
-        const auto language_standard { cfg::cpp_language_standard_map.find(int_result.value()) };
-        if (language_standard == cfg::cpp_language_standard_map.end()) {
-          throw std::runtime_error { std::format("build.language_standard not recognized: {}", int_result.value()) };
-        }
-        cfg.language_standard = language_standard->second;
-        break;
-      }
+    const auto language_standard { cfg::language_std_from_int(int_result.value(), cfg.language) };
+    if (!language_standard.has_value()) {
+      throw std::runtime_error { std::format("build.language_standard not recognized: {}", int_result.value()) };
     }
+    cfg.language_standard = language_standard;
   }
 
   auto sv_result { table[BUILD][BUILD_COMPILER].value<std::string_view>() };
@@ -139,11 +128,11 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.compiler = std::nullopt;
   }
   else {
-    const auto compiler { cfg::compiler_map.find(sv_result.value()) };
-    if (compiler == cfg::compiler_map.end()) {
+    const auto compiler { cfg::compiler_from_str(sv_result.value()) };
+    if (!compiler.has_value()) {
       throw std::runtime_error { std::format("build.compiler not recognized: {}", sv_result.value()) };
     }
-    cfg.compiler = cfg::compiler_map.at(sv_result.value());
+    cfg.compiler = compiler;
   }
 
   // auto array_result { table[BUILD][BUILD_COMPILER_FLAGS].value<toml::array>() };
@@ -169,7 +158,7 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.gnu_extensions_enabled = std::nullopt;
   }
   else {
-    cfg.gnu_extensions_enabled = bool_result.value();
+    cfg.gnu_extensions_enabled = bool_result;
   }
 
   sv_result = table[BUILD][BUILD_BUILD_SYSTEM].value<std::string_view>();
@@ -177,11 +166,11 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.build_system = std::nullopt;
   }
   else {
-    const auto build_system { cfg::build_system_map.find(sv_result.value()) };
-    if (build_system == cfg::build_system_map.end()) {
+    const auto build_system { cfg::build_system_from_str(sv_result.value()) };
+    if (!build_system .has_value()) {
       throw std::runtime_error { std::format("build.build_system not recognized: {}", sv_result.value()) };
     }
-    cfg.build_system = build_system->second;
+    cfg.build_system = build_system;
   }
 
   sv_result = table[BUILD][BUILD_GENERATOR].value<std::string_view>();
@@ -189,11 +178,11 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.generator = std::nullopt;
   }
   else {
-    const auto generator { cfg::generator_map.find(sv_result.value()) };
-    if (generator == cfg::generator_map.end()) {
+    const auto generator { cfg::generator_from_str(sv_result.value()) };
+    if (!generator.has_value()) {
       throw std::runtime_error { std::format("build.generator not recognized: {}", sv_result.value()) };
     }
-    cfg.generator = generator->second;
+    cfg.generator = generator;
   }
 
   sv_result = table[BUILD][BUILD_BUILD_TYPE].value<std::string_view>();
@@ -201,11 +190,11 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.build_type = std::nullopt;
   }
   else {
-    const auto build_type { cfg::build_type_map.find(sv_result.value()) };
-    if (build_type == cfg::build_type_map.end()) {
+    const auto build_type { cfg::build_type_from_str(sv_result.value()) };
+    if (!build_type.has_value()) {
       throw std::runtime_error { std::format("build.build_type not recognized: {}", sv_result.value()) };
     }
-    cfg.build_type = build_type->second;
+    cfg.build_type = build_type;
   }
 }
 
@@ -216,11 +205,11 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     cfg.clang_format_style = std::nullopt;
   }
   else {
-    const auto format_style { cfg::format_style_map.find(sv_result.value()) };
-    if (format_style == cfg::format_style_map.end()) {
+    const auto format_style { cfg::fromat_style_from_str(sv_result.value()) };
+    if (!format_style.has_value()) {
       throw std::runtime_error { std::format("checks.clang_format_style not recognized: {}", sv_result.value()) };
     }
-    cfg.clang_format_style = format_style->second;
+    cfg.clang_format_style = format_style;
   }
 
   sv_result = table[CHECKS][CHECKS_LANGUAGE_SERVER].value<std::string_view>();
@@ -236,7 +225,7 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     cfg.clang_tidy_enabled = std::nullopt;
   }
   else {
-    cfg.clang_tidy_enabled = bool_result.value();
+    cfg.clang_tidy_enabled = bool_result;
   }
 
   auto array_result { table[CHECKS][CHECKS_CLANG_TIDY_ARGS].as_array() };
@@ -261,7 +250,7 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     cfg.cppcheck_enabled = std::nullopt;
   }
   else {
-    cfg.cppcheck_enabled = bool_result.value();
+    cfg.cppcheck_enabled = bool_result;
   }
 
   array_result = table[CHECKS][CHECKS_CPPCHECK_CHECKS].as_array();
@@ -306,7 +295,7 @@ void validate_tests_section(cfg::Config& cfg, const toml::table& table) {
     cfg.testing_enabled = std::nullopt;
   }
   else {
-    cfg.testing_enabled = bool_result.value();
+    cfg.testing_enabled = bool_result;
   }
 
   auto sv_result { table[TESTS][TESTS_TEST_FRAMEWORK].value<std::string_view>() };
@@ -314,11 +303,11 @@ void validate_tests_section(cfg::Config& cfg, const toml::table& table) {
     cfg.test_framework = std::nullopt;
   }
   else {
-    const auto test_framework { cfg::test_framework_map.find(sv_result.value()) };
-    if (test_framework == cfg::test_framework_map.end()) {
+    const auto test_framework { cfg::test_framework_from_str(sv_result.value()) };
+    if (!test_framework.has_value()) {
       throw std::runtime_error { std::format("tests.test_framework not recognized: {}", sv_result.value()) };
     }
-    cfg.test_framework = test_framework->second;
+    cfg.test_framework = test_framework;
   }
 }
 
@@ -329,11 +318,11 @@ void validate_deps_section(cfg::Config& cfg, const toml::table& table) {
     cfg.package_manager = std::nullopt;
   }
   else {
-    const auto package_manager { cfg::package_manager_map.find(sv_result.value()) };
-    if (package_manager == cfg::package_manager_map.end()) {
+    const auto package_manager { cfg::package_manager_from_str(sv_result.value()) };
+    if (!package_manager.has_value()) {
       throw std::runtime_error { std::format("deps.package_manager not recognized: {}", sv_result.value()) };
     }
-    cfg.package_manager = package_manager->second;
+    cfg.package_manager = package_manager;
   }
 
   auto array_result { table[DEPS][DEPS_BUILD_TYPES].as_array() };
@@ -353,15 +342,16 @@ void validate_deps_section(cfg::Config& cfg, const toml::table& table) {
       if (!elem.value<std::string_view>().has_value()) {
         break;
       }
-      const auto build_type { cfg::build_type_map.find(elem.value<std::string_view>().value()) };
-      if (build_type == cfg::build_type_map.end()) {
-        throw std::runtime_error { std::format("deps.build_types[{}] not recognized: {}", idx, build_type->first) };
+      const auto build_type { cfg::build_type_from_str(elem.value<std::string_view>().value()) };
+      if (!build_type.has_value()) {
+        throw std::runtime_error { std::format("deps.build_types[{}] not recognized: {}", idx, elem.value<std::string_view>().value()) };
       }
-      cfg.build_types.at(idx) = build_type->second;
+      cfg.build_types.at(idx) = build_type;
       ++idx;
     }
   }
 }
+// NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,-warnings-as-errors)
 
 
 cfg::Config validate_config(const toml::table& table) {
@@ -380,9 +370,9 @@ cfg::Config validate_config(const toml::table& table) {
 toml::table create_project_table(const cfg::Config& cfg) {
   toml::table project_table {};
 
-  bool name_success { project_table.emplace(PROJECT_NAME, cfg.name).second };
-  bool language_success { project_table.emplace(PROJECT_LANGUAGE, cfg::to_string(cfg.language)).second };
-  bool target_success { project_table.emplace(PROJECT_TARGET, cfg::to_string(cfg.target)).second };
+  const bool name_success { project_table.emplace(PROJECT_NAME, cfg.name).second };
+  const bool language_success { project_table.emplace(PROJECT_LANGUAGE, cfg::to_str(cfg.language)).second };
+  const bool target_success { project_table.emplace(PROJECT_TARGET, cfg::to_str(cfg.target)).second };
 
   if (!(name_success && language_success && target_success)) {
     throw std::runtime_error { "failed to create project toml::table" };
@@ -403,11 +393,11 @@ toml::table create_build_table(const cfg::Config& cfg) {
   bool build_type_success { true };
 
   if (cfg.language_standard.has_value()) {
-    language_standard_success = build_table.emplace(BUILD_LANGUAGE_STD, cfg::to_string(cfg.language_standard.value())).second;
+    language_standard_success = build_table.emplace(BUILD_LANGUAGE_STD, cfg::to_str(cfg.language_standard.value())).second;
   }
 
   if (cfg.compiler.has_value()) {
-    compiler_success = build_table.emplace(BUILD_COMPILER, cfg::to_string(cfg.compiler.value())).second;
+    compiler_success = build_table.emplace(BUILD_COMPILER, cfg::to_str(cfg.compiler.value())).second;
   }
 
   if (cfg.compiler_flags.has_value()) {
@@ -419,15 +409,15 @@ toml::table create_build_table(const cfg::Config& cfg) {
   }
 
   if (cfg.build_system.has_value()) {
-    build_system_success = build_table.emplace(BUILD_BUILD_SYSTEM, cfg::to_string(cfg.build_system.value())).second;
+    build_system_success = build_table.emplace(BUILD_BUILD_SYSTEM, cfg::to_str(cfg.build_system.value())).second;
   }
 
   if (cfg.generator.has_value()) {
-    generator_success = build_table.emplace(BUILD_GENERATOR, cfg::to_string(cfg.generator.value())).second;
+    generator_success = build_table.emplace(BUILD_GENERATOR, cfg::to_str(cfg.generator.value())).second;
   }
 
   if (cfg.build_type.has_value()) {
-    build_type_success = build_table.emplace(BUILD_BUILD_TYPE, cfg::to_string(cfg.build_type.value())).second;
+    build_type_success = build_table.emplace(BUILD_BUILD_TYPE, cfg::to_str(cfg.build_type.value())).second;
   }
 
   if (!(language_standard_success && compiler_success && compiler_flags_success && gnu_extensions_success && build_system_success && generator_success && build_type_success)) {
@@ -449,7 +439,7 @@ toml::table create_checks_table(const cfg::Config& cfg) {
   bool cppcheck_args_success { true };
 
   if (cfg.clang_format_style.has_value()) {
-    clang_format_success = checks_table.emplace(CHECKS_CLANG_FORMAT_STYLE, cfg::to_string(cfg.clang_format_style.value())).second;
+    clang_format_success = checks_table.emplace(CHECKS_CLANG_FORMAT_STYLE, cfg::to_str(cfg.clang_format_style.value())).second;
   }
 
   if (cfg.language_server.has_value()) {
@@ -494,7 +484,7 @@ toml::table create_tests_table(const cfg::Config& cfg) {
   }
 
   if (cfg.test_framework.has_value()) {
-    framework_success = tests_table.emplace(TESTS_TEST_FRAMEWORK, cfg::to_string(cfg.test_framework.value())).second;
+    framework_success = tests_table.emplace(TESTS_TEST_FRAMEWORK, cfg::to_str(cfg.test_framework.value())).second;
   }
 
   if (!(testing_success && framework_success)) {
@@ -511,13 +501,14 @@ toml::table create_deps_table(const cfg::Config& cfg) {
   bool build_types_success { true };
 
   if (cfg.package_manager.has_value()) {
-    package_manager_success = deps_table.emplace(DEPS_PACKAGE_MANAGER, cfg::to_string(cfg.package_manager.value())).second;
+    package_manager_success = deps_table.emplace(DEPS_PACKAGE_MANAGER, cfg::to_str(cfg.package_manager.value())).second;
   }
 
   toml::array build_types {};
   for (std::size_t i { 0 }; i < cfg.build_types.size(); ++i) {
     if (cfg.build_types.at(i).has_value()) {
-      build_types.emplace_back(cfg::to_string(cfg.build_types.at(i).value()));
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+      build_types.emplace_back(cfg::to_str(cfg.build_types.at(i).value()));
     }
   }
   if (!build_types.empty()) {
@@ -559,15 +550,15 @@ void Config::to_file(const std::filesystem::path& file) const {
   }
 
   toml::table table {};
-  bool project_success { table.emplace(PROJECT, create_project_table(*this)).second };
+  const bool project_success { table.emplace(PROJECT, create_project_table(*this)).second };
 
-  bool build_success { table.emplace(BUILD, create_build_table(*this)).second };
+  const bool build_success { table.emplace(BUILD, create_build_table(*this)).second };
 
-  bool checks_success { table.emplace(CHECKS, create_checks_table(*this)).second };
+  const bool checks_success { table.emplace(CHECKS, create_checks_table(*this)).second };
 
-  bool tests_success { table.emplace(TESTS, create_tests_table(*this)).second };
+  const bool tests_success { table.emplace(TESTS, create_tests_table(*this)).second };
 
-  bool deps_success { table.emplace(DEPS, create_deps_table(*this)).second };
+  const bool deps_success { table.emplace(DEPS, create_deps_table(*this)).second };
 
   if (!(project_success && build_success && checks_success && tests_success && deps_success)) {
     throw std::runtime_error { "failed to create config toml::table" };
@@ -576,6 +567,7 @@ void Config::to_file(const std::filesystem::path& file) const {
   // The default << overload for toml::table sorts the fields alphabetically.
   // I want the tables to have a specific order in the file so I have to print it
   // manually.
+  // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
   cfg_stream << '[' << PROJECT << "]\n" << table[PROJECT] << "\n";
   if (!table[BUILD].as_table()->empty()) {
     cfg_stream << "\n[" << BUILD << "]\n" << table[BUILD] << "\n";
@@ -589,6 +581,7 @@ void Config::to_file(const std::filesystem::path& file) const {
   if (!table[DEPS].as_table()->empty()) {
     cfg_stream << "\n[" << DEPS << "]\n" << table[DEPS] << "\n";
   }
+  // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
   cfg_stream << std::flush;
 }
 
@@ -664,7 +657,7 @@ const std::filesystem::path Config::get_build_dir() const {
   if (is_multi_config()) {
     return std::format("{}/build", utils::get_root_dir().string());
   }
-  return std::format("{}/build/{}", utils::get_root_dir().string(), cfg::to_string(get_build_type()));
+  return std::format("{}/build/{}", utils::get_root_dir().string(), cfg::to_str(get_build_type()));
 }
 
 
@@ -732,4 +725,4 @@ bool Config::is_cppcheck_enabled() const {
   return cppcheck_enabled.has_value() && cppcheck_enabled.value();
 }
 
-}  // namespace config
+}
