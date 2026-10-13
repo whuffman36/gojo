@@ -53,6 +53,7 @@ void test(std::span<std::string_view> args) {
 
   const cfg::Config cfg { cfg::Config::this_project() };
   if (!cfg.is_testing_enabled()) {
+    utils::gojo_print(utils::LogLevel::Warning, "testing not enabled");
     return;
   }
 
@@ -77,7 +78,7 @@ void test(std::span<std::string_view> args) {
   const std::string cmd {
     std::format("ctest --output-on-failure{}{}", build_type_arg, target)
   };
-  auto cmd_result { utils::execute_command(cmd.c_str()) };
+  auto cmd_result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
   if (!cmd_result.success) {
     throw std::runtime_error { "failed to run tests" };
   }

@@ -9,8 +9,10 @@
 #define GOJO_SRC_UTILS_HPP
 
 #include <cstdio>
+#include <cstddef>
 #include <filesystem>
 #include <format>
+#include <optional>
 #include <print>
 #include <string>
 #include <string_view>
@@ -55,7 +57,7 @@ struct CommandResult {
   bool success;
 };
 
-CommandResult execute_command(const char* const cmd, bool capture_output=false);
+CommandResult execute_command(const char* const cmd, bool capture_output, bool verbose, const std::optional<std::filesystem::path>& logfile=std::nullopt);
 
 std::string get_file_contents(const std::filesystem::path& file);
 
@@ -83,18 +85,20 @@ void gojo_print(LogLevel level, std::format_string<Args...> fmt, Args&&... args)
       std::println(CLEAR);
       break;
     case LogLevel::Warning:
-      std::print(stderr, "{}[Warning]: ", YELLOW);
+      std::print(stderr, YELLOW);
       std::print(stderr, fmt, std::forward<Args>(args)...);
       std::println(stderr, CLEAR);
       break;
     case LogLevel::Error:
-      std::print(stderr, "{}[Error]: ", RED_BOLD);
+      std::print(stderr, RED_BOLD);
       std::print(stderr, fmt, std::forward<Args>(args)...);
       std::println(stderr, CLEAR);
       break;
   }
 }
 
+
+void gojo_log(const std::filesystem::path& destination, const char* content, std::size_t content_size);
 
 const std::filesystem::path get_root_dir();
 

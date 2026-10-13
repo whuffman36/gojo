@@ -31,6 +31,7 @@ constexpr std::string_view PROJECT { "project" };
 constexpr std::string_view PROJECT_NAME   { "name" };
 constexpr std::string_view PROJECT_LANGUAGE { "language" };
 constexpr std::string_view PROJECT_TARGET { "target" };
+constexpr std::string_view PROJECT_VERBOSE { "verbose" };
 
 constexpr std::string_view BUILD { "build" };
 constexpr std::string_view BUILD_LANGUAGE_STD { "language_standard" };
@@ -107,6 +108,14 @@ void validate_project_section(cfg::Config& cfg, const toml::table& table) {
     throw std::runtime_error { std::format("project.target not recognized: {}", sv_result.value()) };
   }
   cfg.target = target.value();
+
+  auto bool_result { table[PROJECT][PROJECT_VERBOSE].value<bool>() };
+  if (!bool_result.has_value()) {
+    cfg.verbose = std::nullopt;
+  }
+  else {
+    cfg.verbose = bool_result;
+  }
 }
 
 
@@ -373,8 +382,13 @@ toml::table create_project_table(const cfg::Config& cfg) {
   const bool name_success { project_table.emplace(PROJECT_NAME, cfg.name).second };
   const bool language_success { project_table.emplace(PROJECT_LANGUAGE, cfg::to_str(cfg.language)).second };
   const bool target_success { project_table.emplace(PROJECT_TARGET, cfg::to_str(cfg.target)).second };
+  bool verbose_success { true };
 
-  if (!(name_success && language_success && target_success)) {
+  if (cfg.verbose.has_value()) {
+    verbose_success = project_table.emplace(PROJECT_VERBOSE, cfg.verbose.value()).second;
+  }
+
+  if (!(name_success && language_success && target_success && verbose_success)) {
     throw std::runtime_error { "failed to create project toml::table" };
   }
 
@@ -723,6 +737,11 @@ bool Config::is_clang_tidy_enabled() const {
 
 bool Config::is_cppcheck_enabled() const {
   return cppcheck_enabled.has_value() && cppcheck_enabled.value();
+}
+
+
+bool Config::is_verbose_enabled() const {
+  return verbose.has_value() && verbose.value();
 }
 
 }

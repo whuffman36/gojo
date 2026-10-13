@@ -82,6 +82,8 @@ void dep(std::span<std::string_view> args) {
     throw std::runtime_error { "gojo dep: no package manager enabled" };
   }
 
+  bool verbose { cfg.is_verbose_enabled() };
+
   // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
   switch (subcommand.value()) {
     case Subcommand::Search:
@@ -101,9 +103,18 @@ void dep(std::span<std::string_view> args) {
       }
       break;
     case Subcommand::Install:
+      if (args.size() > 2) {
+        throw std::runtime_error { "gojo dep install: too many arguments" };
+      }
+      if (args.size() > 1 && (args[1] != "--verbose" && args[1] != "-v")) {
+        throw std::runtime_error { std::format("gojo dep install: argument not recognized: {}", args[1]) };
+      }
+      else if (args.size() > 1 && (args[1] == "--verbose" || args[1] == "-v")) {
+        verbose = true;
+      }
       switch (cfg.package_manager.value()) {
         case cfg::PackageManager::Conan:
-          conan::install(cfg, true);
+          conan::install(cfg, verbose);
           break;
         case cfg::PackageManager::Vcpkg:
           break;

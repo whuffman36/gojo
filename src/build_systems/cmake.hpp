@@ -15,13 +15,10 @@
 
 namespace cmake {
 
-void configure(const cfg::Config& cfg, bool verbose, bool reconfigure=false);
+void configure(const cfg::Config& cfg, bool verbose);
 
 
-void build(const cfg::Config& cfg, std::string_view target, bool clean, bool verbose);
-
-
-void clean(const cfg::Config& cfg, bool deep);
+void build(const cfg::Config& cfg, std::string_view target, bool verbose);
 
 
 consteval std::string_view get_version() {

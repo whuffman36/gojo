@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "src/build_systems/cmake.hpp"
 #include "src/cfg/config.hpp"
 #include "src/cfg/enums.hpp"
 #include "src/utils.hpp"
@@ -38,16 +37,11 @@ R"({1}Command:{0}
 namespace cmd {
 
 void clean(std::span<std::string_view> args) {
-  bool deep { false };
-  bool all { false };
+  bool deps { false };
 
   for (const auto arg : args) {
-    if (arg == "--deep") {
-      deep = true;
-      break;
-    }
-    else if (arg == "--all") {
-      all = true;
+    if (arg == "--deps") {
+      deps = true;
       break;
     }
     else if (arg == "--help") {
@@ -61,24 +55,12 @@ void clean(std::span<std::string_view> args) {
 
   const cfg::Config cfg { cfg::Config::this_project() };
 
-  cfg::BuildSystem build_system {};
-  if (!cfg.build_system.has_value()) {
-    build_system = cfg::BuildSystem::CMake;
-  }
-  else {
-    build_system = cfg.build_system.value();
-  }
-  switch (build_system) {
+  switch (cfg.get_build_system()) {
     case cfg::BuildSystem::CMake:
-      if (all) {
-        // Delete entire build folder.
-        std::filesystem::remove_all(cfg.get_build_dir());
-        std::filesystem::create_directory(cfg.get_build_dir());
-        return cmake::configure(cfg, false);
+      if (deps) {
+        std::filesystem::remove_all(utils::get_root_dir() / "deps");
       }
-      else {
-        return cmake::clean(cfg, deep);
-      }
+      std::filesystem::remove_all(cfg.get_build_dir());
       break;
   }
 }

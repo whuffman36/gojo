@@ -80,7 +80,7 @@ void fmt(std::span<std::string_view> args) {
                 fmt_args)
   };
 
-  auto cmd_result { utils::execute_command(cmd.c_str(), true) };
+  auto cmd_result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
   if (!cmd_result.success) {
     throw std::runtime_error { "failed to format" };
   }
