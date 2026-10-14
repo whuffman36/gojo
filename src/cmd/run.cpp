@@ -44,7 +44,7 @@ void run(std::span<std::string_view> args) {
 
   const cfg::Config cfg { cfg::Config::this_project() };
   if (cfg.target == cfg::Target::Library) {
-    utils::gojo_print(utils::LogLevel::Warning, "Cannot run a library target. See 'gojo run --help' for more information");
+    utils::gojo_print(utils::LogLevel::Warning, "cannot run a library target. See 'gojo run --help' for more information");
     return;
   }
 
@@ -66,7 +66,7 @@ void run(std::span<std::string_view> args) {
                       args_to_string(args));
   }
 
-  auto cmd_result { utils::execute_command(cmd.c_str()) };
+  auto cmd_result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
   if (!cmd_result.success) {
     throw std::runtime_error { std::format("failed to run {} executable", cfg.name) };
   }

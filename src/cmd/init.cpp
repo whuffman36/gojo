@@ -682,6 +682,9 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
   cfg.language = cfg::Language::Cpp;
 
   for (const auto arg : args) {
+    if (arg == "--verbose" || arg == "-v") {
+      cfg.verbose = true;
+    }
     if (arg == "--lib") {
       cfg.target = cfg::Target::Library;
     }
@@ -825,7 +828,7 @@ void init(std::span<std::string_view> args) {
       break;
   }
 
-  auto git_result { utils::execute_command("git init") };
+  auto git_result { utils::execute_command("git init", false, cfg.is_verbose_enabled(), cfg.get_build_dir() / "log.txt") };
   if (!git_result.success) {
     throw std::runtime_error { "failed to initialize git repository" };
   }

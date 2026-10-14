@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <print>
 #include <span>
 #include <string_view>
 #include <vector>
@@ -14,7 +13,7 @@
 // TODO:
 // * Create gojo package system
 //
-// * Have formats folder in .gojo to import
+// * Have formats folder in ~/.gojo to import
 //
 // * test refresh
 //
@@ -22,15 +21,20 @@
 //
 // * test profile
 //
-// * Write outputs to a file in ~/.gojo/<project>/cmake/out.txt
-//   - Let verbose toggle writing to stdout instead
-//   - much faster, allows user to still check output from last commmand
-//   - maybe a place to define executable as well ?
-//   - or just force user to specify target each time ?
+// * change gojo test to use cmake::test since it is using ctest
+//   - Makes sense since it will probably be different with meson
+//   - should gojo test also build first like run does?
+//
+// * gojo clean should just delete build folder and optionally delete deps folder
+//
+// * test gojo build from scratch without config to see if it detects config step needed
 //
 // * Create arguments system for custom arguments in config file
 //   - compiler=custom "/path/to/custom/compiler"
-//   - format=custom "format name in ~/.gojocli/formats/"
+//   - format=custom "format name in ~/.gojo/formats/"
+//   - these are the only fields with custom option, should I even bother?
+//   - i feel like the custom formats should be a thing at least
+//   - custom compiler probably doesn't need to happen but it could be useful
 
 namespace {
 
@@ -149,7 +153,7 @@ int main(int argc, const char* const argv[]) {
         cmd::help();
         break;
       case cmd::Command::Version:
-        std::println(VERSION_STRING);
+        utils::gojo_print(utils::LogLevel::Info, VERSION_STRING);
         break;
     }
   }

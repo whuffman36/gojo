@@ -64,7 +64,12 @@ void check(std::span<std::string_view> args) {
 
   const cfg::Config cfg { cfg::Config::this_project() };
 
+  if (!verbose) {
+    verbose = cfg.is_verbose_enabled();
+  }
+
   if (!cfg.is_clang_tidy_enabled() && !cfg.is_cppcheck_enabled()) {
+    utils::gojo_print(utils::LogLevel::Warning, "no checks enabled");
     return;
   }
 
@@ -115,13 +120,12 @@ void check(std::span<std::string_view> args) {
     if (verbose) {
       utils::gojo_print(utils::LogLevel::Status, "Running clang-tidy...\n");
     }
-    auto cmd_result { utils::execute_command(cmd.c_str(), !verbose) };
+    auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
     if (!cmd_result.success) {
-      utils::gojo_print(utils::LogLevel::Info, "{}", cmd_result.output);
       throw std::runtime_error { "failed clang-tidy checks" };
     }
     if (verbose) {
-      utils::gojo_print(utils::LogLevel::Success, "No problems found!");
+      utils::gojo_print(utils::LogLevel::Success, "\nNo problems found!");
     }
   }
 
@@ -176,13 +180,12 @@ void check(std::span<std::string_view> args) {
     if (verbose) {
       utils::gojo_print(utils::LogLevel::Status, "Running cppcheck...\n");
     }
-    auto cmd_result { utils::execute_command(cmd.c_str(), !verbose) };
+    auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
     if (!cmd_result.success) {
-      utils::gojo_print(utils::LogLevel::Info, "{}", cmd_result.output);
       throw std::runtime_error { "failed cppcheck checks" };
     }
     if (verbose) {
-      utils::gojo_print(utils::LogLevel::Success, "No problems found!");
+      utils::gojo_print(utils::LogLevel::Success, "\nNo problems found!");
     }
   }
 }

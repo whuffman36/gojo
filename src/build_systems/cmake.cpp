@@ -15,15 +15,7 @@
 
 namespace cmake {
 
-void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
-  // Keeps most of the build directory intact, but ignores the cache built
-  // up from previous builds. This is different from a brand new configure
-  // in an empty build directory.
-  std::string_view fresh_build {};
-  if (reconfigure) {
-    fresh_build = "--fresh ";
-  }
-
+void configure(const cfg::Config& cfg, bool verbose) {
   std::string_view build_type { cfg::to_str(cfg.get_build_type()) };
 
   const std::string build_dir { cfg.get_build_dir().string() };
@@ -42,13 +34,7 @@ void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
 
   std::string_view compiler { cfg::to_absolute_path(cfg.get_compiler()) };
 
-  std::string_view language_standard {};
-  if (cfg.language_standard.has_value()) {
-    language_standard = cfg::to_str(cfg.language_standard.value());
-  }
-  else {
-    language_standard = "23";
-  }
+  std::string_view language_standard { cfg::to_str(cfg.get_language_standard()) };
 
   std::string_view extensions { cfg.are_gnu_extensions_enabled() ? "ON" : "OFF" };
 
@@ -78,111 +64,87 @@ void configure(const cfg::Config& cfg, bool verbose, bool reconfigure) {
 
   constexpr std::string_view cmdstr {
     "cmake "
-    "{0}"
     "-S . "
-    "-B {1} "
-    "-G \"{2}\" "
-    "-DCMAKE_{3}_COMPILER={4} "
-    "-DCMAKE_{3}_STANDARD={5} "
-    "-DCMAKE_{3}_STANDARD_REQUIRED=ON "
-    "-DCMAKE_{3}_EXTENSIONS={6} "
-    "-DCMAKE_BUILD_TYPE={7}"  // ignored for multi-config generators
+    "-B {0} "
+    "-G \"{1}\" "
+    "-DCMAKE_{2}_COMPILER={3} "
+    "-DCMAKE_{2}_STANDARD={4} "
+    "-DCMAKE_{2}_STANDARD_REQUIRED=ON "
+    "-DCMAKE_{2}_EXTENSIONS={5} "
+    "-DCMAKE_BUILD_TYPE={6}"  // ignored for multi-config generators
+    "{7}"
     "{8}"
     "{9}"
-    "{10}"
   };
   const std::string cmd { std::format(cmdstr,
-    fresh_build,       // {0}
-    build_dir,         // {1}
-    generator,         // {2}
-    language,          // {3}
-    compiler,          // {4}
-    language_standard, // {5}
-    extensions,        // {6}
-    build_type,        // {7}
-    compiler_flags,    // {8}
-    build_tests,       // {9}
-    toolchain          // {10}
+    build_dir,         // {0}
+    generator,         // {1}
+    language,          // {2}
+    compiler,          // {3}
+    language_standard, // {4}
+    extensions,        // {5}
+    build_type,        // {6}
+    compiler_flags,    // {7}
+    build_tests,       // {8}
+    toolchain          // {9}
   )};
 
   if (verbose) {
     utils::gojo_print(utils::LogLevel::Status, "Configuring CMake...\n");
     utils::gojo_print(utils::LogLevel::Info, "command: {}\n", cmd);
     std::fflush(stdout);
-
-    auto result { utils::execute_command(cmd.c_str()) };
-
-    if (!result.success) {
-      throw std::runtime_error { "failed to configure CMake project" };
-    }
-
-    std::fflush(stdout);
-    utils::gojo_print(utils::LogLevel::Success, "\nCMake configured successfully");
-    return;
   }
 
-  auto result { utils::execute_command(cmd.c_str(), true) };
+  auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
 
   if (!result.success) {
-    throw std::runtime_error { std::format("failed to configure CMake project: \n{}", result.output) };
+    throw std::runtime_error { "failed to configure CMake project" };
+  }
+
+  if (verbose) {
+    std::fflush(stdout);
+    utils::gojo_print(utils::LogLevel::Success, "\nCMake configured successfully");
   }
 }
 
 
-void build(const cfg::Config& cfg, std::string_view target, bool clean, bool verbose) {
+void build(const cfg::Config& cfg, std::string_view target, bool verbose) {
   std::string build_target {};
   if (!target.empty()) {
     build_target = std::format("--target {} ", target);
   }
 
-  std::string_view clean_flag { clean ? " --clean-first" : "" };
-
   std::string_view build_type { cfg::to_str(cfg.get_build_type()) };
 
-  std::string build_dir { cfg.get_build_dir().string() };
   std::string config {};
   if (cfg.is_multi_config()) {
     config = std::format("--config {} ", build_type);
   }
 
   const std::string cmd { 
-    std::format("cmake --build {} {}{}--parallel{}",
-                build_dir,
+    std::format("cmake --build {} {}{}--parallel",
+                cfg.get_build_dir().string(),
                 config,
-                build_target,
-                clean_flag)
+                build_target)
   };
 
-  utils::gojo_print(utils::LogLevel::Status, "Building project {}...\n", cfg.name);
+  utils::gojo_print(utils::LogLevel::Status, "Building {} project {}...\n", cfg::to_str(cfg.language), cfg.name);
   std::fflush(stdout);
 
   auto begin { std::chrono::system_clock::now() };
 
-  auto result { utils::execute_command(cmd.c_str(), !verbose) };
+  auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+
+  auto end { std::chrono::system_clock::now() };
 
   if (!result.success) {
-    utils::gojo_print(utils::LogLevel::Info, "{}", result.output);
     throw std::runtime_error { "failed to build CMake project" };
   }
 
-  auto end { std::chrono::system_clock::now() };
   const std::chrono::duration<float> total_time { end - begin };
 
   std::fflush(stdout);
   utils::gojo_print(utils::LogLevel::Success, "\nSuccessfully built in {} seconds", total_time.count());
-}
-
-
-void clean(const cfg::Config& cfg, bool deep) {
-  if (deep) {
-    return cmake::configure(cfg, false, true);
-  }
-
-  const std::string cmd { std::format("cmake --build {} --target clean", cfg.get_build_dir().string()) };
-  auto result { utils::execute_command(cmd.c_str()) };
-  if (!result.success) {
-    throw std::runtime_error { "failed to clean CMake project" };
-  }
 }
 
 }

@@ -30,31 +30,31 @@ constexpr std::string_view TEST_FILE { "example.txt" };
 TEST(UtilsTest, ExecuteCommand) {
   const char* cmd { "ls" };
 
-  const auto result1 { utils::execute_command(cmd) };
+  const auto result1 { utils::execute_command(cmd, false, false) };
   EXPECT_TRUE(result1.output.empty());
   EXPECT_TRUE(result1.success);
 
-  const auto result2 { utils::execute_command(cmd, true) };
+  const auto result2 { utils::execute_command(cmd, true, false) };
   EXPECT_FALSE(result2.output.empty());
   EXPECT_TRUE(result2.success);
 
   const char* bad_cmd { "bad-cmd" };
 
-  const auto result3 { utils::execute_command(bad_cmd) };
+  const auto result3 { utils::execute_command(bad_cmd, false, false) };
   EXPECT_TRUE(result3.output.empty());
   EXPECT_FALSE(result3.success);
 
-  const auto result4 { utils::execute_command(bad_cmd, true) };
+  const auto result4 { utils::execute_command(bad_cmd, true, false) };
   EXPECT_FALSE(result4.output.empty());
   EXPECT_FALSE(result4.success);
 
-  const auto result5 { utils::execute_command(bad_cmd, true) };
+  const auto result5 { utils::execute_command(bad_cmd, true, false) };
   EXPECT_FALSE(result5.output.empty());
   EXPECT_FALSE(result5.success);
 
   const std::filesystem::path new_file { test_root_path() / "execute_command.txt" };
   const std::string touch_cmd { std::format("touch {}", new_file.string()) };
-  const auto result6 { utils::execute_command(touch_cmd.c_str()) };
+  const auto result6 { utils::execute_command(touch_cmd.c_str(), false, false) };
   EXPECT_TRUE(result6.success);
   EXPECT_TRUE(std::filesystem::exists(new_file));
   EXPECT_TRUE(std::filesystem::remove(new_file));

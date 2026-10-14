@@ -67,7 +67,6 @@ void build(std::span<std::string_view> args) {
   cfg::BuildType build_type { cfg::BuildType::Debug };
   std::string_view target {};
   bool testing_enabled { false };
-  bool clean { false };
   bool reconfigure { false };
   bool verbose { false };
 
@@ -83,9 +82,6 @@ void build(std::span<std::string_view> args) {
     }
     else if (arg == "--no-tests") {
       testing_enabled = false;
-    }
-    else if (arg == "--clean") {
-      clean = true;
     }
     else if (arg == "--verbose" || arg == "-v") {
       verbose = true;
@@ -106,6 +102,10 @@ void build(std::span<std::string_view> args) {
 
   cfg::Config cfg { cfg::Config::this_project() };
 
+  if (!verbose) {
+    verbose = cfg.is_verbose_enabled();
+  }
+
   reconfigure = ((cfg.get_build_type() != build_type) && !cfg.is_multi_config()) ||
                 (cfg.is_testing_enabled() != testing_enabled);
 
@@ -116,8 +116,6 @@ void build(std::span<std::string_view> args) {
     std::size_t empty_idx { cfg.build_types.size() };
     for (std::size_t idx {0}; idx < cfg.build_types.size(); idx++) {
       if (cfg.build_types.at(idx).has_value()) {
-        // For some reason clang-tidy can't see the optional check in the
-        // previous line.
         // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
         exists_in_dep_build_types = cfg.build_types.at(idx).value() == build_type;
       }
@@ -147,7 +145,7 @@ void build(std::span<std::string_view> args) {
     }
     switch (cfg.get_build_system()) {
       case cfg::BuildSystem::CMake:
-        cmake::configure(cfg, verbose, true);
+        cmake::configure(cfg, verbose);
         break;
     }
 
@@ -156,7 +154,7 @@ void build(std::span<std::string_view> args) {
 
   switch (cfg.get_build_system()) {
     case cfg::BuildSystem::CMake:
-      cmake::build(cfg, target, clean, verbose);
+      cmake::build(cfg, target, verbose);
       break;
   }
 }

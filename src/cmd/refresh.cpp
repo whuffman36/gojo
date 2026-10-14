@@ -59,9 +59,15 @@ void refresh(std::span<std::string_view> args) {
 
   const cfg::Config cfg { cfg::Config::this_project() };
 
+  if (!verbose) {
+    verbose = cfg.is_verbose_enabled();
+  }
+
+  clean({});
+
   switch (cfg.get_build_system()) {
     case cfg::BuildSystem::CMake:
-      return cmake::configure(cfg, verbose, true);
+      return cmake::configure(cfg, verbose);
       break;
   }
 }

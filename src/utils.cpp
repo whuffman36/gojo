@@ -2,17 +2,20 @@
 
 #include <array>
 #include <cctype>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <format>
+#include <ios>
+#include <optional>
 #include <ostream>
-#include <print>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <system_error>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -81,12 +84,19 @@ std::vector<char*> split_args(const char* const args_str) {
 
 namespace utils {
 
-CommandResult execute_command(const char* const cmd, bool capture_output) {
+CommandResult execute_command(const char* const cmd, bool capture_output, bool verbose, const std::optional<std::filesystem::path>& logfile) {
+  if (cmd == nullptr) {
+    return CommandResult {
+      .output { "nullptr passed to 'execute_command()'" },
+      .success=false
+    };
+  }
+
   // Open pipe to pass data between parent and child process.
   std::array<int, 2> pipefd {};
   if (pipe(pipefd.data()) == -1) {
     return CommandResult { 
-      .output="failed to open inter-process pipe",
+      .output { "failed to open inter-process pipe" },
       .success=false
     };
   }
@@ -96,7 +106,7 @@ CommandResult execute_command(const char* const cmd, bool capture_output) {
   const pid_t pid { fork() };
   if (pid == -1) {
     return CommandResult {
-      .output="failed to fork process",
+      .output { "failed to fork process" },
       .success=false
     };
   }
@@ -130,19 +140,34 @@ CommandResult execute_command(const char* const cmd, bool capture_output) {
     // child.
     close(pipefd.at(1));
 
-    constexpr int BUFFER_SIZE { 4096 };
+    gojo_log(logfile.value_or("/dev/null"), cmd, std::strlen(cmd));
+
+    constexpr std::size_t BUFFER_SIZE { 4096 };
     std::array<char, BUFFER_SIZE> buffer {};
     std::string output {};
     ssize_t bytes_read { 0 };
 
-    if (capture_output) {
+    if (verbose) {
       while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
-        output.append(buffer.data(), static_cast<std::size_t>(bytes_read));
+        gojo_print(LogLevel::Info, "{}", buffer.data());
       }
     }
     else {
-      while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
-        std::print("{}", buffer.data());
+      if (!logfile.has_value() && !capture_output) {
+        gojo_print(LogLevel::Warning, "no logfile to write to");
+      }
+      // Kind of awkward, but I can't think of another way to avoid appending to output without
+      // having an if statement in the while loop.
+      if (capture_output) {
+        while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
+          gojo_log(logfile.value_or("/dev/null"), buffer.data(), static_cast<std::size_t>(bytes_read));
+          output.append(buffer.data(), static_cast<std::size_t>(bytes_read));
+        }
+      }
+      else {
+        while ((bytes_read = read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
+          gojo_log(logfile.value_or("/dev/null"), buffer.data(), static_cast<std::size_t>(bytes_read));
+        }
       }
     }
 
@@ -239,8 +264,31 @@ std::string to_lower(std::string_view str) {
 }
 
 
+void gojo_log(const std::filesystem::path& destination, const char* content, std::size_t content_size) {
+  const std::filesystem::path parent { destination.parent_path() };
+  if (!parent.empty()) {
+    std::error_code error;
+    std::filesystem::create_directories(parent, error);
+    if (error) {
+      gojo_print(LogLevel::Warning, "failed to create log directory: {}", parent.string());
+      return;
+    }
+  }
+  std::ofstream destination_file { destination, std::ios::app | std::ios::binary };
+  if (!destination_file.is_open()) {
+    gojo_print(LogLevel::Warning, "failed to open log file: {}", destination.string());
+    return;
+  }
+
+  destination_file.write(content, static_cast<std::streamsize>(content_size));
+  if (!destination_file) {
+    gojo_print(LogLevel::Warning, "failed to write log file: {}", destination.string());
+  }
+}
+
+
 const std::filesystem::path get_root_dir() {
-  const std::filesystem::path root_dir {
+  static const std::filesystem::path root_dir {
     std::filesystem::current_path()
   };
   return std::filesystem::absolute(root_dir);
@@ -248,13 +296,13 @@ const std::filesystem::path get_root_dir() {
 
 
 const std::filesystem::path get_home_dir() {
-  const static std::filesystem::path HOME { std::getenv("HOME") };
+  static const std::filesystem::path HOME { std::getenv("HOME") };
   return std::filesystem::absolute(HOME);
 }
 
 
 const std::filesystem::path get_profiles_dir() {
-  const static std::filesystem::path profiles_dir {
+  static const std::filesystem::path profiles_dir {
     get_home_dir() / ".gojo" / "profiles"
   };
   return std::filesystem::absolute(profiles_dir);
@@ -262,7 +310,7 @@ const std::filesystem::path get_profiles_dir() {
 
 
 const std::filesystem::path get_config_path() {
-  const static std::filesystem::path config_path {
+  static const std::filesystem::path config_path {
     get_root_dir() / "gojo.toml"
   };
   return std::filesystem::absolute(config_path);

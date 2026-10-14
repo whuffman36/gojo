@@ -28,11 +28,11 @@ const std::filesystem::path get_profiles_dir() {
 }
 
 
-std::string get_compiler_version(cfg::Compiler compiler) {
-  const std::string cmd { std::format("{} -dumpversion", cfg::to_absolute_path(compiler)) };
-  auto result { utils::execute_command(cmd.c_str(), true) };
+std::string get_compiler_version(const cfg::Config& cfg) {
+  const std::string cmd { std::format("{} -dumpversion", cfg::to_absolute_path(cfg.get_compiler())) };
+  auto result { utils::execute_command(cmd.c_str(), true, false, cfg.get_build_dir() / "log.txt") };
   if (!result.success) {
-    throw std::runtime_error { std::format("compiler not found: {}", cfg::to_absolute_path(compiler)) };
+    throw std::runtime_error { std::format("compiler not found: {}", cfg::to_absolute_path(cfg.get_compiler())) };
   }
 
   // Return the major version number without any decimals.
@@ -46,10 +46,10 @@ std::string get_compiler_version(cfg::Compiler compiler) {
 }
 
 
-void create_default_profile() {
+void create_default_profile(const cfg::Config& cfg) {
   // Check for conan profile
   if (!std::filesystem::exists(get_profiles_dir() / "default")) {
-    const auto result { utils::execute_command("conan profile detect --force") };
+    const auto result { utils::execute_command("conan profile detect --force", false, false, cfg.get_build_dir() / "log.txt") };
     if (!result.success) {
       throw std::runtime_error { "failed to detect default conan profile" };
     }
@@ -141,11 +141,9 @@ void Profile::to_file(const cfg::Config& cfg) {
 
   std::string_view cfg_build_type { cfg::to_str(cfg.get_build_type()) };
 
-  const cfg::Compiler cfg_compiler { cfg.get_compiler() };
-
   std::string_view compiler_str {};
 
-  switch (cfg_compiler) {
+  switch (cfg.get_compiler()) {
     case cfg::Compiler::AppleClang:
     case cfg::Compiler::AppleClangPp:
       compiler_str = "apple-clang";
@@ -197,7 +195,7 @@ os={6}
       compiler_str,                       // {2}
       language_standard,                  // {3}
       lib,                                // {4}
-      get_compiler_version(cfg_compiler), // {5}
+      get_compiler_version(cfg),          // {5}
       os,                                 // {6}
       other_settings)                     // {7}
   };
@@ -211,7 +209,7 @@ void search(std::string_view package) {
     std::format("conan search {}", package)
   };
 
-  auto result { utils::execute_command(cmd.c_str()) };
+  auto result { utils::execute_command(cmd.c_str(), false, true) };
   if (!result.success) {
     throw std::runtime_error { "gojo dep search: package not found" };
   }
@@ -223,7 +221,7 @@ void install(const cfg::Config& cfg, bool verbose) {
     get_profiles_dir() / cfg.name
   };
   if (!std::filesystem::exists(profile_path)) {
-    create_default_profile();
+    create_default_profile(cfg);
     Profile::from_file("default").to_file(cfg);
   }
 
@@ -245,22 +243,20 @@ void install(const cfg::Config& cfg, bool verbose) {
   for (std::size_t idx { 0 }; idx < cfg.build_types.size(); ++idx) {
     if (cfg.build_types.at(idx).has_value()) {
       num_build_types_specified++;
-      // clang-tidy can't detect that build_types[idx] is being checked in
-      // the if statement.
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_str(cfg.build_types.at(idx).value()));
-      auto result { utils::execute_command(cmd.c_str(), !verbose) };
+      auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
       if (!result.success) {
-        throw std::runtime_error { std::format("{}\nfailed to install conan dependencies", result.output) };
+        throw std::runtime_error { "\nfailed to install conan dependencies" };
       }
     }
   }
 
   if (num_build_types_specified == 0) {
     cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_str(cfg::BuildType::Debug));
-    auto result { utils::execute_command(cmd.c_str(), !verbose) };
+    auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
     if (!result.success) {
-      throw std::runtime_error { std::format("{}\nfailed to install conan dependencies", result.output) };
+      throw std::runtime_error { "\nfailed to install conan dependencies" };
     }
   }
 
@@ -277,7 +273,7 @@ void uninstall(std::string_view package) {
     std::format("conan remove {}", package)
   };
 
-  auto result { utils::execute_command(cmd.c_str()) };
+  auto result { utils::execute_command(cmd.c_str(), false, true) };
   if (!result.success) {
     throw std::runtime_error { "gojo dep uninstall: package not found" };
   }

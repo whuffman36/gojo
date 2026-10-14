@@ -60,6 +60,8 @@ struct Config {
 
   [[nodiscard]] bool is_cppcheck_enabled() const;
 
+  [[nodiscard]] bool is_verbose_enabled() const;
+
   // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   std::optional<std::string> compiler_flags;
   std::optional<std::string> clang_tidy_args;
@@ -83,6 +85,7 @@ struct Config {
   std::optional<bool> testing_enabled;
   std::optional<bool> clang_tidy_enabled;
   std::optional<bool> cppcheck_enabled;
+  std::optional<bool> verbose;
 
   Language language { Language::Cpp };
   Target target { Target::Binary };
