@@ -21,13 +21,7 @@
 //
 // * test profile
 //
-// * change gojo test to use cmake::test since it is using ctest
-//   - Makes sense since it will probably be different with meson
-//   - should gojo test also build first like run does?
-//
-// * gojo clean should just delete build folder and optionally delete deps folder
-//
-// * test gojo build from scratch without config to see if it detects config step needed
+// * gojo new <name> <path> [-i interactive mode]
 //
 // * Create arguments system for custom arguments in config file
 //   - compiler=custom "/path/to/custom/compiler"

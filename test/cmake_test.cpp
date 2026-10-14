@@ -22,6 +22,7 @@ const std::filesystem::path& test_root_path() {
 TEST(CMakeTest, Configure) {
   cfg::Config cfg {};
   EXPECT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
+  cfg.testing_enabled = true;
 
   std::filesystem::current_path(test_root_path() / "bin");
   EXPECT_NO_THROW(cmake::configure(cfg, false));
@@ -40,6 +41,7 @@ TEST(CMakeTest, Configure) {
 TEST(CMakeTest, Build) {
   cfg::Config cfg {};
   EXPECT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
+  cfg.testing_enabled = true;
 
   std::filesystem::current_path(test_root_path() / "bin");
   EXPECT_NO_THROW(cmake::configure(cfg, false));
@@ -49,6 +51,26 @@ TEST(CMakeTest, Build) {
 
   std::filesystem::current_path(test_root_path() / "lib");
   EXPECT_NO_THROW(cmake::configure(cfg, false));
+  EXPECT_NO_THROW(cmake::build(cfg, "", false));
   EXPECT_TRUE(std::filesystem::exists(cfg.get_build_dir()));
+  EXPECT_TRUE(std::filesystem::remove_all(cfg.get_build_dir()));
+}
+
+
+TEST(CMakeTest, Test) {
+  cfg::Config cfg {};
+  EXPECT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
+  cfg.testing_enabled = true;
+
+  std::filesystem::current_path(test_root_path() / "bin");
+  EXPECT_NO_THROW(cmake::configure(cfg, false));
+  EXPECT_NO_THROW(cmake::build(cfg, "", false));
+  EXPECT_NO_THROW(cmake::test(cfg, ""));
+  EXPECT_TRUE(std::filesystem::remove_all(cfg.get_build_dir()));
+
+  std::filesystem::current_path(test_root_path() / "lib");
+  EXPECT_NO_THROW(cmake::configure(cfg, false));
+  EXPECT_NO_THROW(cmake::build(cfg, "", false));
+  EXPECT_NO_THROW(cmake::test(cfg, ""));
   EXPECT_TRUE(std::filesystem::remove_all(cfg.get_build_dir()));
 }

@@ -15,3 +15,5 @@ target_include_directories(
   PRIVATE
   ${CMAKE_SOURCE_DIR}
 )
+
+add_subdirectory(test)
