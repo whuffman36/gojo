@@ -29,6 +29,9 @@ jobs:
           - os: macos-latest
             compiler: clang++
             arch: arm64
+        exclude:
+          - os: macos-latest
+            arch: amd64
 
     steps:
       - name: Checkout Source Code

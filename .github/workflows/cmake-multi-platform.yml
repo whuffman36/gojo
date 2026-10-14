@@ -44,6 +44,8 @@ jobs:
         exclude:
           # TODO: Add Windows support
           - os: windows-latest
+          - os: macos-latest
+            arch: amd64
 
     steps:
     - name: Checkout Source Code
