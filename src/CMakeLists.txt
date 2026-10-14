@@ -13,10 +13,10 @@ target_include_directories(
 )
 
 
-add_executable(gojo)
+add_executable(${EXE_NAME})
 
 target_sources(
-  gojo
+  ${EXE_NAME}
   PRIVATE
   gojo.cpp
 )
@@ -27,7 +27,7 @@ add_subdirectory(build_systems)
 add_subdirectory(cmd)
 
 target_link_libraries(
-  gojo
+  ${EXE_NAME}
   PRIVATE
   build_systems
   cfg
@@ -37,7 +37,7 @@ target_link_libraries(
 )
 
 target_include_directories(
-  gojo
+  ${EXE_NAME}
   PRIVATE
   ${CMAKE_SOURCE_DIR}
 )

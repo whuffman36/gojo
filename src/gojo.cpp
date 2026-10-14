@@ -13,8 +13,6 @@
 // TODO:
 // * Create gojo package system
 //
-// * Make gojo downloadable
-//
 // * test refresh
 //
 // * test dep
@@ -34,7 +32,7 @@
 
 namespace {
 
-constexpr std::string_view VERSION_STRING { "gojo version 0.1.3" };
+constexpr std::string_view VERSION_STRING { "gojo version 0.1.5" };
 
 constexpr std::string_view WIN {
 R"({2}

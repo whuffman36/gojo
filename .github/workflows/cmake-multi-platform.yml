@@ -96,6 +96,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake
         -DBUILD_TESTING=ON
+        -DEXE_NAME=gojo
         -S ${{ github.workspace }}
 
     - name: Build Application
