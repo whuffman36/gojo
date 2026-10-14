@@ -55,14 +55,10 @@ void clean(std::span<std::string_view> args) {
 
   const cfg::Config cfg { cfg::Config::this_project() };
 
-  switch (cfg.get_build_system()) {
-    case cfg::BuildSystem::CMake:
-      if (deps) {
-        std::filesystem::remove_all(utils::get_root_dir() / "deps");
-      }
-      std::filesystem::remove_all(cfg.get_build_dir());
-      break;
+  if (deps) {
+    std::filesystem::remove_all(utils::get_root_dir() / "deps");
   }
+  std::filesystem::remove_all(cfg.get_build_dir());
 }
 
 }

@@ -1,13 +1,13 @@
 #include "src/cmd/commands.hpp"
 
 #include <cstddef>
-#include <filesystem>
 #include <format>
 #include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
+#include "src/build_systems/cmake.hpp"
 #include "src/cfg/config.hpp"
 #include <src/cfg/enums.hpp>
 #include "src/utils.hpp"
@@ -36,11 +36,16 @@ namespace cmd {
 
 void test(std::span<std::string_view> args) {
   std::string target {};
+  bool build_first { false };
+
   for (const auto arg : args) {
     if (arg.starts_with("--target=")) {
       // Length of "--target="
       constexpr std::size_t target_arg_len { 9 };
       target = std::format(" -R \"{}\"", arg.substr(target_arg_len));
+    }
+    else if (arg == "--build") {
+      build_first = true;
     }
     else if (arg == "--help") {
       utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
@@ -57,30 +62,13 @@ void test(std::span<std::string_view> args) {
     return;
   }
 
-  std::filesystem::path build { utils::get_root_dir() / "build" };
-  std::string_view build_type { cfg::to_str(cfg.get_build_type()) };
-  std::string build_type_arg {};
-
-  if (cfg.is_multi_config()) {
-    build /= "test";
-    build_type_arg = std::format(" -C {}", build_type);
-  }
-  else {
-    build /= build_type;
-    build /= "test";
-  }
-
-  if (!std::filesystem::exists(build)) {
-    throw std::runtime_error { std::format("directory not found: {}", build.string()) };
-  }
-
-  std::filesystem::current_path(build);
-  const std::string cmd {
-    std::format("ctest --output-on-failure{}{}", build_type_arg, target)
-  };
-  auto cmd_result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
-  if (!cmd_result.success) {
-    throw std::runtime_error { "failed to run tests" };
+  switch (cfg.get_build_system()) {
+    case cfg::BuildSystem::CMake:
+      if (build_first) {
+        cmake::build(cfg, target, cfg.is_verbose_enabled());
+      }
+      cmake::test(cfg, target);
+      break;
   }
 }
 

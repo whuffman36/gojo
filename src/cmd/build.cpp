@@ -109,6 +109,10 @@ void build(std::span<std::string_view> args) {
   reconfigure = ((cfg.get_build_type() != build_type) && !cfg.is_multi_config()) ||
                 (cfg.is_testing_enabled() != testing_enabled);
 
+  if (!std::filesystem::exists(cfg.get_build_dir())) {
+    reconfigure = true;
+  }
+
   if (cfg.build_type.has_value() || (build_type != cfg::BuildType::Debug)) {
     cfg.build_type = build_type;
 

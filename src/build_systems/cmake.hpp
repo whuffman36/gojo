@@ -21,6 +21,9 @@ void configure(const cfg::Config& cfg, bool verbose);
 void build(const cfg::Config& cfg, std::string_view target, bool verbose);
 
 
+void test(const cfg::Config& cfg, std::string_view target);
+
+
 consteval std::string_view get_version() {
   // Version 3.31.6 is the default version of cmake on github actions.
   // Most recent version (July 2026): 4.3.4

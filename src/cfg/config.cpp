@@ -669,9 +669,9 @@ BuildType Config::get_build_type() const {
 
 const std::filesystem::path Config::get_build_dir() const {
   if (is_multi_config()) {
-    return std::format("{}/build", utils::get_root_dir().string());
+    return utils::get_root_dir() / "build";
   }
-  return std::format("{}/build/{}", utils::get_root_dir().string(), cfg::to_str(get_build_type()));
+  return utils::get_root_dir() / "build" / cfg::to_str(get_build_type());
 }
 
 

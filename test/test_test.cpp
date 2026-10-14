@@ -78,3 +78,15 @@ TEST(CommandsTest, TestTestLibC) {
 
   EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
+
+
+TEST(CommandsTest, TestTestBuildFlag) {
+  std::vector<std::string_view> args { "testexample", "--tests" };
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+
+  args.clear();
+  args.emplace_back("--build");
+  EXPECT_NO_THROW(cmd::test(args));
+
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+}

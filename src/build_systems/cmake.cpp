@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdio>
+#include <filesystem>
 #include <format>
 #include <optional>
 #include <stdexcept>
@@ -145,6 +146,28 @@ void build(const cfg::Config& cfg, std::string_view target, bool verbose) {
 
   std::fflush(stdout);
   utils::gojo_print(utils::LogLevel::Success, "\nSuccessfully built in {} seconds", total_time.count());
+}
+
+
+void test(const cfg::Config& cfg, std::string_view target) {
+  const std::filesystem::path build_dir { cfg.get_build_dir() / "test" };
+  if (!std::filesystem::exists(build_dir)) {
+    throw std::runtime_error { std::format("directory not found: {}", build_dir.string()) };
+  }
+
+  std::string build_type_arg {};
+  if (cfg.is_multi_config()) {
+    build_type_arg = std::format(" -C {}", cfg::to_str(cfg.get_build_type()));
+  }
+
+  std::filesystem::current_path(build_dir);
+  const std::string cmd {
+    std::format("ctest --output-on-failure{}{}", build_type_arg, target)
+  };
+  auto result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
+  if (!result.success) {
+    throw std::runtime_error { "failed to run tests" };
+  }
 }
 
 }
