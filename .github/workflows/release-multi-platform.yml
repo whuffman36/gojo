@@ -1,4 +1,7 @@
-name: Publish Cross-Platform Release
+name: Publish
+
+permissions:
+  contents: write
 
 on:
   push:
@@ -7,7 +10,7 @@ on:
 
 jobs:
   build_and_release:
-    name: Build Asset
+    name: CMake Build
     runs-on: ${{ matrix.os }}
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -67,6 +70,6 @@ jobs:
       - name: Upload OS Artifact to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ github.workspace }}/build/Release/${{ matrix.artifact_name }}
+          files: ${{ github.workspace }}/build/Release/src/${{ matrix.artifact_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
