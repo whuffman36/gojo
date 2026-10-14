@@ -81,9 +81,43 @@ detect_os() {
 }
 
 install_gojo() {
-    # Download latest release from github into ~/.gojocli/bin
+    case "$OS" in
+        macos)
+            ROS="macos" 
+            ;;
+        debian)
+            ROS="linux"
+            ;;
+        fedora)
+            ROS="linux"
+            ;;
+        centos)
+            ROS="linux"
+            ;;
+        arch)
+            ROS="linux"
+            ;;
+        unknown)
+            error "Unsupported operating system."
+            ;;
+    esac
 
-    # Download gojo-update from github into ~/.gojocli/bin
+    case "$(uname -m)" in
+        x86_64)
+            ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            ;;
+        unknown)
+            error "Unsupported architecture."
+            ;;
+    esac
+
+    # Download latest release from github into ~/.gojo/bin
+    curl --proto '=https' --tlsv1.2 -sSf -L "https://github.com/whuffman36/gojo/releases/download/v0.1.2/gojo-${ROS}-${ARCH}" > "$HOME/.gojo/bin/gojo"
+
+    # Download gojo-update from github into ~/.gojo/bin
 }
 
 # Install dependencies on macOS
@@ -104,8 +138,8 @@ install_macos() {
 
     install_gojo
 
-    # Add ~/.gojocli/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojocli/bin/\"" >> ~/.zshrc
+    # Add ~/.gojo/bin to PATH
+    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> ~/.zshrc
 
     success "gojo has successfully been installed!\n"
     echo -e "run '${YELLOW}source ~/.zshrc${CLEAR}' in your terminal to use it,\n"
@@ -137,8 +171,8 @@ install_debian() {
 
     install_gojo
 
-    # Add ~/.gojocli/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojocli/bin/\"" >> ~/.bashrc
+    # Add ~/.gojo/bin to PATH
+    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> ~/.bashrc
 
     success "gojo has successfully been installed!\n"
     echo -e "run '${YELLOW}source ~/.bashrc${CLEAR}' in your terminal to use it,\n"
@@ -167,8 +201,8 @@ install_fedora() {
 
     install_gojo
 
-    # Add ~/.gojocli/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojocli/bin/\"" >> ~/.bashrc
+    # Add ~/.gojo/bin to PATH
+    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> ~/.bashrc
 
     success "gojo has successfully been installed!\n"
     echo -e "run '${YELLOW}source ~/.bashrc${CLEAR}' in your terminal to use it,\n"
@@ -216,8 +250,8 @@ install_centos() {
 
     install_gojo
 
-    # Add ~/.gojocli/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojocli/bin/\"" >> ~/.bashrc
+    # Add ~/.gojo/bin to PATH
+    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> ~/.bashrc
 
     success "gojo has successfully been installed!\n"
     echo -e "run '${YELLOW}source ~/.bashrc${CLEAR}' in your terminal to use it,\n"
@@ -245,8 +279,8 @@ install_arch() {
 
     install_gojo
 
-    # Add ~/.gojocli/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojocli/bin/\"" >> ~/.bashrc
+    # Add ~/.gojo/bin to PATH
+    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> ~/.bashrc
 
     success "gojo has successfully been installed!\n"
     echo -e "run '${YELLOW}source ~/.bashrc${CLEAR}' in your terminal to use it,\n"
@@ -255,9 +289,9 @@ install_arch() {
 
 main() {
     # Create directories in the user's home directory.
-    mkdir -p "$HOME/.gojocli"
-    mkdir -p "$HOME/.gojocli/profiles"
-    mkdir -p "$HOME/.gojocli/bin"
+    mkdir -p "$HOME/.gojo"
+    mkdir -p "$HOME/.gojo/profiles"
+    mkdir -p "$HOME/.gojo/bin"
 
     detect_os
     info "Detected OS: $OS"

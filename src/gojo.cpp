@@ -13,7 +13,7 @@
 // TODO:
 // * Create gojo package system
 //
-// * Have formats folder in ~/.gojo to import
+// * Make gojo downloadable
 //
 // * test refresh
 //
@@ -22,6 +22,8 @@
 // * test profile
 //
 // * gojo new <name> <path> [-i interactive mode]
+//
+// * Have formats folder in ~/.gojo to import
 //
 // * Create arguments system for custom arguments in config file
 //   - compiler=custom "/path/to/custom/compiler"
@@ -32,7 +34,7 @@
 
 namespace {
 
-constexpr std::string_view VERSION_STRING { "gojo version 0.1.0" };
+constexpr std::string_view VERSION_STRING { "gojo version 0.1.2" };
 
 constexpr std::string_view WIN {
 R"({2}
