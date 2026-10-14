@@ -32,7 +32,7 @@
 
 namespace {
 
-constexpr std::string_view VERSION_STRING { "gojo version 1.0.0-beta" };
+constexpr std::string_view VERSION_STRING { "gojo version 0.1.0" };
 
 constexpr std::string_view WIN {
 R"({2}

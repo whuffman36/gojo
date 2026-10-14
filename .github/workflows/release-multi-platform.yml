@@ -1,4 +1,7 @@
-name: Publish Cross-Platform Release
+name: Publish
+
+permissions:
+  contents: write
 
 on:
   push:
@@ -7,9 +10,11 @@ on:
 
 jobs:
   build_and_release:
-    name: Build Asset
+    name: CMake Build
     runs-on: ${{ matrix.os }}
     strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
       matrix:
         # Define the distinct environments you need to build on
         os: [ubuntu-latest, macos-latest]
@@ -25,31 +30,46 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Install Updated gcc
+      - name: Install Updated GCC (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt install -y g++-16
+          sudo apt install -y g++-16 build-essential
+
+      - name: Set Up Conan Client
+        uses: conan-io/setup-conan@v1
+
+      - name: Install Conan Dependencies
+        run: >
+          conan install .
+          --deployer=full_deploy
+          --output-folder=./deps
+          --build=missing
+          --profile=default
+          -s build_type=Release
+          -s compiler.cppstd=23
 
       - name: Configure CMake
         run: >
-          cmake -B ${{ github.workspace }}/build
+          cmake -B ${{ github.workspace }}/build/Release
           -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
           -DCMAKE_CXX_STANDARD=23
           -DCMAKE_CXX_STANDARD_REQUIRED=ON
           -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wconversion -Wshadow -s"
           -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake
           -DBUILD_TESTING=OFF
           -S ${{ github.workspace }}
 
       - name: Build Application
-        run: cmake --build ${{ github.workspace }}/build --config Release --parallel
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        run: cmake --build ${{ github.workspace }}/build/Release --config Release --parallel
 
       # Automatically uploads assets into the exact same release tag
       - name: Upload OS Artifact to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ github.workspace }}/build/${{ matrix.artifact_name }}
+          files: ${{ github.workspace }}/build/Release/src/${{ matrix.artifact_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

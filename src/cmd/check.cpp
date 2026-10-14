@@ -120,7 +120,7 @@ void check(std::span<std::string_view> args) {
     if (verbose) {
       utils::gojo_print(utils::LogLevel::Status, "Running clang-tidy...\n");
     }
-    auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+    const auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
     if (!cmd_result.success) {
       throw std::runtime_error { "failed clang-tidy checks" };
     }
@@ -180,7 +180,7 @@ void check(std::span<std::string_view> args) {
     if (verbose) {
       utils::gojo_print(utils::LogLevel::Status, "Running cppcheck...\n");
     }
-    auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+    const auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
     if (!cmd_result.success) {
       throw std::runtime_error { "failed cppcheck checks" };
     }
