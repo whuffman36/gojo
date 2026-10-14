@@ -115,7 +115,7 @@ install_gojo() {
     esac
 
     # Download latest release from github into ~/.gojo/bin
-    curl --proto '=https' --tlsv1.2 -sSf -L "https://github.com/whuffman36/gojo/releases/download/v0.1.3/gojo-${ROS}-${ARCH}" > "$HOME/.gojo/bin/gojo"
+    curl --proto '=https' --tlsv1.2 -sSf -L "https://github.com/whuffman36/gojo/releases/download/v0.1.4/gojo-${ROS}-${ARCH}" > "$HOME/.gojo/bin/gojo"
 
     # Download gojo-update from github into ~/.gojo/bin
 }

@@ -23,12 +23,15 @@ jobs:
           - os: ubuntu-latest
             compiler: g++-16
             arch: amd64
+            exe_name: gojo-linux-amd64
           - os: ubuntu-latest
             compiler: g++-16
             arch: arm64
+            exe_name: gojo-linux-arm64
           - os: macos-latest
             compiler: clang++
             arch: arm64
+            exe_name: gojo-macos-arm64
         exclude:
           - os: macos-latest
             arch: amd64
@@ -67,6 +70,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=deps/build/Release/generators/conan_toolchain.cmake
           -DBUILD_TESTING=OFF
+          -DEXE_NAME=${{matrix.exe_name}}
           -S ${{ github.workspace }}
 
       - name: Build Application
@@ -77,6 +81,6 @@ jobs:
       - name: Upload OS Artifact to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ github.workspace }}/build/Release/src/gojo-${{matrix.os}}-${{matrix.arch}}
+          files: ${{ github.workspace }}/build/Release/src/${{matrix.exe_name}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
