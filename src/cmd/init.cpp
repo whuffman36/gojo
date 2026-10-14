@@ -689,7 +689,7 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
       cfg.target = cfg::Target::Library;
     }
     else if (arg.starts_with("--lang=")) {
-      if (arg.ends_with("c")) {
+      if (arg.ends_with('c')) {
         cfg.language = cfg::Language::C;
       }
       else if (arg.ends_with("c++")) {
@@ -721,7 +721,7 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
       utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
       return std::nullopt;
     }
-    else if (arg.starts_with("--") || arg.starts_with("-")) {
+    else if (arg.starts_with("--") || arg.starts_with('-')) {
       throw std::runtime_error { std::format("gojo init: option not recognized: {}", arg) };
     }
     else {
@@ -828,7 +828,7 @@ void init(std::span<std::string_view> args) {
       break;
   }
 
-  auto git_result { utils::execute_command("git init", false, cfg.is_verbose_enabled(), cfg.get_build_dir() / "log.txt") };
+  const auto git_result { utils::execute_command("git init", false, cfg.is_verbose_enabled(), cfg.get_build_dir() / "log.txt") };
   if (!git_result.success) {
     throw std::runtime_error { "failed to initialize git repository" };
   }

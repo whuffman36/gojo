@@ -109,7 +109,7 @@ void validate_project_section(cfg::Config& cfg, const toml::table& table) {
   }
   cfg.target = target.value();
 
-  auto bool_result { table[PROJECT][PROJECT_VERBOSE].value<bool>() };
+  const auto bool_result { table[PROJECT][PROJECT_VERBOSE].value<bool>() };
   if (!bool_result.has_value()) {
     cfg.verbose = std::nullopt;
   }
@@ -162,7 +162,7 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     cfg.compiler_flags = std::move(compiler_flags);
   }
 
-  auto bool_result { table[BUILD][BUILD_GNU_EXTENSIONS].value<bool>() };
+  const auto bool_result { table[BUILD][BUILD_GNU_EXTENSIONS].value<bool>() };
   if (!bool_result.has_value()) {
     cfg.gnu_extensions_enabled = std::nullopt;
   }
@@ -299,7 +299,7 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
 
 
 void validate_tests_section(cfg::Config& cfg, const toml::table& table) {
-  auto bool_result { table[TESTS][TESTS_TESTING_ENABLED].value<bool>() };
+  const auto bool_result { table[TESTS][TESTS_TESTING_ENABLED].value<bool>() };
   if (!bool_result.has_value()) {
     cfg.testing_enabled = std::nullopt;
   }

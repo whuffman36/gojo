@@ -96,7 +96,7 @@ void configure(const cfg::Config& cfg, bool verbose) {
     std::fflush(stdout);
   }
 
-  auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+  const auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
 
   if (!result.success) {
     throw std::runtime_error { "failed to configure CMake project" };
@@ -132,11 +132,11 @@ void build(const cfg::Config& cfg, std::string_view target, bool verbose) {
   utils::gojo_print(utils::LogLevel::Status, "Building {} project {}...\n", cfg::to_str(cfg.language), cfg.name);
   std::fflush(stdout);
 
-  auto begin { std::chrono::system_clock::now() };
+  const auto begin { std::chrono::system_clock::now() };
 
-  auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+  const auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
 
-  auto end { std::chrono::system_clock::now() };
+  const auto end { std::chrono::system_clock::now() };
 
   if (!result.success) {
     throw std::runtime_error { "failed to build CMake project" };
@@ -164,7 +164,7 @@ void test(const cfg::Config& cfg, std::string_view target) {
   const std::string cmd {
     std::format("ctest --output-on-failure{}{}", build_type_arg, target)
   };
-  auto result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
+  const auto result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
   if (!result.success) {
     throw std::runtime_error { "failed to run tests" };
   }

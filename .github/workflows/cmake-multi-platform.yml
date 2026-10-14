@@ -94,10 +94,10 @@ jobs:
       run: cmake --build ${{ github.workspace }}/build/Release --config Release
 
     - name: Check With Static Analyzers
-      run: run-clang-tidy -p ${{ github.workspace }}/build/Release
+      run: run-clang-tidy -p ${{ github.workspace }}/build/Release --extra-arg=-Wno-unknown-warning-option --extra-arg=-Wno-gcc-compat
 
     - name: Test Application
       working-directory: ${{ github.workspace }}/build/Release/test
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest --output-on-failure --build-config ${{ matrix.build_type }}
+      run: ctest --output-on-failure --build-config Release

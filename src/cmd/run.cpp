@@ -66,7 +66,7 @@ void run(std::span<std::string_view> args) {
                       args_to_string(args));
   }
 
-  auto cmd_result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
+  const auto cmd_result { utils::execute_command(cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt") };
   if (!cmd_result.success) {
     throw std::runtime_error { std::format("failed to run {} executable", cfg.name) };
   }

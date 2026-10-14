@@ -48,7 +48,7 @@ std::optional<Subcommand> subcommand_from_str(std::string_view str) {
     { "uninstall", Subcommand::Uninstall },
   };
 
-  auto result { map.find(str) };
+  const auto result { map.find(str) };
   if (result == map.end()) {
     return std::nullopt;
   }

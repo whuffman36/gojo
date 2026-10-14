@@ -30,13 +30,13 @@ const std::filesystem::path get_profiles_dir() {
 
 std::string get_compiler_version(const cfg::Config& cfg) {
   const std::string cmd { std::format("{} -dumpversion", cfg::to_absolute_path(cfg.get_compiler())) };
-  auto result { utils::execute_command(cmd.c_str(), true, false, cfg.get_build_dir() / "log.txt") };
+  const auto result { utils::execute_command(cmd.c_str(), true, false, cfg.get_build_dir() / "log.txt") };
   if (!result.success) {
     throw std::runtime_error { std::format("compiler not found: {}", cfg::to_absolute_path(cfg.get_compiler())) };
   }
 
   // Return the major version number without any decimals.
-  auto idx { result.output.find_first_of('.') };
+  const auto idx { result.output.find_first_of('.') };
   if (idx == std::string::npos) {
     // No decimals included in the string.
     return result.output;
@@ -209,7 +209,7 @@ void search(std::string_view package) {
     std::format("conan search {}", package)
   };
 
-  auto result { utils::execute_command(cmd.c_str(), false, true) };
+  const auto result { utils::execute_command(cmd.c_str(), false, true) };
   if (!result.success) {
     throw std::runtime_error { "gojo dep search: package not found" };
   }
@@ -245,7 +245,7 @@ void install(const cfg::Config& cfg, bool verbose) {
       num_build_types_specified++;
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_str(cfg.build_types.at(idx).value()));
-      auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+      const auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
       if (!result.success) {
         throw std::runtime_error { "\nfailed to install conan dependencies" };
       }
@@ -254,7 +254,7 @@ void install(const cfg::Config& cfg, bool verbose) {
 
   if (num_build_types_specified == 0) {
     cmd = std::format(cmd_str, utils::get_root_dir().string(), (utils::get_root_dir() / "deps").string(), cfg.name, cfg::to_str(cfg::BuildType::Debug));
-    auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
+    const auto result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
     if (!result.success) {
       throw std::runtime_error { "\nfailed to install conan dependencies" };
     }
@@ -273,7 +273,7 @@ void uninstall(std::string_view package) {
     std::format("conan remove {}", package)
   };
 
-  auto result { utils::execute_command(cmd.c_str(), false, true) };
+  const auto result { utils::execute_command(cmd.c_str(), false, true) };
   if (!result.success) {
     throw std::runtime_error { "gojo dep uninstall: package not found" };
   }
@@ -301,7 +301,7 @@ void add(const std::filesystem::path& conanfile, std::string_view package, std::
 
 void remove(const std::filesystem::path& conanfile, std::string_view package) {
   std::string file_contents { utils::get_file_contents(conanfile) };
-  auto idx { file_contents.find(package) };
+  const auto idx { file_contents.find(package) };
 
   if (idx == std::string::npos) {
     throw std::runtime_error { std::format("package not found in conanfile: {}", package) };
