@@ -94,7 +94,7 @@ jobs:
       run: cmake --build ${{ github.workspace }}/build/Release --config Release
 
     - name: Check With Static Analyzers
-      run: run-clamg-tidy -p ${{ github.workspace }}/build/Release
+      run: run-clang-tidy -p ${{ github.workspace }}/build/Release
 
     - name: Test Application
       working-directory: ${{ github.workspace }}/build/Release/test
