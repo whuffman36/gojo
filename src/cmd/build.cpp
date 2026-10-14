@@ -1,6 +1,7 @@
 #include "src/cmd/commands.hpp"
 
 #include <cstddef>
+#include <filesystem>
 #include <format>
 #include <span>
 #include <stdexcept>

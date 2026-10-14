@@ -22,7 +22,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, CheckTestNotEnabled) {
+TEST(CommandsTest, CheckNotEnabledCpp) {
   std::vector<std::string_view> args { "check" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -33,7 +33,7 @@ TEST(CommandsTest, CheckTestNotEnabled) {
 }
 
 #if defined(__APPLE__)
-TEST(CommandsTest, CheckTestClangTidy) {
+TEST(CommandsTest, CheckClangTidyCpp) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
@@ -53,7 +53,7 @@ TEST(CommandsTest, CheckTestClangTidy) {
 #endif
 
 
-TEST(CommandsTest, CheckTestCppCheck) {
+TEST(CommandsTest, CheckCppCheckCpp) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
@@ -74,7 +74,7 @@ TEST(CommandsTest, CheckTestCppCheck) {
 
 
 #if defined(__APPLE__)
-TEST(CommandsTest, CheckTestAllEnabled) {
+TEST(CommandsTest, CheckAllEnabledCpp) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
@@ -97,7 +97,7 @@ TEST(CommandsTest, CheckTestAllEnabled) {
 #endif
 
 
-TEST(CommandsTest, CheckTestAllEnabledC) {
+TEST(CommandsTest, CheckAllEnabledC) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
@@ -119,7 +119,7 @@ TEST(CommandsTest, CheckTestAllEnabledC) {
 }
 
 
-TEST(CommandsTest, CheckTestAllEnabledLib) {
+TEST(CommandsTest, CheckAllEnabledLibCpp) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";
@@ -141,7 +141,7 @@ TEST(CommandsTest, CheckTestAllEnabledLib) {
 }
 
 
-TEST(CommandsTest, CheckTestAllEnabledLibC) {
+TEST(CommandsTest, CheckAllEnabledLibC) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_minimum.toml")));
   cfg.name = "check";

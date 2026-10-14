@@ -20,7 +20,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, TestTestCpp) {
+TEST(CommandsTest, TestCpp) {
   std::vector<std::string_view> args { "testexample", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -35,7 +35,7 @@ TEST(CommandsTest, TestTestCpp) {
 }
 
 
-TEST(CommandsTest, TestTestLibCpp) {
+TEST(CommandsTest, TestLibCpp) {
   std::vector<std::string_view> args { "testexample", "--lib", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -50,7 +50,7 @@ TEST(CommandsTest, TestTestLibCpp) {
 }
 
 
-TEST(CommandsTest, TestTestC) {
+TEST(CommandsTest, TestC) {
   std::vector<std::string_view> args { "testexample", "--lang=c", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -65,7 +65,7 @@ TEST(CommandsTest, TestTestC) {
 }
 
 
-TEST(CommandsTest, TestTestLibC) {
+TEST(CommandsTest, TestLibC) {
   std::vector<std::string_view> args { "testexample", "--lang=c", "--lib", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -80,7 +80,7 @@ TEST(CommandsTest, TestTestLibC) {
 }
 
 
-TEST(CommandsTest, TestTestBuildFlag) {
+TEST(CommandsTest, TestBuildFlag) {
   std::vector<std::string_view> args { "testexample", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
