@@ -94,7 +94,7 @@ jobs:
       run: cmake --build ${{ github.workspace }}/build/Release --config Release
 
     - name: Check With Static Analyzers
-      run: run-clang-tidy -p ${{ github.workspace }}/build/Release --extra-arg=-Wno-unknown-warning-option --extra-arg=-Wno-gcc-compat
+      run: run-clang-tidy -p ${{ github.workspace }}/build/Release -extra-arg=-Wno-unknown-warning-option -extra-arg=-Wno-gcc-compat
 
     - name: Test Application
       working-directory: ${{ github.workspace }}/build/Release/test
