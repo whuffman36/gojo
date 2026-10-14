@@ -20,7 +20,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, CleanTest) {
+TEST(CommandsTest, CleanCpp) {
   std::vector<std::string_view> args { "cleantest" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -38,7 +38,7 @@ TEST(CommandsTest, CleanTest) {
 }
 
 
-TEST(CommandsTest, CleanTestLib) {
+TEST(CommandsTest, CleanLibCpp) {
   std::vector<std::string_view> args { "cleantest", "--lib" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 

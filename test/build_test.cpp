@@ -20,7 +20,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, BuildTestCpp) {
+TEST(CommandsTest, BuildCpp) {
   std::vector<std::string_view> args { "buildtest" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -50,7 +50,36 @@ TEST(CommandsTest, BuildTestCpp) {
 }
 
 
-TEST(CommandsTest, BuildTestC) {
+TEST(CommandsTest, BuildLibCpp) {
+  std::vector<std::string_view> args { "buildtest", "--lib" };
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+
+  args.clear();
+  args.emplace_back("--no-tests");
+  EXPECT_NO_THROW(cmd::build(args));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src"));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+  
+  args.clear();
+  args.emplace_back("buildtest");
+  args.emplace_back("--lib");
+  args.emplace_back("--tests");
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+
+  args.clear();
+  args.emplace_back("--debug");
+  args.emplace_back("--tests");
+  EXPECT_NO_THROW(cmd::build(args));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "test"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "test" / "buildtest_test"));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+}
+
+
+TEST(CommandsTest, BuildC) {
   std::vector<std::string_view> args { "buildtest", "--lang=c" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -82,7 +111,37 @@ TEST(CommandsTest, BuildTestC) {
 }
 
 
-TEST(CommandsTest, BuildTestRelease) {
+TEST(CommandsTest, BuildLibC) {
+  std::vector<std::string_view> args { "buildtest", "--lib", "--lang=c" };
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+
+  args.clear();
+  args.emplace_back("--no-tests");
+  EXPECT_NO_THROW(cmd::build(args));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src"));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+  
+  args.clear();
+  args.emplace_back("buildtest");
+  args.emplace_back("--lib");
+  args.emplace_back("--lang=c");
+  args.emplace_back("--tests");
+  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+
+  args.clear();
+  args.emplace_back("--debug");
+  args.emplace_back("--tests");
+  EXPECT_NO_THROW(cmd::build(args));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "test"));
+  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "test" / "buildtest_test"));
+  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+}
+
+
+TEST(CommandsTest, BuildRelease) {
   std::vector<std::string_view> args { "buildtest" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -105,7 +164,7 @@ TEST(CommandsTest, BuildTestRelease) {
 }
 
 
-TEST(CommandsTest, BuildTestNoConfig) {
+TEST(CommandsTest, BuildNoConfig) {
   std::vector<std::string_view> args { "buildtest" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
   ASSERT_NO_THROW(cmd::clean({}));

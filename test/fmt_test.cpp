@@ -20,7 +20,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, FmtTestCpp) {
+TEST(CommandsTest, FmtCpp) {
   std::vector<std::string_view> args { "format" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -31,7 +31,7 @@ TEST(CommandsTest, FmtTestCpp) {
 }
 
 
-TEST(CommandsTest, FmtTestLibCpp) {
+TEST(CommandsTest, FmtLibCpp) {
   std::vector<std::string_view> args { "format", "--lib" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -42,7 +42,7 @@ TEST(CommandsTest, FmtTestLibCpp) {
 }
 
 
-TEST(CommandsTest, FmtTestC) {
+TEST(CommandsTest, FmtC) {
   std::vector<std::string_view> args { "format", "--lang=c" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -53,7 +53,7 @@ TEST(CommandsTest, FmtTestC) {
 }
 
 
-TEST(CommandsTest, FmtTestLibC) {
+TEST(CommandsTest, FmtLibC) {
   std::vector<std::string_view> args { "format", "--lang=c", "--lib" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -64,7 +64,7 @@ TEST(CommandsTest, FmtTestLibC) {
 }
 
 
-TEST(CommandsTest, FmtTestTestsCpp) {
+TEST(CommandsTest, FmtTestsCpp) {
   std::vector<std::string_view> args { "format", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -75,7 +75,7 @@ TEST(CommandsTest, FmtTestTestsCpp) {
 }
 
 
-TEST(CommandsTest, FmtTestLibTestsCpp) {
+TEST(CommandsTest, FmtTestsLibCpp) {
   std::vector<std::string_view> args { "format", "--lib", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -86,7 +86,7 @@ TEST(CommandsTest, FmtTestLibTestsCpp) {
 }
 
 
-TEST(CommandsTest, FmtTestTestsC) {
+TEST(CommandsTest, FmtTestsC) {
   std::vector<std::string_view> args { "format", "--lang=c",  "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -97,7 +97,7 @@ TEST(CommandsTest, FmtTestTestsC) {
 }
 
 
-TEST(CommandsTest, FmtTestLibTestsC) {
+TEST(CommandsTest, FmtTestsLibC) {
   std::vector<std::string_view> args { "format", "--lang=c", "--lib", "--tests" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 

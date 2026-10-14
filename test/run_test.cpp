@@ -20,7 +20,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, RunTestCpp) {
+TEST(CommandsTest, RunCpp) {
   std::vector<std::string_view> args { "runtest" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -36,7 +36,7 @@ TEST(CommandsTest, RunTestCpp) {
 }
 
 
-TEST(CommandsTest, RunTestC) {
+TEST(CommandsTest, RunC) {
   std::vector<std::string_view> args { "runtest", "--lang=c" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
@@ -52,7 +52,7 @@ TEST(CommandsTest, RunTestC) {
 }
 
 
-TEST(CommandsTest, RunTestLib) {
+TEST(CommandsTest, RunLib) {
   std::vector<std::string_view> args { "runtest", "--lib" };
   ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 

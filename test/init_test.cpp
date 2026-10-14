@@ -22,7 +22,7 @@ const std::filesystem::path& test_root_path() {
 }
 
 
-TEST(CommandsTest, InitTestCpp) {
+TEST(CommandsTest, InitCpp) {
   EXPECT_TRUE(std::filesystem::create_directories(test_root_path() / "init"));
   std::filesystem::current_path(test_root_path() / "init");
   std::vector<std::string_view> args { "example" };
@@ -38,7 +38,7 @@ TEST(CommandsTest, InitTestCpp) {
 }
 
 
-TEST(CommandsTest, InitTestCppLib) {
+TEST(CommandsTest, InitLibCpp) {
   std::vector<std::string_view> args { "example" };
   EXPECT_TRUE(std::filesystem::create_directories(test_root_path() / "init"));
   std::filesystem::current_path(test_root_path() / "init");
@@ -58,7 +58,7 @@ TEST(CommandsTest, InitTestCppLib) {
 }
 
 
-TEST(CommandsTest, InitTestC) {
+TEST(CommandsTest, InitC) {
   EXPECT_TRUE(std::filesystem::create_directories(test_root_path() / "init"));
   std::filesystem::current_path(test_root_path() / "init");
   std::vector<std::string_view> args { "example" };
@@ -75,7 +75,7 @@ TEST(CommandsTest, InitTestC) {
 }
 
 
-TEST(CommandsTest, InitTestCLib) {
+TEST(CommandsTest, InitLibC) {
   std::vector<std::string_view> args { "example" };
   EXPECT_TRUE(std::filesystem::create_directories(test_root_path() / "init"));
   std::filesystem::current_path(test_root_path() / "init");
@@ -96,7 +96,7 @@ TEST(CommandsTest, InitTestCLib) {
 }
 
 
-TEST(CommandsTest, InitTestProfileCpp) {
+TEST(CommandsTest, InitProfileCpp) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_full.toml")));
   ASSERT_TRUE(create_test_gojo_profile(cfg));
@@ -121,7 +121,7 @@ TEST(CommandsTest, InitTestProfileCpp) {
 }
 
 
-TEST(CommandsTest, InitTestLibProfileCpp) {
+TEST(CommandsTest, InitProfileLibCpp) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_full.toml")));
   ASSERT_TRUE(create_test_gojo_profile(cfg));
@@ -149,7 +149,7 @@ TEST(CommandsTest, InitTestLibProfileCpp) {
 }
 
 
-TEST(CommandsTest, InitTestProfileC) {
+TEST(CommandsTest, InitProfileC) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_full.toml")));
   cfg.language = cfg::Language::C;
@@ -176,7 +176,7 @@ TEST(CommandsTest, InitTestProfileC) {
 }
 
 
-TEST(CommandsTest, InitTestLibProfileC) {
+TEST(CommandsTest, InitProfileLibC) {
   cfg::Config cfg;
   ASSERT_NO_THROW(cfg = cfg::Config::from_file(get_config("config_full.toml")));
   cfg.target = cfg::Target::Library;
