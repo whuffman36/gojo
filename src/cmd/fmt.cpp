@@ -1,4 +1,7 @@
+#include <cstddef>
+#include <filesystem>
 #include <format>
+#include <fstream>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -31,7 +34,38 @@ constexpr std::string_view HELP {
 )"
 };
 
+const std::filesystem::path& get_formats_dir() {
+    static const std::filesystem::path dir {
+        std::filesystem::absolute(utils::get_home_dir() / ".gojo" / "formats")
+    };
+    return dir;
 }
+
+void copy_format_file(const std::filesystem::path& dest,
+                      const std::filesystem::path& src) {
+    if (!std::filesystem::exists(src)) {
+        throw std::runtime_error { std::format(
+            "gojo fmt --from: no format file named {}", src.filename().string()
+        ) };
+    }
+
+    const std::ifstream src_file(src);
+    if (!src_file.is_open()) {
+        throw std::runtime_error { std::format("failed to open file: {}",
+                                               src.string()) };
+    }
+
+    std::filesystem::create_directories(dest.parent_path());
+    std::ofstream dest_file(dest);
+    if (!dest_file.is_open()) {
+        throw std::runtime_error { std::format("failed to open file: {}",
+                                               dest.string()) };
+    }
+
+    dest_file << utils::get_file_contents(get_formats_dir());
+}
+
+}  // namespace
 
 namespace cmd {
 
@@ -42,8 +76,19 @@ void fmt(std::span<std::string_view> args) {
         if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
+        } else if (arg.starts_with("--use=")) {
+            constexpr std::size_t arg_len { 6 };
+            copy_format_file(utils::get_root_dir() / ".clang-format",
+                             get_formats_dir() / arg.substr(arg_len));
+            break;
+        } else if (arg.starts_with("--save-as=")) {
+            constexpr std::size_t arg_len { 10 };
+            copy_format_file(get_formats_dir() / arg.substr(arg_len),
+                             utils::get_root_dir() / ".clang-format");
+            return;
         } else {
             fmt_args = args_to_string(args);
+            // Add space to the beginning for formatting.
             fmt_args.insert(fmt_args.begin(), ' ');
             break;
         }
