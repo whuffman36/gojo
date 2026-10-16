@@ -1,5 +1,3 @@
-#include "src/cmd/commands.hpp"
-
 #include <filesystem>
 #include <format>
 #include <span>
@@ -7,15 +5,15 @@
 #include <string>
 #include <string_view>
 
-#include "src/cfg/config.hpp"
 #include "src/cfg//enums.hpp"
+#include "src/cfg/config.hpp"
+#include "src/cmd/commands.hpp"
 #include "src/utils.hpp"
-
 
 namespace {
 
 constexpr std::string_view HELP {
-R"({1}Command:{0}
+    R"({1}Command:{0}
   gojo {2}check{0} {4}[options]{0}
 
 {1}Summary:{0}
@@ -43,151 +41,164 @@ R"({1}Command:{0}
 
 }
 
-
 namespace cmd {
 
 void check(std::span<std::string_view> args) {
-  bool verbose { false };
+    bool verbose { false };
 
-  for (const auto arg : args) {
-    if (arg == "--verbose" || arg == "-v") {
-      verbose = true;
-    }
-    else if (arg == "--help") {
-      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
-      return;
-    }
-    else {
-      throw std::runtime_error { std::format("gojo check: argument not recognized: {}", arg) };
-    }
-  }
-
-  const cfg::Config cfg { cfg::Config::this_project() };
-
-  if (!verbose) {
-    verbose = cfg.is_verbose_enabled();
-  }
-
-  if (!cfg.is_clang_tidy_enabled() && !cfg.is_cppcheck_enabled()) {
-    utils::gojo_print(utils::LogLevel::Warning, "no checks enabled");
-    return;
-  }
-
-  if (!std::filesystem::exists(cfg.get_build_dir() / "compile_commands.json")) {
-    throw std::runtime_error { std::format("file not found: {}/compile_commands.json", cfg.get_build_dir().string()) };
-  }
-
-  if (cfg.is_clang_tidy_enabled()) {
-    if (!std::filesystem::exists(utils::get_root_dir() / ".clang-tidy")) {
-      throw std::runtime_error { std::format("file not found: {}/.clang-tidy", utils::get_root_dir().string()) };
+    for (const auto arg : args) {
+        if (arg == "--verbose" || arg == "-v") {
+            verbose = true;
+        } else if (arg == "--help") {
+            utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
+            return;
+        } else {
+            throw std::runtime_error {
+                std::format("gojo check: argument not recognized: {}", arg)
+            };
+        }
     }
 
-    std::string_view ignore {};
-    switch (cfg.get_compiler()) {
-      case cfg::Compiler::Clang:
-      case cfg::Compiler::ClangPp:
-      case cfg::Compiler::AppleClang:
-      case cfg::Compiler::AppleClangPp:
-      case cfg::Compiler::HomebrewClang:
-      case cfg::Compiler::HomebrewClangPp:
-        // Some flags may be used in other compilers that clang does not
-        // recognize. This flag ignores any unknown flags.
-        ignore = " -extra-arg=-Wno-unknown-warning-option";
-        break;
-      default:
-        break;
+    const cfg::Config cfg { cfg::Config::this_project() };
+
+    if (!verbose) {
+        verbose = cfg.is_verbose_enabled();
     }
 
-    std::string clang_tidy_args {};
-    if (cfg.clang_tidy_args.has_value()) {
-      clang_tidy_args = " " + cfg.clang_tidy_args.value();
+    if (!cfg.is_clang_tidy_enabled() && !cfg.is_cppcheck_enabled()) {
+        utils::gojo_print(utils::LogLevel::Warning, "no checks enabled");
+        return;
     }
 
-    // Run clang-tidy
-    constexpr std::string_view cmd_str {
-      "run-clang-tidy "
-      "-p {0}"
-      "{1}"
-      "{2}"
-    };
-    const std::string cmd {
-      std::format(cmd_str,
-                  cfg.get_build_dir().string(), // {0}
-                  ignore,                       // {2}
-                  clang_tidy_args)              // {3}
-    };
-
-    if (verbose) {
-      utils::gojo_print(utils::LogLevel::Status, "Running clang-tidy...\n");
-    }
-    const auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
-    if (!cmd_result.success) {
-      throw std::runtime_error { "failed clang-tidy checks" };
-    }
-    if (verbose) {
-      utils::gojo_print(utils::LogLevel::Success, "\nNo problems found!");
-    }
-  }
-
-  if (cfg.is_cppcheck_enabled()) {
-    std::string language_standard_arg { utils::to_lower(cfg::to_str(cfg.language)) };
-    
-    switch (cfg.get_language_standard()) {
-      case cfg::LanguageStandard::C99:
-        language_standard_arg.append("99");
-        break;
-      case cfg::LanguageStandard::C11:
-      case cfg::LanguageStandard::C17:
-      case cfg::LanguageStandard::C23:
-        language_standard_arg.append("11");
-        break;
-      case cfg::LanguageStandard::Cpp11:
-      case cfg::LanguageStandard::Cpp14:
-      case cfg::LanguageStandard::Cpp17:
-        language_standard_arg.append(cfg::to_str(cfg.get_language_standard()));
-        break;
-      case cfg::LanguageStandard::Cpp20:
-      case cfg::LanguageStandard::Cpp23:
-      case cfg::LanguageStandard::Cpp26:
-        language_standard_arg.append("20");
-        break;
+    if (!std::filesystem::exists(cfg.get_build_dir() /
+                                 "compile_commands.json")) {
+        throw std::runtime_error {
+            std::format("file not found: {}/compile_commands.json",
+                        cfg.get_build_dir().string())
+        };
     }
 
-    std::string_view cppcheck_checks {};
-    std::string cppcheck_args {};
-    if (cfg.cppcheck_checks.has_value()) {
-      cppcheck_checks = cfg.cppcheck_checks.value();
-    }
-    if (cfg.cppcheck_args.has_value()) {
-      cppcheck_args = " " + cfg.cppcheck_args.value();
+    if (cfg.is_clang_tidy_enabled()) {
+        if (!std::filesystem::exists(utils::get_root_dir() / ".clang-tidy")) {
+            throw std::runtime_error { std::format(
+                "file not found: {}/.clang-tidy", utils::get_root_dir().string()
+            ) };
+        }
+
+        std::string_view ignore {};
+        switch (cfg.get_compiler()) {
+            case cfg::Compiler::Clang:
+            case cfg::Compiler::ClangPp:
+            case cfg::Compiler::AppleClang:
+            case cfg::Compiler::AppleClangPp:
+            case cfg::Compiler::HomebrewClang:
+            case cfg::Compiler::HomebrewClangPp:
+                // Some flags may be used in other compilers that clang does not
+                // recognize. This flag ignores any unknown flags.
+                ignore = " -extra-arg=-Wno-unknown-warning-option";
+                break;
+            default: break;
+        }
+
+        std::string clang_tidy_args {};
+        if (cfg.clang_tidy_args.has_value()) {
+            clang_tidy_args = " " + cfg.clang_tidy_args.value();
+        }
+
+        // Run clang-tidy
+        constexpr std::string_view cmd_str {
+            "run-clang-tidy "
+            "-p {0}"
+            "{1}"
+            "{2}"
+        };
+        const std::string cmd {
+            std::format(cmd_str,
+                        cfg.get_build_dir().string(),  // {0}
+                        ignore,                        // {2}
+                        clang_tidy_args)               // {3}
+        };
+
+        if (verbose) {
+            utils::gojo_print(utils::LogLevel::Status,
+                              "Running clang-tidy...\n");
+        }
+        const auto cmd_result { utils::execute_command(
+            cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt"
+        ) };
+        if (!cmd_result.success) {
+            throw std::runtime_error { "failed clang-tidy checks" };
+        }
+        if (verbose) {
+            utils::gojo_print(utils::LogLevel::Success, "\nNo problems found!");
+        }
     }
 
-    // Run cppcheck
-    constexpr std::string_view cmd_str {
-      "cppcheck "
-      "--project={0}/compile_commands.json "
-      "--std={1} "
-      "--enable={2}"
-      "{3}"
-    };
-    const std::string cmd {
-      std::format(cmd_str,
-                  cfg.get_build_dir().string(),  // {0}
-                  language_standard_arg,         // {1}
-                  cppcheck_checks,               // {2}
-                  cppcheck_args)                 // {3}
-    };
-    if (verbose) {
-      utils::gojo_print(utils::LogLevel::Status, "Running cppcheck...\n");
+    if (cfg.is_cppcheck_enabled()) {
+        std::string language_standard_arg {
+            utils::to_lower(cfg::to_str(cfg.language))
+        };
+
+        switch (cfg.get_language_standard()) {
+            case cfg::LanguageStandard::C99:
+                language_standard_arg.append("99");
+                break;
+            case cfg::LanguageStandard::C11:
+            case cfg::LanguageStandard::C17:
+            case cfg::LanguageStandard::C23:
+                language_standard_arg.append("11");
+                break;
+            case cfg::LanguageStandard::Cpp11:
+            case cfg::LanguageStandard::Cpp14:
+            case cfg::LanguageStandard::Cpp17:
+                language_standard_arg.append(
+                    cfg::to_str(cfg.get_language_standard())
+                );
+                break;
+            case cfg::LanguageStandard::Cpp20:
+            case cfg::LanguageStandard::Cpp23:
+            case cfg::LanguageStandard::Cpp26:
+                language_standard_arg.append("20");
+                break;
+        }
+
+        std::string_view cppcheck_checks {};
+        std::string cppcheck_args {};
+        if (cfg.cppcheck_checks.has_value()) {
+            cppcheck_checks = cfg.cppcheck_checks.value();
+        }
+        if (cfg.cppcheck_args.has_value()) {
+            cppcheck_args = " " + cfg.cppcheck_args.value();
+        }
+
+        // Run cppcheck
+        constexpr std::string_view cmd_str {
+            "cppcheck "
+            "--project={0}/compile_commands.json "
+            "--std={1} "
+            "--enable={2}"
+            "{3}"
+        };
+        const std::string cmd {
+            std::format(cmd_str,
+                        cfg.get_build_dir().string(),  // {0}
+                        language_standard_arg,         // {1}
+                        cppcheck_checks,               // {2}
+                        cppcheck_args)                 // {3}
+        };
+        if (verbose) {
+            utils::gojo_print(utils::LogLevel::Status, "Running cppcheck...\n");
+        }
+        const auto cmd_result { utils::execute_command(
+            cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt"
+        ) };
+        if (!cmd_result.success) {
+            throw std::runtime_error { "failed cppcheck checks" };
+        }
+        if (verbose) {
+            utils::gojo_print(utils::LogLevel::Success, "\nNo problems found!");
+        }
     }
-    const auto cmd_result { utils::execute_command(cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt") };
-    if (!cmd_result.success) {
-      throw std::runtime_error { "failed cppcheck checks" };
-    }
-    if (verbose) {
-      utils::gojo_print(utils::LogLevel::Success, "\nNo problems found!");
-    }
-  }
 }
 
-}
+}  // namespace cmd

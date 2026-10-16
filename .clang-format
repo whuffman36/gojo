@@ -115,7 +115,7 @@ BraceWrapping:
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
-BreakAfterOpenBracketBracedList: false
+BreakAfterOpenBracketBracedList: true
 BreakAfterOpenBracketFunction: false
 BreakAfterOpenBracketIf: false
 BreakAfterOpenBracketLoop: false
@@ -123,11 +123,11 @@ BreakAfterOpenBracketSwitch: false
 BreakAfterReturnType: Automatic
 BreakArrays: false
 BreakBeforeBinaryOperators: None
-BreakBeforeCloseBracketBracedList: false
-BreakBeforeCloseBracketFunction: false
-BreakBeforeCloseBracketIf: false
-BreakBeforeCloseBracketLoop: false
-BreakBeforeCloseBracketSwitch: false
+BreakBeforeCloseBracketBracedList: true
+BreakBeforeCloseBracketFunction: true
+BreakBeforeCloseBracketIf: true
+BreakBeforeCloseBracketLoop: true
+BreakBeforeCloseBracketSwitch: true
 BreakBeforeConceptDeclarations: Always
 BreakBeforeBraces: Attach
 BreakBeforeInlineASMColon: OnlyMultiline

@@ -1,14 +1,12 @@
-#include "src/cmd/commands.hpp"
-
 #include <string_view>
 
+#include "src/cmd/commands.hpp"
 #include "src/utils.hpp"
-
 
 namespace {
 
 constexpr std::string_view INFO {
-R"(
+    R"(
 {1}gojo{0} man page
 
 {1}About{0}
@@ -277,11 +275,10 @@ repository, as well as become a contributor:
 
 }
 
-
 namespace cmd {
 
 void info() {
-  utils::gojo_print(utils::LogLevel::Info, INFO, INFO_COLORS);
+    utils::gojo_print(utils::LogLevel::Info, INFO, INFO_COLORS);
 }
 
-}
+}  // namespace cmd

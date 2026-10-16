@@ -4,7 +4,6 @@
 /// @date      2026
 /// @copyright MIT License
 
-
 #ifndef GOJO_SRC_CMD_COMMANDS_HPP
 #define GOJO_SRC_CMD_COMMANDS_HPP
 
@@ -12,16 +11,15 @@
 #include <string>
 #include <string_view>
 
-
 namespace cmd {
 
 inline std::string args_to_string(std::span<std::string_view> args) {
-  std::string str {};
-  for (const auto arg : args) {
-    str.append(arg);
-    str.push_back(' ');
-  }
-  return str;
+    std::string str {};
+    for (const auto arg : args) {
+        str.append(arg);
+        str.push_back(' ');
+    }
+    return str;
 }
 
 void init(std::span<std::string_view> args);
