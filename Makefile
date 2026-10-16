@@ -20,7 +20,8 @@ test:
 	@cd ../../../
 
 fmt:
-	@find src/ -iname '*.cpp' -o -iname '*.hpp' | xargs clang-format -n
+	@find src/ -iname '*.cpp' -o -iname '*.hpp' | xargs clang-format -i
+	@find test/ -iname '*.cpp' -o -iname '*.hpp' | xargs clang-format -i
 
 check:
 	@run-clang-tidy -p build/Debug
