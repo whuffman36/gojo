@@ -1,65 +1,61 @@
+#include <gtest/gtest.h>
+
 #include <filesystem>
 #include <string_view>
 #include <vector>
 
-#include <gtest/gtest.h>
-
 #include "src/cmd/commands.hpp"
 #include "test/utils.hpp"
-
 
 namespace {
 
 const std::filesystem::path& test_root_path() {
-  static const std::filesystem::path path {
-    get_assets_path() / "commands" / "run"
-  };
-  return path;
+    static const std::filesystem::path path { get_assets_path() / "commands" /
+                                              "run" };
+    return path;
 }
 
-}
-
+}  // namespace
 
 TEST(CommandsTest, RunCpp) {
-  std::vector<std::string_view> args { "runtest" };
-  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+    std::vector<std::string_view> args { "runtest" };
+    ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
-  args.clear();
-  args.emplace_back("--debug");
-  ASSERT_NO_THROW(cmd::run(args));
+    args.clear();
+    args.emplace_back("--debug");
+    ASSERT_NO_THROW(cmd::run(args));
 
-  args.clear();
-  args.emplace_back("--release");
-  EXPECT_NO_THROW(cmd::run(args));
+    args.clear();
+    args.emplace_back("--release");
+    EXPECT_NO_THROW(cmd::run(args));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+    EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
-
 
 TEST(CommandsTest, RunC) {
-  std::vector<std::string_view> args { "runtest", "--lang=c" };
-  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+    std::vector<std::string_view> args { "runtest", "--lang=c" };
+    ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
-  args.clear();
-  args.emplace_back("--debug");
-  ASSERT_NO_THROW(cmd::run(args));
+    args.clear();
+    args.emplace_back("--debug");
+    ASSERT_NO_THROW(cmd::run(args));
 
-  args.clear();
-  args.emplace_back("--release");
-  EXPECT_NO_THROW(cmd::run(args));
+    args.clear();
+    args.emplace_back("--release");
+    EXPECT_NO_THROW(cmd::run(args));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+    EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
-
 TEST(CommandsTest, RunLib) {
-  std::vector<std::string_view> args { "runtest", "--lib" };
-  ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+    std::vector<std::string_view> args { "runtest", "--lib" };
+    ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
-  args.clear();
-  EXPECT_NO_THROW(cmd::run(args));
-  EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug"));
-  EXPECT_FALSE(std::filesystem::exists(test_root_path() / "build" / "Debug" / "src" / "runtest"));
+    args.clear();
+    EXPECT_NO_THROW(cmd::run(args));
+    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug"));
+    EXPECT_FALSE(std::filesystem::exists(test_root_path() / "build" / "Debug" /
+                                         "src" / "runtest"));
 
-  EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+    EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }

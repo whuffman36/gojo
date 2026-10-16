@@ -1,5 +1,3 @@
-#include "src/cmd/commands.hpp"
-
 #include <cstddef>
 #include <filesystem>
 #include <format>
@@ -10,13 +8,14 @@
 #include "src/build_systems/cmake.hpp"
 #include "src/cfg/config.hpp"
 #include "src/cfg/enums.hpp"
+#include "src/cmd/commands.hpp"
 #include "src/package_managers/conan.hpp"
 #include "src/utils.hpp"
 
 namespace {
 
 constexpr std::string_view HELP {
-R"({1}Command:{0}
+    R"({1}Command:{0}
   gojo {2}build{0} {4}[options]{0}
 
 {1}Summary:{0}
@@ -61,107 +60,97 @@ R"({1}Command:{0}
 
 }
 
-
 namespace cmd {
 
 void build(std::span<std::string_view> args) {
-  cfg::BuildType build_type { cfg::BuildType::Debug };
-  std::string_view target {};
-  bool testing_enabled { false };
-  bool reconfigure { false };
-  bool verbose { false };
+    cfg::BuildType build_type { cfg::BuildType::Debug };
+    std::string_view target {};
+    bool testing_enabled { false };
+    bool reconfigure { false };
+    bool verbose { false };
 
-  for (const auto arg : args) {
-    if (arg == "--release") {
-      build_type = cfg::BuildType::Release;
-    }
-    else if (arg == "--debug") {
-      build_type = cfg::BuildType::Debug;
-    }
-    else if (arg == "--tests") {
-      testing_enabled = true;
-    }
-    else if (arg == "--no-tests") {
-      testing_enabled = false;
-    }
-    else if (arg == "--verbose" || arg == "-v") {
-      verbose = true;
-    }
-    else if (arg.starts_with("--target=")) {
-      // Length of "--target="
-      constexpr std::size_t target_arg_len { 9 };
-      target = arg.substr(target_arg_len);
-    }
-    else if (arg == "--help") {
-      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
-      return;
-    }
-    else {
-      throw std::runtime_error { std::format("gojo build: argument not recognized: {}", arg) };
-    }
-  }
-
-  cfg::Config cfg { cfg::Config::this_project() };
-
-  if (!verbose) {
-    verbose = cfg.is_verbose_enabled();
-  }
-
-  reconfigure = ((cfg.get_build_type() != build_type) && !cfg.is_multi_config()) ||
-                (cfg.is_testing_enabled() != testing_enabled);
-
-  if (!std::filesystem::exists(cfg.get_build_dir())) {
-    reconfigure = true;
-  }
-
-  if (cfg.build_type.has_value() || (build_type != cfg::BuildType::Debug)) {
-    cfg.build_type = build_type;
-
-    bool exists_in_dep_build_types { false };
-    std::size_t empty_idx { cfg.build_types.size() };
-    for (std::size_t idx {0}; idx < cfg.build_types.size(); idx++) {
-      if (cfg.build_types.at(idx).has_value()) {
-        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-        exists_in_dep_build_types = cfg.build_types.at(idx).value() == build_type;
-      }
-      else {
-        empty_idx = idx;
-      }
+    for (const auto arg : args) {
+        if (arg == "--release") {
+            build_type = cfg::BuildType::Release;
+        } else if (arg == "--debug") {
+            build_type = cfg::BuildType::Debug;
+        } else if (arg == "--tests") {
+            testing_enabled = true;
+        } else if (arg == "--no-tests") {
+            testing_enabled = false;
+        } else if (arg == "--verbose" || arg == "-v") {
+            verbose = true;
+        } else if (arg.starts_with("--target=")) {
+            // Length of "--target="
+            constexpr std::size_t target_arg_len { 9 };
+            target = arg.substr(target_arg_len);
+        } else if (arg == "--help") {
+            utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
+            return;
+        } else {
+            throw std::runtime_error {
+                std::format("gojo build: argument not recognized: {}", arg)
+            };
+        }
     }
 
-    if (!exists_in_dep_build_types) {
-      cfg.build_types.at(empty_idx) = build_type;
-    }
-  }
+    cfg::Config cfg { cfg::Config::this_project() };
 
-  if (cfg.testing_enabled.has_value() || (testing_enabled != false)) {
-    cfg.testing_enabled = testing_enabled;
-  }
-
-  if (reconfigure) {
-    if (cfg.package_manager.has_value()) {
-      switch (cfg.package_manager.value()) {
-        case cfg::PackageManager::Conan:
-          conan::install(cfg, false);
-          break;
-        case cfg::PackageManager::Vcpkg:
-          break;
-      }
+    if (!verbose) {
+        verbose = cfg.is_verbose_enabled();
     }
+
+    reconfigure =
+        ((cfg.get_build_type() != build_type) && !cfg.is_multi_config()) ||
+        (cfg.is_testing_enabled() != testing_enabled);
+
+    if (!std::filesystem::exists(cfg.get_build_dir())) {
+        reconfigure = true;
+    }
+
+    if (cfg.build_type.has_value() || (build_type != cfg::BuildType::Debug)) {
+        cfg.build_type = build_type;
+
+        bool exists_in_dep_build_types { false };
+        std::size_t empty_idx { cfg.build_types.size() };
+        for (std::size_t idx { 0 }; idx < cfg.build_types.size(); idx++) {
+            if (cfg.build_types.at(idx).has_value()) {
+                exists_in_dep_build_types =
+                    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+                    cfg.build_types.at(idx).value() == build_type;
+            } else {
+                empty_idx = idx;
+            }
+        }
+
+        if (!exists_in_dep_build_types) {
+            cfg.build_types.at(empty_idx) = build_type;
+        }
+    }
+
+    if (cfg.testing_enabled.has_value() || (testing_enabled != false)) {
+        cfg.testing_enabled = testing_enabled;
+    }
+
+    if (reconfigure) {
+        if (cfg.package_manager.has_value()) {
+            switch (cfg.package_manager.value()) {
+                case cfg::PackageManager::Conan:
+                    conan::install(cfg, false);
+                    break;
+                case cfg::PackageManager::Vcpkg: break;
+            }
+        }
+        switch (cfg.get_build_system()) {
+            case cfg::BuildSystem::CMake: cmake::configure(cfg, verbose); break;
+        }
+
+        cfg.to_file(utils::get_config_path());
+    }
+
     switch (cfg.get_build_system()) {
-      case cfg::BuildSystem::CMake:
-        cmake::configure(cfg, verbose);
-        break;
+        case cfg::BuildSystem::CMake: cmake::build(cfg, target, verbose); break;
     }
-
-    cfg.to_file(utils::get_config_path());
-  }
-
-  switch (cfg.get_build_system()) {
-    case cfg::BuildSystem::CMake:
-      cmake::build(cfg, target, verbose);
-      break;
-  }
 }
 
-}
+}  // namespace cmd

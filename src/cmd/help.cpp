@@ -1,14 +1,12 @@
-#include "src/cmd/commands.hpp"
-
 #include <string_view>
 
+#include "src/cmd/commands.hpp"
 #include "src/utils.hpp"
-
 
 namespace {
 
-constexpr std::string_view HELP { 
-R"(
+constexpr std::string_view HELP {
+    R"(
 {1}gojo:{0} a C/C++ CLI
 
 {1}Usage:{0} gojo {2}<command>{0} {3}<arg(s)>{0} {4}[options]{0}
@@ -31,13 +29,12 @@ See 'gojo {2}<command>{0} {4}--help{0}' for more information on a specific comma
 )"
 };
 
-
 }
 
 namespace cmd {
 
 void help() {
-  utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
+    utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
 }
 
-}
+}  // namespace cmd

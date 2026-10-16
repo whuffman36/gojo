@@ -1,8 +1,6 @@
-#include "src/cmd/commands.hpp"
-
 #include <cerrno>
-#include <cstring>
 #include <cstddef>
+#include <cstring>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -16,19 +14,19 @@
 #include "src/build_systems/cmake.hpp"
 #include "src/cfg/config.hpp"
 #include "src/cfg/enums.hpp"
+#include "src/cmd/commands.hpp"
 #include "src/package_managers/conan.hpp"
 #include "src/utils.hpp"
-
 
 namespace {
 
 constexpr std::string_view GITIGNORE {
-R"(build
+    R"(build
 deps)"
 };
 
 constexpr std::string_view HELP {
-R"({1}Command:{0}
+    R"({1}Command:{0}
   gojo {2}init{0} {3}<name>{0} {4}[options]{0}
 
 {1}Summary:{0}
@@ -65,21 +63,20 @@ R"({1}Command:{0}
 )"
 };
 
-
 std::string cmakelists_root(const cfg::Config& cfg) {
-  std::string_view testing_enabled {};
-  if (cfg.testing_enabled) {
-    testing_enabled = 
-R"(# Bring test directory into scope.
+    std::string_view testing_enabled {};
+    if (cfg.testing_enabled) {
+        testing_enabled =
+            R"(# Bring test directory into scope.
 # Bring other directories into scope before this line to use them in tests.
 if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)
 endif())";
-  } // if
+    }  // if
 
-  constexpr std::string_view template_str {
-R"(cmake_minimum_required(VERSION {0})
+    constexpr std::string_view template_str {
+        R"(cmake_minimum_required(VERSION {0})
 
 project({1})
 
@@ -98,30 +95,30 @@ add_subdirectory(src)
 
 {2}
 )"
-  }; // template_str
+    };  // template_str
 
-  return std::format(template_str,
-                     cmake::get_version(), // {0}
-                     cfg.name,    // {1}
-                     testing_enabled);    // {2}
+    return std::format(template_str,
+                       cmake::get_version(),  // {0}
+                       cfg.name,              // {1}
+                       testing_enabled);      // {2}
 }
 
-
 std::string cmakelists_src(const cfg::Config& cfg) {
-  std::string_view target { "executable" };
-  std::string_view target_name { cfg.name };
-  std::string_view include_dirs { "\"${CMAKE_SOURCE_DIR}\"" };
-  std::string_view link_type {};
+    std::string_view target { "executable" };
+    std::string_view target_name { cfg.name };
+    std::string_view include_dirs { "\"${CMAKE_SOURCE_DIR}\"" };
+    std::string_view link_type {};
 
-  if (cfg.target == cfg::Target::Library) {
-    target = "library";
-    include_dirs = "\"${CMAKE_SOURCE_DIR}\"\n"
-                   "  \"${CMAKE_SOURCE_DIR}/include\"";
-    link_type = " STATIC";
-  }
+    if (cfg.target == cfg::Target::Library) {
+        target = "library";
+        include_dirs =
+            "\"${CMAKE_SOURCE_DIR}\"\n"
+            "  \"${CMAKE_SOURCE_DIR}/include\"";
+        link_type = " STATIC";
+    }
 
-  constexpr std::string_view template_str {
-R"(add_{0}({1}{2})
+    constexpr std::string_view template_str {
+        R"(add_{0}({1}{2})
 
 target_sources(
   {1}
@@ -154,73 +151,73 @@ target_include_directories(
 # )
 # ...
 )"
-  }; // template_str
+    };  // template_str
 
-  return std::format(template_str,
-                     target,         // {0}
-                     target_name,    // {1}
-                     link_type,      // {2}
-                     cfg.get_source_extension(),    // {3}
-                     include_dirs);  // {4}
+    return std::format(template_str,
+                       target,                      // {0}
+                       target_name,                 // {1}
+                       link_type,                   // {2}
+                       cfg.get_source_extension(),  // {3}
+                       include_dirs);               // {4}
 }
 
-
 std::string cmakelists_test(const cfg::Config& cfg) {
-  std::string_view test_framework_package {};
-  std::string_view include_dirs { "\"${CMAKE_SOURCE_DIR}\"" };
-  std::string_view lib {};
-  std::string_view name { cfg.name };
-  std::string add_test {};
+    std::string_view test_framework_package {};
+    std::string_view include_dirs { "\"${CMAKE_SOURCE_DIR}\"" };
+    std::string_view lib {};
+    std::string_view name { cfg.name };
+    std::string add_test {};
 
-  if (cfg.target == cfg::Target::Library) {
-    lib = cfg.name;
-    include_dirs = "\"${CMAKE_SOURCE_DIR}\"\n"
-                   "  \"${CMAKE_SOURCE_DIR}/include\"";
-  }
+    if (cfg.target == cfg::Target::Library) {
+        lib = cfg.name;
+        include_dirs =
+            "\"${CMAKE_SOURCE_DIR}\"\n"
+            "  \"${CMAKE_SOURCE_DIR}/include\"";
+    }
 
-  if (cfg.is_testing_enabled() && cfg.test_framework.has_value()) {
-    if (cfg.test_framework.value() == cfg::TestFramework::GoogleTest) {
-      test_framework_package =
-R"(find_package(GTest REQUIRED)
+    if (cfg.is_testing_enabled() && cfg.test_framework.has_value()) {
+        if (cfg.test_framework.value() == cfg::TestFramework::GoogleTest) {
+            test_framework_package =
+                R"(find_package(GTest REQUIRED)
 
 # Link all following targets to GoogleTest.
 link_libraries(gtest::gtest)
 )";
 
-      add_test = std::format(
-R"(include(GoogleTest)
+            add_test = std::format(
+                R"(include(GoogleTest)
 gtest_discover_tests({0}_test)
 # Add more tests here, ex.
 # gtest_discover_tests(<test_target>)
 # ...
 )",
-        name  // {0}
-      );
-    } // project_lang == C++
+                name  // {0}
+            );
+        }  // project_lang == C++
 
-    if (cfg.test_framework.value() == cfg::TestFramework::Unity) {
-      test_framework_package =
-R"(find_package(unity REQUIRED)
+        if (cfg.test_framework.value() == cfg::TestFramework::Unity) {
+            test_framework_package =
+                R"(find_package(unity REQUIRED)
 
 # Link all following targets to Unity.
 link_libraries(unity::unity)
 )";
-    } // project_lang == C
-  } // test_framework
+        }  // project_lang == C
+    }  // test_framework
 
-  if (add_test.empty()) {
-    add_test = std::format(
-R"(add_test(NAME {0}Test COMMAND {0}_test)
+    if (add_test.empty()) {
+        add_test = std::format(
+            R"(add_test(NAME {0}Test COMMAND {0}_test)
 # Add more tests here, ex.
 # add_test(NAME <test_name> COMMAND <test_target>)
 # ...
 )",
-      name  // {0}
-    );
-  }
+            name  // {0}
+        );
+    }
 
-  constexpr std::string_view template_str {
-R"({0}
+    constexpr std::string_view template_str {
+        R"({0}
 add_executable({1}_test)
 
 target_sources(
@@ -248,28 +245,27 @@ target_include_directories(
 
 {5}
 )"
-  }; // template_str
+    };  // template_str
 
-  return std::format(template_str,
-                     test_framework_package,  // {0}
-                     name,                    // {1}
-                     cfg.get_source_extension(),             // {2}
-                     lib,                     // {3}
-                     include_dirs,            // {4}
-                     add_test);               // {5}
+    return std::format(template_str,
+                       test_framework_package,      // {0}
+                       name,                        // {1}
+                       cfg.get_source_extension(),  // {2}
+                       lib,                         // {3}
+                       include_dirs,                // {4}
+                       add_test);                   // {5}
 }
 
-
 std::string source_file(const cfg::Config& cfg) {
-  std::string str {};
+    std::string str {};
 
-  // This might be the most convoluted, fucked up control statement
-  // block I've ever written...
-  // Maybe I should split this up into several functions?
-  if (cfg.target == cfg::Target::Library) {
-    if (cfg.language == cfg::Language::Cpp) {
-      str = std::format(
-R"(#include "{0}/{0}.{1}"
+    // This might be the most convoluted, fucked up control statement
+    // block I've ever written...
+    // Maybe I should split this up into several functions?
+    if (cfg.target == cfg::Target::Library) {
+        if (cfg.language == cfg::Language::Cpp) {
+            str = std::format(
+                R"(#include "{0}/{0}.{1}"
 #include <string>
 
 
@@ -281,57 +277,56 @@ std::string hello_world() {{
 
 }}  // namespace {0}
 )",
-        cfg.name,  // {0}
-        cfg.get_header_extension()        // {1}
-      );
-    } // project_lang == C++
-    else if (cfg.language == cfg::Language::C) {
-      str = std::format(
-R"(#include "{0}/{0}.{1}"
+                cfg.name,                   // {0}
+                cfg.get_header_extension()  // {1}
+            );
+        }  // project_lang == C++
+        else if (cfg.language == cfg::Language::C) {
+            str = std::format(
+                R"(#include "{0}/{0}.{1}"
 
 
 const char* hello_world(void) {{
   return "Hello world!";
 }}
 )",
-        cfg.name,  // {0}
-        cfg.get_header_extension()        // {1}
-      );
-    } // project_lang == C
-  } // is_library
-  else {
-    if (cfg.language == cfg::Language::Cpp) {
-      str =
-R"(#include <iostream>
+                cfg.name,                   // {0}
+                cfg.get_header_extension()  // {1}
+            );
+        }  // project_lang == C
+    }  // is_library
+    else {
+        if (cfg.language == cfg::Language::Cpp) {
+            str =
+                R"(#include <iostream>
 
 int main() {
   std::cout << "Hello world!\n";
   return 0;
 }
-)";        
-    } // project_lang == C++
-    else if (cfg.language == cfg::Language::C) {
-      str =
-R"(#include <stdio.h>
+)";
+        }  // project_lang == C++
+        else if (cfg.language == cfg::Language::C) {
+            str =
+                R"(#include <stdio.h>
 
 int main(void) {
   printf("Hello world!\n");
   return 0;
 }
 )";
-    } // project_lang == C
-  } // is_binary
+        }  // project_lang == C
+    }  // is_binary
 
-  return str;
+    return str;
 }
 
-
 std::string header_file(const cfg::Config& cfg) {
-  std::string str {};
+    std::string str {};
 
-  if (cfg.language == cfg::Language::Cpp) {
-    str = std::format(
-R"(#ifndef {0}_{0}_{1}
+    if (cfg.language == cfg::Language::Cpp) {
+        str = std::format(
+            R"(#ifndef {0}_{0}_{1}
 #define {0}_{0}_{1}
 
 #include <string>
@@ -346,13 +341,12 @@ std::string hello_world();
 
 #endif
 )",
-      cfg.name,  // {0}
-      cfg.get_header_extension()        // {1}
-    );
-  }
-  else if (cfg.language == cfg::Language::C) {
-    str = std::format(
-R"(#ifndef {0}_{0}_{1}
+            cfg.name,                   // {0}
+            cfg.get_header_extension()  // {1}
+        );
+    } else if (cfg.language == cfg::Language::C) {
+        str = std::format(
+            R"(#ifndef {0}_{0}_{1}
 #define {0}_{0}_{1}
 
 
@@ -361,26 +355,25 @@ const char* hello_world(void);
 
 #endif
 )",
-      cfg.name,  // {0}
-      cfg.get_header_extension()        // {1}
-    );
-  }
+            cfg.name,                   // {0}
+            cfg.get_header_extension()  // {1}
+        );
+    }
 
-  return str;
+    return str;
 }
 
-
 std::string test_file(const cfg::Config& cfg) {
-  // is library
-  //   is C++
-  //     is framework enabled
-  std::string str {};
+    // is library
+    //   is C++
+    //     is framework enabled
+    std::string str {};
 
-  if (cfg.target == cfg::Target::Library) {
-    if (cfg.language == cfg::Language::Cpp) {
-      if (!cfg.test_framework.has_value()) {
-        str = std::format(
-R"(#include <cassert>
+    if (cfg.target == cfg::Target::Library) {
+        if (cfg.language == cfg::Language::Cpp) {
+            if (!cfg.test_framework.has_value()) {
+                str = std::format(
+                    R"(#include <cassert>
 
 #include "{0}/{0}.{1}"
 
@@ -390,13 +383,11 @@ int main() {{
   return 0;
 }}
 )",
-          cfg.name,
-          cfg.get_header_extension()
-        );
-      }
-      else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
-        str = std::format(
-R"(#include <gtest/gtest.h>
+                    cfg.name, cfg.get_header_extension()
+                );
+            } else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
+                str = std::format(
+                    R"(#include <gtest/gtest.h>
 
 #include "{0}/{0}.{1}"
 
@@ -405,15 +396,14 @@ TEST({0}TestSuite, HelloWorld) {{
   EXPECT_STREQ("Hello world!", {0}::hello_world());
 }}
 )",
-          cfg.name,
-          cfg.get_header_extension()
-        );
-      } // gtest
-    } // C++
-    else if (cfg.language == cfg::Language::C) {
-      if (!cfg.test_framework.has_value()) {
-        str = std::format(
-R"(#include <assert.h>
+                    cfg.name, cfg.get_header_extension()
+                );
+            }  // gtest
+        }  // C++
+        else if (cfg.language == cfg::Language::C) {
+            if (!cfg.test_framework.has_value()) {
+                str = std::format(
+                    R"(#include <assert.h>
 #include <string.h>
 
 #include "{0}/{0}.{1}"
@@ -424,13 +414,11 @@ int main(void) {{
     return 0;
 }}
 )",
-          cfg.name,
-          cfg.get_header_extension()
-        );
-      }
-      else if (cfg.test_framework == cfg::TestFramework::Unity) {
-        str = std::format(
-R"(#include <unity.h>
+                    cfg.name, cfg.get_header_extension()
+                );
+            } else if (cfg.test_framework == cfg::TestFramework::Unity) {
+                str = std::format(
+                    R"(#include <unity.h>
 
 #include "{0}/{0}.{1}"
 
@@ -453,26 +441,24 @@ int main(void) {{
     return UNITY_END();
 }}
 )",
-          cfg.name,
-          cfg.get_header_extension()
-        );
-      } // unity
-    } // C
-  } // is_library
-  else {
-    if (cfg.language == cfg::Language::Cpp) {
-      if (!cfg.test_framework.has_value()) {
-        str =
-R"(
+                    cfg.name, cfg.get_header_extension()
+                );
+            }  // unity
+        }  // C
+    }  // is_library
+    else {
+        if (cfg.language == cfg::Language::Cpp) {
+            if (!cfg.test_framework.has_value()) {
+                str =
+                    R"(
 int main() {
   static_assert(5 + 5 == 10);
   return 0;
 }
 )";
-      }
-      else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
-        str =
-R"(#include <gtest/gtest.h>
+            } else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
+                str =
+                    R"(#include <gtest/gtest.h>
 
 
 // Demonstrate some basic assertions.
@@ -484,12 +470,12 @@ TEST(TestSuiteName, TestName) {
   EXPECT_EQ(7 * 6, 42);
 }
 )";
-      } // gtest
-    } // C++
-    else if (cfg.language == cfg::Language::C) {
-      if (!cfg.test_framework.has_value()) {
-        str =
-R"(#include <assert.h>
+            }  // gtest
+        }  // C++
+        else if (cfg.language == cfg::Language::C) {
+            if (!cfg.test_framework.has_value()) {
+                str =
+                    R"(#include <assert.h>
 #include <string.h>
 
 
@@ -498,10 +484,9 @@ int main(void) {
     return 0;
 }
 )";
-      }
-      else if (cfg.test_framework == cfg::TestFramework::Unity) {
-        str =
-R"(#include <unity.h>
+            } else if (cfg.test_framework == cfg::TestFramework::Unity) {
+                str =
+                    R"(#include <unity.h>
 
 
 void setUp(void) {
@@ -522,52 +507,49 @@ int main(void) {
     return UNITY_END();
 }
 )";
-      } // unity
-    } // C
-  } // is_binary
+            }  // unity
+        }  // C
+    }  // is_binary
 
-  return str;
+    return str;
 }
 
-
 std::string clangd(const cfg::Config& cfg) {
-  std::string_view remove {};
-  switch (cfg.get_compiler()) {
-    case cfg::Compiler::Gcc:
-    case cfg::Compiler::Gpp:
-    case cfg::Compiler::HomebrewGcc:
-    case cfg::Compiler::HomebrewGpp:
-      remove =
-R"(Remove:
+    std::string_view remove {};
+    switch (cfg.get_compiler()) {
+        case cfg::Compiler::Gcc:
+        case cfg::Compiler::Gpp:
+        case cfg::Compiler::HomebrewGcc:
+        case cfg::Compiler::HomebrewGpp:
+            remove =
+                R"(Remove:
     - -fmodules-ts
     - -fmodule-mapper=*
     - -fdeps-format=*
 )";
-      break;
-    default:
-      break;
-  }
-  constexpr std::string_view template_str {
-R"(CompileFlags:
+            break;
+        default: break;
+    }
+    constexpr std::string_view template_str {
+        R"(CompileFlags:
   CompilationDatabase: "{}"
   {}
   )"
-  };
+    };
 
-  return std::format(template_str, cfg.get_build_dir().string(), remove);
+    return std::format(template_str, cfg.get_build_dir().string(), remove);
 }
 
-
 std::string clangtidy(const cfg::Config& cfg) {
-  std::string_view header_filter { "src/.*" };
-  if (cfg.target == cfg::Target::Library) {
-    header_filter = "include/.*|src/.*";
-  }
+    std::string_view header_filter { "src/.*" };
+    if (cfg.target == cfg::Target::Library) {
+        header_filter = "include/.*|src/.*";
+    }
 
-  std::string_view checks {};
-  if (cfg.language == cfg::Language::Cpp) {
-    checks =
-  R"(>
+    std::string_view checks {};
+    if (cfg.language == cfg::Language::Cpp) {
+        checks =
+            R"(>
   -*,
   bugprone-*,
   modernize-*,
@@ -575,13 +557,13 @@ std::string clangtidy(const cfg::Config& cfg) {
   performance-*,
   cppcoreguidelines-*,
   misc-*)";
-  }
+    }
 
-  // clang-tidy is designed for C++, these were specifically chosen
-  // from https://nrk.neocities.org/articles/c-static-analyzers#clang-tidy
-  if (cfg.language == cfg::Language::C) {
-    checks =
-R"(>
+    // clang-tidy is designed for C++, these were specifically chosen
+    // from https://nrk.neocities.org/articles/c-static-analyzers#clang-tidy
+    if (cfg.language == cfg::Language::C) {
+        checks =
+            R"(>
   performance-*,
   misc-*,
   android-cloexec-*,
@@ -599,10 +581,10 @@ R"(>
   bugprone-branch-clone,
   -clang-analyzer-security.insecureAPI.*,
   -misc-no-recursion)";
-  }
+    }
 
-  return std::format(
-R"(---
+    return std::format(
+        R"(---
 # .clang-tidy defines predetermined static analysis checks that will be run
 # by clang-tidy, a program provided by the LLVM suite. Run these checks by
 # running 'gojo check' at the project root. Make sure clang-tidy is installed
@@ -631,25 +613,23 @@ HeaderFilterRegex: '{1}'
 # Turns on colors in the terminal output.
 UseColor: true
 )",
-    checks,        // {0}
-    header_filter  // {1}
-  );
+        checks,        // {0}
+        header_filter  // {1}
+    );
 }
 
-
 std::string conanfile(const cfg::Config& cfg) {
-  std::string_view reqs { "pass" };
-  if (cfg.is_testing_enabled()) {
-    if (cfg.language == cfg::Language::Cpp) {
-      reqs = "self.requires(\"gtest/1.17.0\")";
-    } 
-    else if (cfg.language == cfg::Language::C) {
-      reqs = "self.requires(\"unity/2.6.0\")";
+    std::string_view reqs { "pass" };
+    if (cfg.is_testing_enabled()) {
+        if (cfg.language == cfg::Language::Cpp) {
+            reqs = "self.requires(\"gtest/1.17.0\")";
+        } else if (cfg.language == cfg::Language::C) {
+            reqs = "self.requires(\"unity/2.6.0\")";
+        }
     }
-  }
 
-  return std::format(
-R"(from conan import ConanFile
+    return std::format(
+        R"(from conan import ConanFile
 from conan.tools.cmake import cmake_layout
 
 
@@ -671,169 +651,171 @@ class {0}Recipe(ConanFile):
     def layout(self):
         cmake_layout(self)
 )",
-    cfg.name,  // {0}
-    reqs               // {1}
-  );
+        cfg.name,  // {0}
+        reqs       // {1}
+    );
 }
-
 
 std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
-  cfg::Config cfg {};
-  cfg.language = cfg::Language::Cpp;
+    cfg::Config cfg {};
+    cfg.language = cfg::Language::Cpp;
 
-  for (const auto arg : args) {
-    if (arg == "--verbose" || arg == "-v") {
-      cfg.verbose = true;
-    }
-    if (arg == "--lib") {
-      cfg.target = cfg::Target::Library;
-    }
-    else if (arg.starts_with("--lang=")) {
-      if (arg.ends_with('c')) {
-        cfg.language = cfg::Language::C;
-      }
-      else if (arg.ends_with("c++")) {
-        cfg.language = cfg::Language::Cpp;
-      }
-      else {
-        constexpr std::string_view fmt_str {
-          "gojo init --lang: argument not recognized: {}\n"
-          "\targument must be 'c' or 'c++'"
-        };
-        
-        // Length of "--lang=".
-        constexpr std::size_t lang_arg_len { 7 };
-        throw std::runtime_error { std::format(fmt_str, arg.substr(lang_arg_len)) };
-      }
-    }
-    else if (arg == "--tests") {
-      cfg.testing_enabled = true;
-    }
-    else if (arg.starts_with("--profile=")) {
-      // length of "--profile=".
-      constexpr size_t profile_arg_len { 10 };
-      const std::string_view profile_name { arg.substr(profile_arg_len) };
-      const std::string_view tmp_name { cfg.name };
-      cfg = cfg::Config::from_file(utils::get_profiles_dir() / profile_name);
-      cfg.name = tmp_name;
-    }
-    else if (arg == "--help") {
-      utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
-      return std::nullopt;
-    }
-    else if (arg.starts_with("--") || arg.starts_with('-')) {
-      throw std::runtime_error { std::format("gojo init: option not recognized: {}", arg) };
-    }
-    else {
-      cfg.name = arg;
-    }
-  }
+    for (const auto arg : args) {
+        if (arg == "--verbose" || arg == "-v") {
+            cfg.verbose = true;
+        }
+        if (arg == "--lib") {
+            cfg.target = cfg::Target::Library;
+        } else if (arg.starts_with("--lang=")) {
+            if (arg.ends_with('c')) {
+                cfg.language = cfg::Language::C;
+            } else if (arg.ends_with("c++")) {
+                cfg.language = cfg::Language::Cpp;
+            } else {
+                constexpr std::string_view fmt_str {
+                    "gojo init --lang: argument not recognized: {}\n"
+                    "\targument must be 'c' or 'c++'"
+                };
 
-  return cfg;
+                // Length of "--lang=".
+                constexpr std::size_t lang_arg_len { 7 };
+                throw std::runtime_error {
+                    std::format(fmt_str, arg.substr(lang_arg_len))
+                };
+            }
+        } else if (arg == "--tests") {
+            cfg.testing_enabled = true;
+        } else if (arg.starts_with("--profile=")) {
+            // length of "--profile=".
+            constexpr size_t profile_arg_len { 10 };
+            const std::string_view profile_name { arg.substr(profile_arg_len) };
+            const std::string_view tmp_name { cfg.name };
+            cfg = cfg::Config::from_file(utils::get_profiles_dir() /
+                                         profile_name);
+            cfg.name = tmp_name;
+        } else if (arg == "--help") {
+            utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
+            return std::nullopt;
+        } else if (arg.starts_with("--") || arg.starts_with('-')) {
+            throw std::runtime_error {
+                std::format("gojo init: option not recognized: {}", arg)
+            };
+        } else {
+            cfg.name = arg;
+        }
+    }
+
+    return cfg;
 }
 
+void create_file(const std::filesystem::path& filepath,
+                 std::string_view contents) {
+    std::filesystem::create_directories(filepath.parent_path());
+    std::ofstream file(filepath);
+    if (!file.is_open()) {
+        throw std::runtime_error { std::format("failed to open file: {}\n{}",
+                                               filepath.string(),
+                                               std::strerror(errno)) };
+    }
 
-void create_file(const std::filesystem::path& filepath, std::string_view contents) {
-  std::filesystem::create_directories(filepath.parent_path());
-  std::ofstream file(filepath);
-  if (!file.is_open()) {
-    throw std::runtime_error { std::format("failed to open file: {}\n{}", filepath.string(), std::strerror(errno)) };
-  }
-
-  file << contents << std::flush;
+    file << contents << std::flush;
 }
-
 
 void create_files(const cfg::Config& cfg) {
-  const std::string main { std::format("{}.{}", cfg.name, cfg.get_source_extension()) };
-  const std::string lib { std::format("{}.{}", cfg.name, cfg.get_header_extension()) };
-  const std::string test { std::format("{}_test.{}", cfg.name, cfg.get_source_extension()) };
+    const std::string main { std::format("{}.{}", cfg.name,
+                                         cfg.get_source_extension()) };
+    const std::string lib { std::format("{}.{}", cfg.name,
+                                        cfg.get_header_extension()) };
+    const std::string test { std::format("{}_test.{}", cfg.name,
+                                         cfg.get_source_extension()) };
 
-  create_file(utils::get_root_dir() / "src" / main, source_file(cfg));
+    create_file(utils::get_root_dir() / "src" / main, source_file(cfg));
 
-  if (cfg.target == cfg::Target::Library) {
-    create_file(utils::get_root_dir() / "include" / cfg.name / lib, header_file(cfg));
-  }
-
-  switch (cfg.get_build_system()) {
-    case cfg::BuildSystem::CMake:
-      create_file(utils::get_root_dir() / "CMakeLists.txt", cmakelists_root(cfg));
-      create_file(utils::get_root_dir() / "src" / "CMakeLists.txt", cmakelists_src(cfg));
-      if (cfg.is_testing_enabled()) {
-        create_file(utils::get_root_dir() / "test" / "CMakeLists.txt", cmakelists_test(cfg));
-        create_file(utils::get_root_dir() / "test" / test, test_file(cfg));
-      }
-      break;
-  }
-
-  if (cfg.package_manager.has_value()) {
-    switch (cfg.package_manager.value()) {
-      case cfg::PackageManager::Conan:
-        create_file(utils::get_root_dir() / "conanfile.py", conanfile(cfg));
-        break;
-      case cfg::PackageManager::Vcpkg:
-        break;
+    if (cfg.target == cfg::Target::Library) {
+        create_file(utils::get_root_dir() / "include" / cfg.name / lib,
+                    header_file(cfg));
     }
-  }
 
-  if (cfg.is_clang_tidy_enabled()) {
-    create_file(utils::get_root_dir() / ".clang-tidy", clangtidy(cfg));
-  }
+    switch (cfg.get_build_system()) {
+        case cfg::BuildSystem::CMake:
+            create_file(utils::get_root_dir() / "CMakeLists.txt",
+                        cmakelists_root(cfg));
+            create_file(utils::get_root_dir() / "src" / "CMakeLists.txt",
+                        cmakelists_src(cfg));
+            if (cfg.is_testing_enabled()) {
+                create_file(utils::get_root_dir() / "test" / "CMakeLists.txt",
+                            cmakelists_test(cfg));
+                create_file(utils::get_root_dir() / "test" / test,
+                            test_file(cfg));
+            }
+            break;
+    }
 
-  if (cfg.language_server.has_value() && cfg.language_server == "clangd") {
-    create_file(utils::get_root_dir() / ".clangd", clangd(cfg));
-  }
+    if (cfg.package_manager.has_value()) {
+        switch (cfg.package_manager.value()) {
+            case cfg::PackageManager::Conan:
+                create_file(utils::get_root_dir() / "conanfile.py",
+                            conanfile(cfg));
+                break;
+            case cfg::PackageManager::Vcpkg: break;
+        }
+    }
 
-  create_file(utils::get_root_dir() / ".gitignore", GITIGNORE);
+    if (cfg.is_clang_tidy_enabled()) {
+        create_file(utils::get_root_dir() / ".clang-tidy", clangtidy(cfg));
+    }
+
+    if (cfg.language_server.has_value() && cfg.language_server == "clangd") {
+        create_file(utils::get_root_dir() / ".clangd", clangd(cfg));
+    }
+
+    create_file(utils::get_root_dir() / ".gitignore", GITIGNORE);
 }
 
-}
+}  // namespace
 
 namespace cmd {
 
-// --lib (creates library)
-// --lang=<c/c++> (sets language)
-// --profile=<name> (creates project from a profile in ~/.gojo/profiles/<name>)
-// --help (displays help info)
 void init(std::span<std::string_view> args) {
-  if (args.empty()) {
-    throw std::runtime_error { "gojo init: missing name argument" };
-  }
-
-  auto result { parse_arguments(args) };
-  if (!result.has_value()) {
-    return;
-  }
-
-  cfg::Config cfg { std::move(result.value()) }; 
-
-  create_files(cfg);
-
-  // init conan
-  if (cfg.package_manager.has_value()) {
-    switch (cfg.package_manager.value()) {
-      case cfg::PackageManager::Conan: {
-        conan::install(cfg, false);
-        break;
-      }
-      case cfg::PackageManager::Vcpkg:
-        break;
+    if (args.empty()) {
+        throw std::runtime_error { "gojo init: missing name argument" };
     }
-  }
 
-  // init cmake
-  switch (cfg.get_build_system()) {
-    case cfg::BuildSystem::CMake:
-      cmake::configure(cfg, false);
-      break;
-  }
+    auto result { parse_arguments(args) };
+    if (!result.has_value()) {
+        return;
+    }
 
-  const auto git_result { utils::execute_command("git init", false, cfg.is_verbose_enabled(), cfg.get_build_dir() / "log.txt") };
-  if (!git_result.success) {
-    throw std::runtime_error { "failed to initialize git repository" };
-  }
+    cfg::Config cfg { std::move(result.value()) };
 
-  cfg.to_file(utils::get_config_path());
+    create_files(cfg);
+
+    // init conan
+    if (cfg.package_manager.has_value()) {
+        switch (cfg.package_manager.value()) {
+            case cfg::PackageManager::Conan:
+                {
+                    conan::install(cfg, false);
+                    break;
+                }
+            case cfg::PackageManager::Vcpkg: break;
+        }
+    }
+
+    // init cmake
+    switch (cfg.get_build_system()) {
+        case cfg::BuildSystem::CMake: cmake::configure(cfg, false); break;
+    }
+
+    const auto git_result {
+        utils::execute_command("git init", false, cfg.is_verbose_enabled(),
+                               cfg.get_build_dir() / "log.txt")
+    };
+    if (!git_result.success) {
+        throw std::runtime_error { "failed to initialize git repository" };
+    }
+
+    cfg.to_file(utils::get_config_path());
 }
 
-};
+};  // namespace cmd
