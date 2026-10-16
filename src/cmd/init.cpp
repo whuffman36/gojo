@@ -656,6 +656,13 @@ class {0}Recipe(ConanFile):
     );
 }
 
+std::optional<cfg::Config> interactive_mode() {
+    // cfg::Config {};
+
+    utils::gojo_print(utils::LogLevel::Info, "Project name: ");
+    return std::nullopt;
+}
+
 std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
     cfg::Config cfg {};
     cfg.language = cfg::Language::Cpp;
@@ -663,6 +670,11 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
     for (const auto arg : args) {
         if (arg == "--verbose" || arg == "-v") {
             cfg.verbose = true;
+        }
+        if (arg == "--interactive" || arg == "-i") {
+            throw std::runtime_error {
+                "interactive mode is not implemented yet"
+            };
         }
         if (arg == "--lib") {
             cfg.target = cfg::Target::Library;

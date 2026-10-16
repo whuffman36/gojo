@@ -9,25 +9,26 @@
 #include "src/cmd/enums.hpp"
 #include "src/utils.hpp"
 
-// TODO:
-// * Create gojo package system
-//
-// * test refresh
-//
-// * test dep
-//
-// * test profile
-//
-// * gojo new <name> <path> [-i interactive mode]
-//
-// * Have formats folder in ~/.gojo to import
-//
-// * Create arguments system for custom arguments in config file
-//   - compiler=custom "/path/to/custom/compiler"
-//   - format=custom "format name in ~/.gojo/formats/"
-//   - these are the only fields with custom option, should I even bother?
-//   - i feel like the custom formats should be a thing at least
-//   - custom compiler probably doesn't need to happen but it could be useful
+/*
+TODO:
+* Create gojo package system
+    - gojo install to take current binary or library available in system
+    - Binary just compiles and moves the executable to ~/.gojo/bin
+    - Library:
+        - compiles
+        - moves everything under include/ to ~/.gojo/include/<project.name>/
+        - moves created lib files to ~/.gojo/lib/<project.name>/
+
+* test refresh
+
+* test dep
+
+* test profile
+
+* test fmt --use --save-as
+
+* gojo new <name> <path> [-i interactive mode]
+*/
 
 namespace {
 

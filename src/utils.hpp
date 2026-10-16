@@ -75,7 +75,7 @@ void gojo_print(LogLevel level, std::format_string<Args...> fmt,
                 Args&&... args) {
     switch (level) {
         case LogLevel::Info:
-            std::print(fmt, std::forward<Args>(args)...);
+            std::println(fmt, std::forward<Args>(args)...);
             break;
         case LogLevel::Status:
             std::print(MAGENTA_BOLD);
@@ -88,14 +88,12 @@ void gojo_print(LogLevel level, std::format_string<Args...> fmt,
             std::println(CLEAR);
             break;
         case LogLevel::Warning:
-            std::print(stderr, YELLOW);
-            std::print(stderr, fmt, std::forward<Args>(args)...);
-            std::println(stderr, CLEAR);
+            std::print(stderr, "{}[Warning]:{} ", YELLOW, CLEAR);
+            std::println(stderr, fmt, std::forward<Args>(args)...);
             break;
         case LogLevel::Error:
-            std::print(stderr, RED_BOLD);
-            std::print(stderr, fmt, std::forward<Args>(args)...);
-            std::println(stderr, CLEAR);
+            std::print(stderr, "{}[Error]:{} ", RED_BOLD, CLEAR);
+            std::println(stderr, fmt, std::forward<Args>(args)...);
             break;
     }
 }

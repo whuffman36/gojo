@@ -315,6 +315,7 @@ main() {
     # Create directories in the user's home directory.
     mkdir -p "$HOME/.gojo"
     mkdir -p "$HOME/.gojo/profiles"
+    mkdir -p "$HOME/.gojo/formats"
     mkdir -p "$HOME/.gojo/bin"
 
     detect_os
