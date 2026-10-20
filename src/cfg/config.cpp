@@ -87,6 +87,9 @@ void validate_project_section(cfg::Config& cfg, const toml::table& table) {
         throw std::runtime_error { "project.name field missing in gojo.toml" };
     }
     cfg.name = sv_result.value();
+    if (cfg.name.contains(' ')) {
+        throw std::runtime_error { "project.name must not contain spaces" };
+    }
 
     sv_result = table[PROJECT][PROJECT_LANGUAGE].value<std::string_view>();
     if (!sv_result.has_value()) {
@@ -116,12 +119,7 @@ void validate_project_section(cfg::Config& cfg, const toml::table& table) {
     }
     cfg.target = target.value();
 
-    const auto bool_result { table[PROJECT][PROJECT_VERBOSE].value<bool>() };
-    if (!bool_result.has_value()) {
-        cfg.verbose = std::nullopt;
-    } else {
-        cfg.verbose = bool_result;
-    }
+    cfg.verbose = table[PROJECT][PROJECT_VERBOSE].value<bool>();
 }
 
 void validate_build_section(cfg::Config& cfg, const toml::table& table) {

@@ -1,15 +1,20 @@
 #include <cerrno>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <iostream>
 #include <optional>
 #include <ostream>
+#include <print>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "src/build_systems/cmake.hpp"
 #include "src/cfg/config.hpp"
@@ -656,27 +661,288 @@ class {0}Recipe(ConanFile):
     );
 }
 
-std::optional<cfg::Config> interactive_mode() {
-    // cfg::Config {};
+#define fill_config_field_from_input(field_label, num_options, option_type,  \
+                                     field_name, default_value)              \
+    while (!success) {                                                       \
+        std::println("{}:\n\t[0] Skip", field_label);                        \
+        for (std::uint8_t i { 1 }; i <= (num_options); i++) {                \
+            std::println("\t[{}] {}", i,                                     \
+                         cfg::to_str(static_cast<option_type>(i - 1)));      \
+        }                                                                    \
+        std::print("\nEnter option: ");                                      \
+        std::getline(input_stream, input);                                   \
+        if (input == "q") {                                                  \
+            return std::nullopt;                                             \
+        }                                                                    \
+        try {                                                                \
+            std::uint8_t parsed_input {                                      \
+                static_cast<std::uint8_t>(std::stoi(input))                  \
+            };                                                               \
+            if (verbose) {                                                   \
+                std::println("\noption entered: {}", parsed_input);          \
+            }                                                                \
+            if (parsed_input == 0) {                                         \
+                /* Skip */                                                   \
+                cfg.field_name = default_value;                              \
+                if (verbose) {                                               \
+                    std::println("\nskipping...");                           \
+                }                                                            \
+                success = true;                                              \
+            } else if (parsed_input > (num_options)) {                       \
+                /* Invalid option. */                                        \
+                utils::gojo_print(                                           \
+                    utils::LogLevel::Error,                                  \
+                    "option must be one of the numbers in the list above"    \
+                );                                                           \
+                success = false;                                             \
+            } else {                                                         \
+                cfg.field_name = static_cast<option_type>(parsed_input - 1); \
+                success = true;                                              \
+            }                                                                \
+        } catch (const std::invalid_argument& e) {                           \
+            utils::gojo_print(utils::LogLevel::Error,                        \
+                              "option must be an integer");                  \
+            success = false;                                                 \
+        } catch (const std::out_of_range& e) {                               \
+            utils::gojo_print(                                               \
+                utils::LogLevel::Error,                                      \
+                "option must be one of the numbers in the list above"        \
+            );                                                               \
+            success = false;                                                 \
+        }                                                                    \
+        std::print("\n\n\n");                                                \
+    }                                                                        \
+    success = false;
 
-    utils::gojo_print(utils::LogLevel::Info, "Project name: ");
-    return std::nullopt;
+#define fill_config_field_from_bool_input(field_label, field_name,           \
+                                          default_value)                     \
+    while (!success) {                                                       \
+        std::print(                                                          \
+            "Enable {}?\n\t[0] Skip\n\t[1] Yes\n\t[2] No\n\nEnter option: ", \
+            field_label                                                      \
+        );                                                                   \
+        std::getline(input_stream, input);                                   \
+        if (input == "q") {                                                  \
+            return std::nullopt;                                             \
+        }                                                                    \
+        try {                                                                \
+            std::uint8_t parsed_input {                                      \
+                static_cast<std::uint8_t>(std::stoi(input))                  \
+            };                                                               \
+            if (verbose) {                                                   \
+                std::println("\noption entered: {}", parsed_input);          \
+            }                                                                \
+            if (parsed_input == 0) {                                         \
+                /* Skip */                                                   \
+                cfg.field_name = default_value;                              \
+                if (verbose) {                                               \
+                    std::println("\nskipping...");                           \
+                }                                                            \
+                success = true;                                              \
+            } else if (parsed_input > 2) {                                   \
+                /* Invalid option. */                                        \
+                utils::gojo_print(utils::LogLevel::Error,                    \
+                                  "option must be 0, 1, or 2");              \
+                success = false;                                             \
+            } else {                                                         \
+                cfg.field_name = parsed_input == 1;                          \
+                success = true;                                              \
+            }                                                                \
+        } catch (const std::invalid_argument& e) {                           \
+            utils::gojo_print(utils::LogLevel::Error,                        \
+                              "option must be an integer");                  \
+            success = false;                                                 \
+        } catch (const std::out_of_range& e) {                               \
+            utils::gojo_print(utils::LogLevel::Error,                        \
+                              "option must be 0, 1, or 2");                  \
+            success = false;                                                 \
+        }                                                                    \
+        std::print("\n\n\n");                                                \
+    }                                                                        \
+    success = false;
+
+#define fill_config_field_from_str_input(field_label, field_name, \
+                                         default_value)           \
+    while (!success) {                                            \
+        std::print("Enter {}: ", field_label);                    \
+        std::getline(input_stream, input);                        \
+        if (input == "q") {                                       \
+            return std::nullopt;                                  \
+        }                                                         \
+        if (input.empty()) {                                      \
+            cfg.field_name = default_value;                       \
+            if (verbose) {                                        \
+                std::println("\nskipping...");                    \
+            }                                                     \
+            success = true;                                       \
+        } else {                                                  \
+            cfg.field_name = input;                               \
+            if (verbose) {                                        \
+                std::println("\nentered: {}", input);             \
+            }                                                     \
+            success = true;                                       \
+        }                                                         \
+        std::print("\n\n\n");                                     \
+    }                                                             \
+    success = false;
+
+std::optional<cfg::Config> interactive_mode(std::istream& input_stream,
+                                            bool verbose) {
+    cfg::Config cfg {};
+
+    std::string input {};
+    bool success { false };
+
+    while (!success) {
+        std::print("Project name:  ");
+        std::getline(input_stream, input);
+        if (input == "q") {
+            return std::nullopt;
+        } else if (input.empty()) {
+            utils::gojo_print(utils::LogLevel::Error,
+                              "Project name is a required field");
+            success = false;
+            break;
+        } else if (input.contains(' ')) {
+            utils::gojo_print(utils::LogLevel::Error,
+                              "Project name must not contain spaces");
+            success = false;
+            break;
+        } else {
+            cfg.name = input;
+            if (verbose) {
+                std::println("\nentered: {}", input);
+            }
+            success = true;
+        }
+        std::print("\n\n\n");
+    }
+    success = false;
+
+    fill_config_field_from_input("Project Language", cfg::LANGUAGE_OPTIONS,
+                                 cfg::Language, language, cfg::Language::Cpp);
+    fill_config_field_from_input("Project Target", cfg::TARGET_OPTIONS,
+                                 cfg::Target, target, cfg::Target::Binary);
+
+    fill_config_field_from_bool_input("Verbose Mode", verbose, std::nullopt);
+
+    // Build
+    fill_config_field_from_input("Language Standard", cfg::LANGUAGE_STD_OPTIONS,
+                                 cfg::LanguageStandard, language_standard,
+                                 std::nullopt);
+    fill_config_field_from_input("Compiler", cfg::COMPILER_OPTIONS,
+                                 cfg::Compiler, compiler, std::nullopt);
+    fill_config_field_from_str_input("Compiler Flags in a Space Separated List",
+                                     compiler_flags, std::nullopt);
+    fill_config_field_from_bool_input("GNU Extensions", gnu_extensions_enabled,
+                                      std::nullopt);
+    fill_config_field_from_input("Build System", cfg::BUILD_SYSTEM_OPTIONS,
+                                 cfg::BuildSystem, build_system, std::nullopt);
+    fill_config_field_from_input("Generator", cfg::GENERATOR_OPTIONS,
+                                 cfg::Generator, generator, std::nullopt);
+    fill_config_field_from_input("Initial Build Type", cfg::BUILD_TYPE_OPTIONS,
+                                 cfg::BuildType, build_type, std::nullopt);
+
+    // Checks
+    fill_config_field_from_input("clang-format Style",
+                                 cfg::FORMAT_STYLE_OPTIONS, cfg::FormatStyle,
+                                 clang_format_style, std::nullopt);
+    fill_config_field_from_str_input("Desired Language Server", language_server,
+                                     std::nullopt);
+    fill_config_field_from_bool_input("'clang-tidy'", clang_tidy_enabled,
+                                      std::nullopt);
+    fill_config_field_from_str_input(
+        "Arguments for 'clang-tidy' in a Space Separated List", clang_tidy_args,
+        std::nullopt
+    );
+    fill_config_field_from_bool_input("'cppcheck'", cppcheck_enabled,
+                                      std::nullopt);
+    fill_config_field_from_str_input(
+        "Checks for 'cppcheck' in a Comma Separated List", cppcheck_checks,
+        std::nullopt
+    );
+    fill_config_field_from_str_input(
+        "Arguments for 'cppcheck' in a Space Separated List", cppcheck_args,
+        std::nullopt
+    );
+
+    // Tests
+    fill_config_field_from_bool_input("Testing", testing_enabled, std::nullopt);
+    fill_config_field_from_input("Unit Test Framwork",
+                                 cfg::TEST_FRAMEWORK_OPTIONS,
+                                 cfg::TestFramework, test_framework,
+                                 std::nullopt);
+
+    // Dependencies
+    fill_config_field_from_input("Package Manager",
+                                 cfg::PACKAGE_MANAGER_OPTIONS,
+                                 cfg::PackageManager, package_manager,
+                                 std::nullopt);
+
+    // Special logic for cfg.build_types
+    while (!success) {
+        std::print(
+            "Enter All Build Types to Build Dependencies With in a Comma Separated List: "
+        );
+        std::getline(input_stream, input);
+        if (input == "q") {
+            return std::nullopt;
+        }
+        if (verbose) {
+            std::println("entered: {}", input);
+        }
+
+        std::size_t start { 0 };
+        std::vector<std::string_view> build_types {};
+        for (std::size_t idx { 0 }; idx < input.size(); idx++) {
+            if (input.at(idx) == ',') {
+                build_types.emplace_back(input.substr(start, idx));
+                start = idx + 1;
+            }
+        }
+        build_types.emplace_back(input.substr(start, input.size()));
+
+        std::size_t num_build_types { 0 };
+        for (const auto build_type : build_types) {
+            if (!cfg::build_type_from_str(build_type).has_value()) {
+                utils::gojo_print(utils::LogLevel::Error,
+                                  "build type not recognized: {}", build_type);
+                success = false;
+                break;
+            } else {
+                // clang-format off
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+                cfg.build_types[num_build_types] =
+                    // clang-format on
+                    cfg::build_type_from_str(build_type).value();
+                if (verbose) {
+                    std::println("build type added: {}", build_type);
+                }
+                num_build_types++;
+                if (num_build_types >= cfg.build_types.size()) {
+                    success = true;
+                    break;
+                }
+            }
+        }
+        success = true;
+        std::print("\n\n\n");
+    }
+
+    return cfg;
 }
 
-std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
+std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args,
+                                           std::istream& input) {
     cfg::Config cfg {};
     cfg.language = cfg::Language::Cpp;
 
     for (const auto arg : args) {
         if (arg == "--verbose" || arg == "-v") {
             cfg.verbose = true;
-        }
-        if (arg == "--interactive" || arg == "-i") {
-            throw std::runtime_error {
-                "interactive mode is not implemented yet"
-            };
-        }
-        if (arg == "--lib") {
+        } else if (arg == "--interactive" || arg == "-i") {
+            return interactive_mode(input, cfg.is_verbose_enabled());
+        } else if (arg == "--lib") {
             cfg.target = cfg::Target::Library;
         } else if (arg.starts_with("--lang=")) {
             if (arg.ends_with('c')) {
@@ -714,6 +980,11 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args) {
             };
         } else {
             cfg.name = arg;
+            if (cfg.name.contains(' ')) {
+                throw std::runtime_error {
+                    "gojo init: name must not contain spaces"
+                };
+            }
         }
     }
 
@@ -740,6 +1011,14 @@ void create_files(const cfg::Config& cfg) {
                                         cfg.get_header_extension()) };
     const std::string test { std::format("{}_test.{}", cfg.name,
                                          cfg.get_source_extension()) };
+
+    if (!std::filesystem::create_directory(std::filesystem::current_path() /
+                                           cfg.name)) {
+        throw std::runtime_error { std::format("failed to create directory: {}",
+                                               cfg.name) };
+    }
+
+    std::filesystem::current_path(std::filesystem::current_path() / cfg.name);
 
     create_file(utils::get_root_dir() / "src" / main, source_file(cfg));
 
@@ -788,12 +1067,12 @@ void create_files(const cfg::Config& cfg) {
 
 namespace cmd {
 
-void init(std::span<std::string_view> args) {
+void init(std::span<std::string_view> args, std::istream& input) {
     if (args.empty()) {
         throw std::runtime_error { "gojo init: missing name argument" };
     }
 
-    auto result { parse_arguments(args) };
+    auto result { parse_arguments(args, input) };
     if (!result.has_value()) {
         return;
     }
@@ -807,7 +1086,7 @@ void init(std::span<std::string_view> args) {
         switch (cfg.package_manager.value()) {
             case cfg::PackageManager::Conan:
                 {
-                    conan::install(cfg, false);
+                    conan::install(cfg, cfg.is_verbose_enabled());
                     break;
                 }
             case cfg::PackageManager::Vcpkg: break;
@@ -816,7 +1095,9 @@ void init(std::span<std::string_view> args) {
 
     // init cmake
     switch (cfg.get_build_system()) {
-        case cfg::BuildSystem::CMake: cmake::configure(cfg, false); break;
+        case cfg::BuildSystem::CMake:
+            cmake::configure(cfg, cfg.is_verbose_enabled());
+            break;
     }
 
     const auto git_result {

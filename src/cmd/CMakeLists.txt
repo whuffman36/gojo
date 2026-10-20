@@ -12,6 +12,7 @@ target_sources(
   help.cpp
   info.cpp
   init.cpp
+  new.cpp
   profile.cpp
   refresh.cpp
   run.cpp

@@ -8,13 +8,13 @@ namespace cmd {
 
 std::optional<Command> command_from_str(std::string_view str) {
     static const std::flat_map<std::string_view, Command> map {
-        { "init", Command::Init },         { "build", Command::Build },
-        { "run", Command::Run },           { "test", Command::Test },
-        { "clean", Command::Clean },       { "fmt", Command::Format },
-        { "check", Command::Check },       { "refresh", Command::Refresh },
-        { "dep", Command::Dep },           { "profile", Command::Profile },
-        { "info", Command::Info },         { "help", Command::Help },
-        { "--version", Command::Version },
+        { "init", Command::Init },   { "build", Command::Build },
+        { "run", Command::Run },     { "test", Command::Test },
+        { "clean", Command::Clean }, { "fmt", Command::Format },
+        { "check", Command::Check }, { "refresh", Command::Refresh },
+        { "dep", Command::Dep },     { "profile", Command::Profile },
+        { "info", Command::Info },   { "help", Command::Help },
+        { "new", Command::New },     { "--version", Command::Version },
     };
 
     const auto result { map.find(str) };

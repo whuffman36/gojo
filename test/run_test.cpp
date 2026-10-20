@@ -53,9 +53,11 @@ TEST(CommandsTest, RunLib) {
 
     args.clear();
     EXPECT_NO_THROW(cmd::run(args));
-    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug"));
-    EXPECT_FALSE(std::filesystem::exists(test_root_path() / "build" / "Debug" /
-                                         "src" / "runtest"));
+    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "runtest" / "build" /
+                                        "Debug"));
+    EXPECT_FALSE(std::filesystem::exists(
+        test_root_path() / "runtest" / "build" / "Debug" / "src" / "runtest"
+    ));
 
     EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }

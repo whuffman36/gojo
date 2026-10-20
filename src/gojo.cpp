@@ -25,9 +25,15 @@ TODO:
 
 * test profile
 
-* test fmt --use --save-as
+* test new
 
-* gojo new <name> <path> [-i interactive mode]
+* gojo init <name>
+    - directory is created in current directory with name <name>
+
+* gojo new <path>
+    - name is taken to be last directory in <path>
+
+* test failure states (bad commands/arguments/options)
 */
 
 namespace {
@@ -113,6 +119,7 @@ int main(int argc, const char* argv[]) {
     try {
         switch (command.value()) {
             case cmd::Command::Init: cmd::init(command_args); break;
+            case cmd::Command::New: cmd::new_init(command_args); break;
             case cmd::Command::Build: cmd::build(command_args); break;
             case cmd::Command::Run: cmd::run(command_args); break;
             case cmd::Command::Test: cmd::test(command_args); break;

@@ -9,6 +9,7 @@ namespace cmd {
 
 enum class Command : std::uint8_t {
     Init,
+    New,
     Build,
     Run,
     Test,

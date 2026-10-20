@@ -286,6 +286,31 @@ target_link_libraries(
 )
 
 
+# New
+add_executable(new_test)
+
+target_sources(
+  new_test
+  PRIVATE
+  new_test.cpp
+)
+
+target_include_directories(
+  new_test
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}
+)
+
+target_link_libraries(
+  new_test
+  PRIVATE
+  cmd
+  cfg
+  build_systems
+  package_managers
+)
+
+
 include(GoogleTest)
 gtest_discover_tests(config_test)
 gtest_discover_tests(utils_test)
@@ -298,3 +323,4 @@ gtest_discover_tests(test_test)
 gtest_discover_tests(clean_test)
 gtest_discover_tests(fmt_test)
 gtest_discover_tests(check_test)
+gtest_discover_tests(new_test)

@@ -123,7 +123,8 @@ TEST(CommandsTest, FmtUse) {
     args.clear();
     args.emplace_back("--use=test");
     EXPECT_NO_THROW(cmd::fmt(args));
-    EXPECT_TRUE(std::filesystem::exists(test_root_path() / ".clang-format"));
+    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "format" /
+                                        ".clang-format"));
 
     EXPECT_TRUE(std::filesystem::remove_all(utils::get_home_dir() / ".gojo"));
     EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
@@ -133,7 +134,7 @@ TEST(CommandsTest, FmtSaveAs) {
     std::vector<std::string_view> args { "format" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
-    std::ofstream src { test_root_path() / ".clang-format" };
+    std::ofstream src { test_root_path() / "format" / ".clang-format" };
     ASSERT_TRUE(src.is_open());
 
     src << test_format_file_contents << std::flush;

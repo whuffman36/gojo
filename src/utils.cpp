@@ -291,26 +291,30 @@ void gojo_log(const std::filesystem::path& destination, const char* content,
 
 const std::filesystem::path get_root_dir() {
     static const std::filesystem::path root_dir {
-        std::filesystem::current_path()
+        std::filesystem::absolute(std::filesystem::current_path())
     };
-    return std::filesystem::absolute(root_dir);
+    return root_dir;
 }
 
 const std::filesystem::path get_home_dir() {
-    static const std::filesystem::path HOME { std::getenv("HOME") };
-    return std::filesystem::absolute(HOME);
+    static const std::filesystem::path HOME {
+        std::filesystem::absolute(std::getenv("HOME"))
+    };
+    return HOME;
 }
 
 const std::filesystem::path get_profiles_dir() {
-    static const std::filesystem::path profiles_dir { get_home_dir() / ".gojo" /
-                                                      "profiles" };
-    return std::filesystem::absolute(profiles_dir);
+    static const std::filesystem::path profiles_dir {
+        std::filesystem::absolute(get_home_dir() / ".gojo" / "profiles")
+    };
+    return profiles_dir;
 }
 
 const std::filesystem::path get_config_path() {
-    static const std::filesystem::path config_path { get_root_dir() /
-                                                     "gojo.toml" };
-    return std::filesystem::absolute(config_path);
+    static const std::filesystem::path config_path {
+        std::filesystem::absolute(get_root_dir() / "gojo.toml")
+    };
+    return config_path;
 }
 
 }  // namespace utils

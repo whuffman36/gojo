@@ -9,9 +9,11 @@ namespace cfg {
 
 // Language
 enum class Language : std::uint8_t {
-    C,
-    Cpp
+    Cpp,
+    C
 };
+
+constexpr std::uint8_t LANGUAGE_OPTIONS { 2 };
 
 std::optional<Language> language_from_str(std::string_view str);
 
@@ -30,6 +32,8 @@ enum class LanguageStandard : std::uint8_t {
     Cpp23,
     Cpp26
 };
+
+constexpr std::uint8_t LANGUAGE_STD_OPTIONS { 10 };
 
 std::optional<LanguageStandard> language_std_from_int(std::uint8_t val,
                                                       Language language);
@@ -51,6 +55,8 @@ enum class Compiler : std::uint8_t {
     HomebrewGpp
 };
 
+constexpr std::uint8_t COMPILER_OPTIONS { 11 };
+
 std::optional<Compiler> compiler_from_str(std::string_view str);
 
 const std::string_view to_str(const Compiler compiler);
@@ -63,6 +69,8 @@ enum class Target : std::uint8_t {
     Library,
 };
 
+constexpr std::uint8_t TARGET_OPTIONS { 2 };
+
 std::optional<Target> target_from_str(std::string_view str);
 
 const std::string_view to_str(const Target target);
@@ -71,6 +79,8 @@ const std::string_view to_str(const Target target);
 enum class BuildSystem : std::uint8_t {
     CMake,
 };
+
+constexpr std::uint8_t BUILD_SYSTEM_OPTIONS { 1 };
 
 std::optional<BuildSystem> build_system_from_str(std::string_view str);
 
@@ -114,6 +124,8 @@ enum class Generator : std::uint8_t {
     GreenHillsMULTI,
 };
 
+constexpr std::uint8_t GENERATOR_OPTIONS { 27 };
+
 std::optional<Generator> generator_from_str(std::string_view str);
 
 const std::string_view to_str(const Generator generator);
@@ -126,6 +138,8 @@ enum class BuildType : std::uint8_t {
     MinSizeRel,
 };
 
+constexpr std::uint8_t BUILD_TYPE_OPTIONS { 4 };
+
 std::optional<BuildType> build_type_from_str(std::string_view str);
 
 const std::string_view to_str(const BuildType build_type);
@@ -135,6 +149,8 @@ enum class PackageManager : std::uint8_t {
     Conan,
     Vcpkg,
 };
+
+constexpr std::uint8_t PACKAGE_MANAGER_OPTIONS { 2 };
 
 std::optional<PackageManager> package_manager_from_str(std::string_view str);
 
@@ -152,6 +168,8 @@ enum class FormatStyle : std::uint8_t {
     Gnu,
 };
 
+constexpr std::uint8_t FORMAT_STYLE_OPTIONS { 8 };
+
 std::optional<FormatStyle> fromat_style_from_str(std::string_view str);
 
 const std::string_view to_str(const FormatStyle format_style);
@@ -161,6 +179,8 @@ enum class TestFramework : std::uint8_t {
     Unity,
     GoogleTest,
 };
+
+constexpr std::uint8_t TEST_FRAMEWORK_OPTIONS { 2 };
 
 std::optional<TestFramework> test_framework_from_str(std::string_view str);
 
