@@ -24,15 +24,17 @@ TEST(CommandsTest, CleanCpp) {
     args.clear();
     ASSERT_NO_THROW(cmd::build(args));
 
-    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" /
-                                        "src" / "cleantest"));
-    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" /
-                                        "CMakeCache.txt"));
+    EXPECT_TRUE(std::filesystem::exists(
+        test_root_path() / "cleantest" / "build" / "Debug" / "src" / "cleantest"
+    ));
+    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "cleantest" /
+                                        "build" / "Debug" / "CMakeCache.txt"));
 
     args.clear();
     EXPECT_NO_THROW(cmd::clean(args));
-    EXPECT_FALSE(std::filesystem::exists(test_root_path() / "build" / "Debug" /
-                                         "src" / "cleantest"));
+    EXPECT_FALSE(std::filesystem::exists(
+        test_root_path() / "cleantest" / "build" / "Debug" / "src" / "cleantest"
+    ));
 
     EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
@@ -43,8 +45,8 @@ TEST(CommandsTest, CleanLibCpp) {
 
     args.clear();
     ASSERT_NO_THROW(cmd::build(args));
-    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "build" / "Debug" /
-                                        "CMakeCache.txt"));
+    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "cleantest" /
+                                        "build" / "Debug" / "CMakeCache.txt"));
 
     args.clear();
     EXPECT_NO_THROW(cmd::clean(args));

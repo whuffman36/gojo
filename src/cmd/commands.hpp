@@ -7,6 +7,7 @@
 #ifndef GOJO_SRC_CMD_COMMANDS_HPP
 #define GOJO_SRC_CMD_COMMANDS_HPP
 
+#include <iostream>
 #include <span>
 #include <string>
 #include <string_view>
@@ -22,7 +23,9 @@ inline std::string args_to_string(std::span<std::string_view> args) {
     return str;
 }
 
-void init(std::span<std::string_view> args);
+void init(std::span<std::string_view> args, std::istream& input = std::cin);
+
+void new_init(std::span<std::string_view> args, std::istream& input = std::cin);
 
 void build(std::span<std::string_view> args);
 
