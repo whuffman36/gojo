@@ -86,7 +86,7 @@ void new_init(std::span<std::string_view> args, std::istream& input) {
     }
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-    args[0] = name;
+    args[0] = args[0].substr(args[0].size() - name.size(), name.size());
     init(args, input);
 }
 

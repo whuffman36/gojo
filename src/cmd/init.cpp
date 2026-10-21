@@ -896,11 +896,11 @@ std::optional<cfg::Config> interactive_mode(std::istream& input_stream,
         std::vector<std::string_view> build_types {};
         for (std::size_t idx { 0 }; idx < input.size(); idx++) {
             if (input.at(idx) == ',') {
-                build_types.emplace_back(input.substr(start, idx));
+                build_types.emplace_back(&input.at(start), idx - start);
                 start = idx + 1;
             }
         }
-        build_types.emplace_back(input.substr(start, input.size()));
+        build_types.emplace_back(&input.at(start), input.size() - start);
 
         std::size_t num_build_types { 0 };
         for (const auto build_type : build_types) {

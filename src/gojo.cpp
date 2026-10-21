@@ -25,14 +25,6 @@ TODO:
 
 * test profile
 
-* test new
-
-* gojo init <name>
-    - directory is created in current directory with name <name>
-
-* gojo new <path>
-    - name is taken to be last directory in <path>
-
 * test failure states (bad commands/arguments/options)
 */
 

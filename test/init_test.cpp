@@ -263,11 +263,11 @@ TEST(CommandsTest, InitInteractive) {
                                      // cppcheck args
                               "\n"   // Skip
                                      // testing enabled
-                              "0\n"  // Skip
+                              "1\n"  // Option 1 (true, enabled)
                                      // test framework
-                              "0\n"  // Skip
+                              "2\n"  // Option 2 (googletest)
                                      // package manager
-                              "1\n"  // Option 1 (Conan)
+                              "1\n"  // Option 1 (conan)
                                      // build types
                               "Debug,Release\n"
     };
@@ -289,7 +289,7 @@ TEST(CommandsTest, InitInteractive) {
     EXPECT_EQ(cfg.language, cfg::Language::Cpp);
     EXPECT_EQ(cfg.target, cfg::Target::Binary);
     ASSERT_TRUE(cfg.verbose.has_value());
-    EXPECT_FALSE(cfg.verbose.value());
+    EXPECT_TRUE(cfg.verbose.value());
     EXPECT_FALSE(cfg.language_standard.has_value());
     EXPECT_EQ(cfg.compiler, cfg::Compiler::Default);
     EXPECT_FALSE(cfg.compiler_flags.has_value());
@@ -307,9 +307,12 @@ TEST(CommandsTest, InitInteractive) {
     EXPECT_FALSE(cfg.cppcheck_enabled.value());
     EXPECT_FALSE(cfg.cppcheck_checks.has_value());
     EXPECT_FALSE(cfg.cppcheck_args.has_value());
-    EXPECT_FALSE(cfg.testing_enabled.has_value());
-    EXPECT_FALSE(cfg.test_framework.has_value());
-    EXPECT_EQ(cfg.package_manager, cfg::PackageManager::Conan);
+    ASSERT_TRUE(cfg.testing_enabled.has_value());
+    EXPECT_TRUE(cfg.testing_enabled.value());
+    ASSERT_TRUE(cfg.test_framework.has_value());
+    EXPECT_EQ(cfg.test_framework.value(), cfg::TestFramework::GoogleTest);
+    ASSERT_TRUE(cfg.package_manager.has_value());
+    EXPECT_EQ(cfg.package_manager.value(), cfg::PackageManager::Conan);
     EXPECT_EQ(cfg.build_types.at(0), cfg::BuildType::Debug);
     EXPECT_EQ(cfg.build_types.at(1), cfg::BuildType::Release);
 
