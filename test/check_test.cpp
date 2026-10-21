@@ -139,7 +139,8 @@ TEST(CommandsTest, CheckAllEnabledLibCpp) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "-v", "--profile=test", "--lib" };
+    std::vector<std::string_view> args { "check", "-v", "--profile=test",
+                                         "--lib" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
@@ -163,8 +164,8 @@ TEST(CommandsTest, CheckAllEnabledLibC) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "-v", "--profile=test", "--lang=c",
-                                         "--lib" };
+    std::vector<std::string_view> args { "check", "-v", "--profile=test",
+                                         "--lang=c", "--lib" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();

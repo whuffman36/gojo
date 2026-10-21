@@ -68,7 +68,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-        sudo apt update
+        sudo apt update -y
         sudo apt install -y g++-16 build-essential
 
     - name: Set Up Conan Client

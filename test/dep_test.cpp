@@ -19,7 +19,6 @@ const std::filesystem::path& test_root_path() {
 
 }  // namespace
 
-
 TEST(CommandsTest, DepSearchConan) {
     cfg::Config cfg;
     ASSERT_NO_THROW(cfg =

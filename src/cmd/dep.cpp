@@ -6,6 +6,7 @@
 #include <span>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 
 #include "src/cfg//enums.hpp"
 #include "src/cfg/config.hpp"

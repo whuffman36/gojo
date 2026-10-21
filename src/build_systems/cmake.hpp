@@ -22,7 +22,7 @@ void test(const cfg::Config& cfg, std::string_view target);
 consteval std::string_view get_version() {
     // Version 3.31.6 is the default version of cmake on github actions.
     // Most recent version (July 2026): 4.3.4
-    return "3.31.6...4.3.4";
+    return "3.28...4.3.4";
 }
 
 }  // namespace cmake

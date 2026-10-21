@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "src/cmd/commands.hpp"
+#include "src/utils.hpp"
 #include "test/utils.hpp"
 
 namespace {
@@ -16,7 +17,6 @@ const std::filesystem::path& test_root_path() {
 }
 
 }  // namespace
-
 
 TEST(CommandsTest, ProfileCreate) {
     std::vector<std::string_view> args { "example", "-v" };

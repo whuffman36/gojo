@@ -72,7 +72,8 @@ bool create_test_gojo_profile() {
     }
 
     try {
-        cfg::Config::from_file(get_config(CONFIG_MIN)).to_file(utils::get_profiles_dir() / "test");
+        cfg::Config::from_file(get_config(CONFIG_MIN))
+            .to_file(utils::get_profiles_dir() / "test");
     } catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;

@@ -17,7 +17,6 @@ const std::filesystem::path& test_root_path() {
 
 }  // namespace
 
-
 TEST(CommandsTest, RefreshCpp) {
     std::vector<std::string_view> args { "example", "-v" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
@@ -70,9 +69,12 @@ TEST(CommandsTest, RefreshAfterBuild) {
     args.emplace_back("-v");
     ASSERT_NO_THROW(cmd::build(args));
 
-    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "example" / "build" / "Debug" / "src" / "example"));
+    EXPECT_TRUE(std::filesystem::exists(test_root_path() / "example" / "build" /
+                                        "Debug" / "src" / "example"));
 
     EXPECT_NO_THROW(cmd::refresh(args));
-    EXPECT_FALSE(std::filesystem::exists(test_root_path() / "example" / "build" / "Debug" / "src" / "example"));
+    EXPECT_FALSE(std::filesystem::exists(
+        test_root_path() / "example" / "build" / "Debug" / "src" / "example"
+    ));
     EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
