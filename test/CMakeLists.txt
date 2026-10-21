@@ -311,6 +311,84 @@ target_link_libraries(
 )
 
 
+# Refresh
+add_executable(refresh_test)
+
+target_sources(
+  refresh_test
+  PRIVATE
+  refresh_test.cpp
+)
+
+target_include_directories(
+  refresh_test
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}
+)
+
+target_link_libraries(
+  refresh_test
+  PRIVATE
+  cmd
+  utils
+  cfg
+  build_systems
+  package_managers
+)
+
+
+# Profile
+add_executable(profile_test)
+
+target_sources(
+  profile_test
+  PRIVATE
+  profile_test.cpp
+)
+
+target_include_directories(
+  profile_test
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}
+)
+
+target_link_libraries(
+  profile_test
+  PRIVATE
+  cmd
+  utils
+  cfg
+  build_systems
+  package_managers
+)
+
+
+# Dep
+add_executable(dep_test)
+
+target_sources(
+  dep_test
+  PRIVATE
+  dep_test.cpp
+)
+
+target_include_directories(
+  dep_test
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}
+)
+
+target_link_libraries(
+  dep_test
+  PRIVATE
+  cmd
+  utils
+  cfg
+  build_systems
+  package_managers
+)
+
+
 include(GoogleTest)
 gtest_discover_tests(config_test)
 gtest_discover_tests(utils_test)
@@ -324,3 +402,6 @@ gtest_discover_tests(clean_test)
 gtest_discover_tests(fmt_test)
 gtest_discover_tests(check_test)
 gtest_discover_tests(new_test)
+gtest_discover_tests(refresh_test)
+gtest_discover_tests(profile_test)
+gtest_discover_tests(dep_test)

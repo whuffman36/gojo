@@ -233,7 +233,7 @@ void append_file_at_line(const std::filesystem::path& file,
                                                line_to_match, file.string()) };
     }
 
-    const std::string new_contents { std::format("\n{}\n", contents) };
+    const std::string new_contents { std::format("{}\n", contents) };
 
     // Insert at newline after the line is found.
     current_contents.insert(idx + line_to_match.size(), new_contents);

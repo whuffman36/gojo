@@ -277,7 +277,7 @@ void install(const cfg::Config& cfg, bool verbose) {
 }
 
 void uninstall(std::string_view package) {
-    const std::string cmd { std::format("conan remove {}", package) };
+    const std::string cmd { std::format("conan remove {} --confirm", package) };
 
     const auto result { utils::execute_command(cmd.c_str(), false, true) };
     if (!result.success) {
@@ -290,16 +290,16 @@ void add(const std::filesystem::path& conanfile, std::string_view package,
     std::string_view line_to_match {};
     std::string contents {};
     if (version == "latest") {
-        version = "[>]";
+        version = "[*]";
     }
     if (conanfile.string().ends_with("py")) {
-        line_to_match = "def requirements(self):";
+        line_to_match = "def requirements(self):\n";
         // Have to match the python indentation.
         contents =
-            std::format("        self.requires({}/{})", package, version);
+            std::format("        self.requires(\"{}/{}\")", package, version);
     }
     if (conanfile.string().ends_with("txt")) {
-        line_to_match = "[requires]";
+        line_to_match = "[requires]\n";
         contents = std::format("{}/{}", package, version);
     }
     utils::append_file_at_line(conanfile, line_to_match, contents);

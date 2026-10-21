@@ -20,10 +20,11 @@ const std::filesystem::path& test_root_path() {
 }  // namespace
 
 TEST(CommandsTest, CheckNotEnabledCpp) {
-    std::vector<std::string_view> args { "check" };
+    std::vector<std::string_view> args { "check", "-v" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
@@ -40,10 +41,11 @@ TEST(CommandsTest, CheckClangTidyCpp) {
     cfg.clang_tidy_enabled = true;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "--profile=test" };
+    std::vector<std::string_view> args { "check", "-v", "--profile=test" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(remove_test_gojo_profile());
@@ -62,10 +64,11 @@ TEST(CommandsTest, CheckCppCheckCpp) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "--profile=test" };
+    std::vector<std::string_view> args { "check", "-v", "--profile=test" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(remove_test_gojo_profile());
@@ -86,10 +89,11 @@ TEST(CommandsTest, CheckAllEnabledCpp) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "--profile=test" };
+    std::vector<std::string_view> args { "check", "-v", "--profile=test" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(remove_test_gojo_profile());
@@ -110,11 +114,12 @@ TEST(CommandsTest, CheckAllEnabledC) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "--profile=test",
+    std::vector<std::string_view> args { "check", "-v", "--profile=test",
                                          "--lang=c" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(remove_test_gojo_profile());
@@ -134,10 +139,11 @@ TEST(CommandsTest, CheckAllEnabledLibCpp) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "--profile=test", "--lib" };
+    std::vector<std::string_view> args { "check", "-v", "--profile=test", "--lib" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(remove_test_gojo_profile());
@@ -157,11 +163,12 @@ TEST(CommandsTest, CheckAllEnabledLibC) {
     cfg.cppcheck_args = std::nullopt;
     ASSERT_TRUE(create_test_gojo_profile(cfg));
 
-    std::vector<std::string_view> args { "check", "--profile=test", "--lang=c",
+    std::vector<std::string_view> args { "check", "-v", "--profile=test", "--lang=c",
                                          "--lib" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
     args.clear();
+    args.emplace_back("-v");
     EXPECT_NO_THROW(cmd::check(args));
 
     EXPECT_TRUE(remove_test_gojo_profile());

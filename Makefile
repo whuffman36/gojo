@@ -53,3 +53,6 @@ prepare: fmt config-rel build-rel test-rel check-rel
 clean:
 	@rm -rf build
 	@mkdir -p build
+
+search:
+	grep -rnw '.' -e '$(PATTERN)'

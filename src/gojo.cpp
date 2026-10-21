@@ -19,13 +19,8 @@ TODO:
         - moves everything under include/ to ~/.gojo/include/<project.name>/
         - moves created lib files to ~/.gojo/lib/<project.name>/
 
-* test refresh
-
-* test dep
-
-* test profile
-
 * test failure states (bad commands/arguments/options)
+    - create unique std::exception types for better error specialization
 */
 
 namespace {

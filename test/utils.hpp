@@ -64,6 +64,22 @@ bool create_test_gojo_profile(const cfg::Config& cfg) {
     return true;
 }
 
+bool create_test_gojo_profile() {
+    if (!std::filesystem::exists(utils::get_profiles_dir())) {
+        if (!std::filesystem::create_directories(utils::get_profiles_dir())) {
+            return false;
+        }
+    }
+
+    try {
+        cfg::Config::from_file(get_config(CONFIG_MIN)).to_file(utils::get_profiles_dir() / "test");
+    } catch (const std::exception& e) {
+        std::println("{}", e.what());
+        return false;
+    }
+    return true;
+}
+
 bool remove_test_gojo_profile() {
     return std::filesystem::remove(utils::get_profiles_dir() / "test");
 }
