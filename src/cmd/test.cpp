@@ -40,12 +40,15 @@ void test(std::span<std::string_view> args) {
             // Length of "--target="
             constexpr std::size_t target_arg_len { 9 };
             target = std::format(" -R \"{}\"", arg.substr(target_arg_len));
-        } else if (arg == "--build") {
+        }
+        else if (arg == "--build") {
             build_first = true;
-        } else if (arg == "--help") {
+        }
+        else if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
-        } else {
+        }
+        else {
             throw std::runtime_error {
                 std::format("gojo test: argument not recognized: {}", arg)
             };

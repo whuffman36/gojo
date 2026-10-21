@@ -47,7 +47,8 @@ void configure(const cfg::Config& cfg, bool verbose) {
     if (cfg.testing_enabled.has_value()) {
         if (cfg.testing_enabled.value()) {
             build_tests = " -DBUILD_TESTING=ON";
-        } else {
+        }
+        else {
             build_tests = " -DBUILD_TESTING=OFF";
         }
     }

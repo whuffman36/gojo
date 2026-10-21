@@ -45,9 +45,11 @@ void refresh(std::span<std::string_view> args) {
         if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
-        } else if (arg == "--verbose" || arg == "-v") {
+        }
+        else if (arg == "--verbose" || arg == "-v") {
             verbose = true;
-        } else {
+        }
+        else {
             throw std::runtime_error {
                 std::format("gojo refresh: argument not recognized: {}", arg)
             };

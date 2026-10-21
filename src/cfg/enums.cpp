@@ -45,24 +45,22 @@ std::optional<LanguageStandard> language_std_from_int(std::uint8_t val,
     };
 
     switch (language) {
-        case cfg::Language::C:
-            {
-                const auto result { c_map.find(val) };
-                if (result == c_map.end()) {
-                    return std::nullopt;
-                }
-                return result->second;
-                break;
+        case cfg::Language::C: {
+            const auto result { c_map.find(val) };
+            if (result == c_map.end()) {
+                return std::nullopt;
             }
-        case cfg::Language::Cpp:
-            {
-                const auto result { cpp_map.find(val) };
-                if (result == cpp_map.end()) {
-                    return std::nullopt;
-                }
-                return result->second;
-                break;
+            return result->second;
+            break;
+        }
+        case cfg::Language::Cpp: {
+            const auto result { cpp_map.find(val) };
+            if (result == cpp_map.end()) {
+                return std::nullopt;
             }
+            return result->second;
+            break;
+        }
     }
 }
 

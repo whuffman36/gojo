@@ -39,10 +39,12 @@ void clean(std::span<std::string_view> args) {
         if (arg == "--deps") {
             deps = true;
             break;
-        } else if (arg == "--help") {
+        }
+        else if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
-        } else {
+        }
+        else {
             throw std::runtime_error {
                 std::format("gojo clean: argument not recognized: {}", arg)
             };

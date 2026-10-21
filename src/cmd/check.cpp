@@ -49,10 +49,12 @@ void check(std::span<std::string_view> args) {
     for (const auto arg : args) {
         if (arg == "--verbose" || arg == "-v") {
             verbose = true;
-        } else if (arg == "--help") {
+        }
+        else if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
-        } else {
+        }
+        else {
             throw std::runtime_error {
                 std::format("gojo check: argument not recognized: {}", arg)
             };

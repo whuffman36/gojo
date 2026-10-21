@@ -122,7 +122,8 @@ int main(int argc, const char* argv[]) {
                 utils::gojo_print(utils::LogLevel::Info, VERSION_STRING);
                 break;
         }
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         utils::gojo_print(utils::LogLevel::Error, "{}", e.what());
         utils::gojo_print(utils::LogLevel::Warning,
                           "see gojo {} --help for more info",

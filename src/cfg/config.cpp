@@ -126,7 +126,8 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     auto int_result { table[BUILD][BUILD_LANGUAGE_STD].value<std::uint8_t>() };
     if (!int_result.has_value()) {
         cfg.language_standard = std::nullopt;
-    } else {
+    }
+    else {
         const auto language_standard {
             cfg::language_std_from_int(int_result.value(), cfg.language)
         };
@@ -141,7 +142,8 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     auto sv_result { table[BUILD][BUILD_COMPILER].value<std::string_view>() };
     if (!sv_result.has_value()) {
         cfg.compiler = std::nullopt;
-    } else {
+    }
+    else {
         const auto compiler { cfg::compiler_from_str(sv_result.value()) };
         if (!compiler.has_value()) {
             throw std::runtime_error { std::format(
@@ -156,7 +158,8 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     auto array_result { table[BUILD][BUILD_COMPILER_FLAGS].as_array() };
     if (array_result == nullptr || array_result->empty()) {
         cfg.compiler_flags = std::nullopt;
-    } else {
+    }
+    else {
         std::string compiler_flags {};
         for (const auto& elem : *array_result) {
             auto flag { elem.value<std::string_view>() };
@@ -172,14 +175,16 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     const auto bool_result { table[BUILD][BUILD_GNU_EXTENSIONS].value<bool>() };
     if (!bool_result.has_value()) {
         cfg.gnu_extensions_enabled = std::nullopt;
-    } else {
+    }
+    else {
         cfg.gnu_extensions_enabled = bool_result;
     }
 
     sv_result = table[BUILD][BUILD_BUILD_SYSTEM].value<std::string_view>();
     if (!sv_result.has_value()) {
         cfg.build_system = std::nullopt;
-    } else {
+    }
+    else {
         const auto build_system {
             cfg::build_system_from_str(sv_result.value())
         };
@@ -194,7 +199,8 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     sv_result = table[BUILD][BUILD_GENERATOR].value<std::string_view>();
     if (!sv_result.has_value()) {
         cfg.generator = std::nullopt;
-    } else {
+    }
+    else {
         const auto generator { cfg::generator_from_str(sv_result.value()) };
         if (!generator.has_value()) {
             throw std::runtime_error { std::format(
@@ -207,7 +213,8 @@ void validate_build_section(cfg::Config& cfg, const toml::table& table) {
     sv_result = table[BUILD][BUILD_BUILD_TYPE].value<std::string_view>();
     if (!sv_result.has_value()) {
         cfg.build_type = std::nullopt;
-    } else {
+    }
+    else {
         const auto build_type { cfg::build_type_from_str(sv_result.value()) };
         if (!build_type.has_value()) {
             throw std::runtime_error { std::format(
@@ -224,7 +231,8 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     };
     if (!sv_result.has_value()) {
         cfg.clang_format_style = std::nullopt;
-    } else {
+    }
+    else {
         const auto format_style {
             cfg::fromat_style_from_str(sv_result.value())
         };
@@ -240,21 +248,24 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     sv_result = table[CHECKS][CHECKS_LANGUAGE_SERVER].value<std::string_view>();
     if (!sv_result.has_value()) {
         cfg.language_server = std::nullopt;
-    } else {
+    }
+    else {
         cfg.language_server = sv_result.value();
     }
 
     auto bool_result { table[CHECKS][CHECKS_CLANG_TIDY_ENABLED].value<bool>() };
     if (!bool_result.has_value()) {
         cfg.clang_tidy_enabled = std::nullopt;
-    } else {
+    }
+    else {
         cfg.clang_tidy_enabled = bool_result;
     }
 
     auto array_result { table[CHECKS][CHECKS_CLANG_TIDY_ARGS].as_array() };
     if (array_result == nullptr || array_result->empty()) {
         cfg.clang_tidy_args = std::nullopt;
-    } else {
+    }
+    else {
         std::string clang_tidy_args {};
         for (const auto& elem : *array_result) {
             auto arg { elem.value<std::string_view>() };
@@ -270,14 +281,16 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     bool_result = table[CHECKS][CHECKS_CPPCHECK_ENABLED].value<bool>();
     if (!bool_result.has_value()) {
         cfg.cppcheck_enabled = std::nullopt;
-    } else {
+    }
+    else {
         cfg.cppcheck_enabled = bool_result;
     }
 
     array_result = table[CHECKS][CHECKS_CPPCHECK_CHECKS].as_array();
     if (array_result == nullptr || array_result->empty()) {
         cfg.cppcheck_checks = std::nullopt;
-    } else {
+    }
+    else {
         std::string cppcheck_checks {};
         for (const auto& elem : *array_result) {
             auto check { elem.value<std::string_view>() };
@@ -293,7 +306,8 @@ void validate_checks_section(cfg::Config& cfg, const toml::table& table) {
     array_result = table[CHECKS][CHECKS_CPPCHECK_ARGS].as_array();
     if (array_result == nullptr || array_result->empty()) {
         cfg.cppcheck_args = std::nullopt;
-    } else {
+    }
+    else {
         std::string cppcheck_args {};
         for (const auto& elem : *array_result) {
             auto arg { elem.value<std::string_view>() };
@@ -313,7 +327,8 @@ void validate_tests_section(cfg::Config& cfg, const toml::table& table) {
     };
     if (!bool_result.has_value()) {
         cfg.testing_enabled = std::nullopt;
-    } else {
+    }
+    else {
         cfg.testing_enabled = bool_result;
     }
 
@@ -322,7 +337,8 @@ void validate_tests_section(cfg::Config& cfg, const toml::table& table) {
     };
     if (!sv_result.has_value()) {
         cfg.test_framework = std::nullopt;
-    } else {
+    }
+    else {
         const auto test_framework {
             cfg::test_framework_from_str(sv_result.value())
         };
@@ -341,7 +357,8 @@ void validate_deps_section(cfg::Config& cfg, const toml::table& table) {
     };
     if (!sv_result.has_value()) {
         cfg.package_manager = std::nullopt;
-    } else {
+    }
+    else {
         const auto package_manager {
             cfg::package_manager_from_str(sv_result.value())
         };
@@ -359,7 +376,8 @@ void validate_deps_section(cfg::Config& cfg, const toml::table& table) {
         cfg.build_types.at(1) = std::nullopt;
         cfg.build_types.at(2) = std::nullopt;
         cfg.build_types.at(3) = std::nullopt;
-    } else {
+    }
+    else {
         if (array_result->size() > 4) {
             throw std::runtime_error {
                 "deps.build_types can only contain up to four build_types"
@@ -789,7 +807,8 @@ bool Config::is_multi_config() const {
     Generator tmp_generator {};
     if (generator.has_value()) {
         tmp_generator = generator.value();
-    } else {
+    }
+    else {
         tmp_generator = Generator::Default;
     }
 

@@ -37,7 +37,8 @@ bool init_test_gojo_project(const std::filesystem::path filepath,
     std::filesystem::current_path(filepath);
     try {
         cmd::init(args);
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;
     }
@@ -57,7 +58,8 @@ bool create_test_gojo_profile(const cfg::Config& cfg) {
 
     try {
         cfg.to_file(utils::get_profiles_dir() / "test");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;
     }
@@ -74,7 +76,8 @@ bool create_test_gojo_profile() {
     try {
         cfg::Config::from_file(get_config(CONFIG_MIN))
             .to_file(utils::get_profiles_dir() / "test");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;
     }
