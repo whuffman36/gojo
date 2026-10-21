@@ -101,10 +101,17 @@ void fmt(std::span<std::string_view> args) {
     std::string style {};
     if (cfg.clang_format_style.has_value()) {
         if (cfg.clang_format_style.value() == cfg::FormatStyle::Custom) {
-            style = " style=file";
+            style = " -style=file";
+        }
+        else if (cfg.clang_format_style.value() == cfg::FormatStyle::Gojo) {
+            style = std::format(
+                " -style=file:{}-{}",
+                (utils::get_home_dir() / ".gojo" / "formats" / "gojo").string(),
+                utils::to_lower(cfg::to_str(cfg.language))
+            );
         }
         else {
-            style = " style=";
+            style = " -style=";
             style.append(cfg::to_str(cfg.clang_format_style.value()));
         }
     }

@@ -316,6 +316,8 @@ main() {
     mkdir -p "$HOME/.gojo"
     mkdir -p "$HOME/.gojo/profiles"
     mkdir -p "$HOME/.gojo/formats"
+    curl --proto '=https' --tlsv1.2 -sSf -L https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install/gojo-c-format > "$HOME/.gojo/formats/gojo-c"
+    curl --proto '=https' --tlsv1.2 -sSf -L https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install/gojo-cpp-format > "$HOME/.gojo/formats/gojo-c++"
     mkdir -p "$HOME/.gojo/bin"
 
     detect_os

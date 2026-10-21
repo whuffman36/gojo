@@ -309,6 +309,7 @@ const std::string_view to_str(const PackageManager package_manager) {
 std::optional<FormatStyle> fromat_style_from_str(std::string_view str) {
     static const std::flat_map<std::string_view, FormatStyle> map {
         { "custom", FormatStyle::Custom },
+        { "gojo", FormatStyle::Gojo },
         { "google", FormatStyle::Google },
         { "llvm", FormatStyle::Llvm },
         { "chromium", FormatStyle::Chromium },
@@ -329,6 +330,7 @@ std::optional<FormatStyle> fromat_style_from_str(std::string_view str) {
 const std::string_view to_str(const FormatStyle format_style) {
     switch (format_style) {
         case FormatStyle::Custom: return "custom"; break;
+        case FormatStyle::Gojo: return "gojo"; break;
         case FormatStyle::Google: return "google"; break;
         case FormatStyle::Llvm: return "llvm"; break;
         case FormatStyle::Chromium: return "chromium"; break;

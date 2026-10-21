@@ -249,7 +249,7 @@ TEST(CommandsTest, InitInteractive) {
                                      // build type
                               "2\n"  // Option 2 (Release)
                                      // format-style
-                              "5\n"  // Option 5 (Mozilla)
+                              "6\n"  // Option 6 (Mozilla)
                                      // language server
                               "\n"   // Skip
                                      // clang-tidy enabled

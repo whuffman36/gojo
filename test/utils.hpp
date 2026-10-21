@@ -17,8 +17,11 @@ constexpr std::string_view CONFIG_FULL { "config_full.toml" };
 const std::filesystem::path get_assets_path() {
     // This code is run from <PROJECT_ROOT>/build/Debug/test
     // The assets path is <PROJECT_ROOT>/test/assets
-    static const std::filesystem::path ASSETS_PATH { "../../../test/assets" };
-    return std::filesystem::absolute(ASSETS_PATH);
+    static const std::filesystem::path ASSETS_PATH {
+        std::filesystem::absolute("../../../test/assets")
+    };
+    // return std::filesystem::absolute(ASSETS_PATH);
+    return ASSETS_PATH;
 }
 
 const std::filesystem::path get_config(const std::filesystem::path filepath) {
