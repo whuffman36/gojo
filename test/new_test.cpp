@@ -23,7 +23,7 @@ const std::filesystem::path& test_root_path() {
 TEST(CommandsTest, NewCpp) {
     EXPECT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
-    std::vector<std::string_view> args { "path/to/project/dir/example" };
+    std::vector<std::string_view> args { "path/to/project/dir/example", "-v" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -42,7 +42,7 @@ TEST(CommandsTest, NewLibCpp) {
     EXPECT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example",
-                                         "--lib" };
+                                         "-v", "--lib" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -65,7 +65,7 @@ TEST(CommandsTest, NewC) {
     EXPECT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example",
-                                         "--lang=c" };
+                                         "-v", "--lang=c" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -84,7 +84,7 @@ TEST(CommandsTest, NewLibC) {
     EXPECT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example", "--lib",
-                                         "--lang=c" };
+                                         "-v", "--lang=c" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -112,7 +112,7 @@ TEST(CommandsTest, NewProfileCpp) {
     ASSERT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example",
-                                         "--profile=test" };
+                                         "-v", "--profile=test" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -141,7 +141,7 @@ TEST(CommandsTest, NewProfileLibCpp) {
     EXPECT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example",
-                                         "--profile=test", "--lib" };
+                                         "-v", "--profile=test", "--lib" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -177,7 +177,7 @@ TEST(CommandsTest, NewProfileC) {
     ASSERT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example",
-                                         "--profile=test" };
+                                         "-v", "--profile=test" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -208,7 +208,7 @@ TEST(CommandsTest, NewProfileLibC) {
     EXPECT_TRUE(std::filesystem::create_directories(test_root_path()));
     std::filesystem::current_path(test_root_path());
     std::vector<std::string_view> args { "path/to/project/dir/example",
-                                         "--profile=test", "--lang=c" };
+                                         "-v", "--profile=test", "--lang=c" };
     EXPECT_NO_THROW(cmd::new_init(args));
 
     const std::filesystem::path root_path { test_root_path() / "path" / "to" /
@@ -245,7 +245,7 @@ TEST(CommandsTest, NewInteractive) {
                                      // project target:
                               "1\n"  // Option 1 (Binary)
                                      // verbose mode:
-                              "2\n"  // Option 2 (false, disabled)
+                              "1\n"  // Option 2 (false, disabled)
                                      // language standard:
                               "0\n"  // Skip (default - C++23)
                                      // compiler:

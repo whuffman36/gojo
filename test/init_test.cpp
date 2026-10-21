@@ -233,7 +233,7 @@ TEST(CommandsTest, InitInteractive) {
                                      // project target:
                               "1\n"  // Option 1 (Binary)
                                      // verbose mode:
-                              "2\n"  // Option 2 (false, disabled)
+                              "1\n"  // Option 2 (false, disabled)
                                      // language standard:
                               "0\n"  // Skip (default - C++23)
                                      // compiler:
