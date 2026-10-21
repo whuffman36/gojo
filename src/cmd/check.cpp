@@ -122,6 +122,7 @@ void check(std::span<std::string_view> args) {
         if (verbose) {
             utils::gojo_print(utils::LogLevel::Status,
                               "Running clang-tidy...\n");
+            utils::gojo_print(utils::LogLevel::Info, "Command: {}", cmd);
         }
         const auto cmd_result { utils::execute_command(
             cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt"
@@ -188,6 +189,7 @@ void check(std::span<std::string_view> args) {
         };
         if (verbose) {
             utils::gojo_print(utils::LogLevel::Status, "Running cppcheck...\n");
+            utils::gojo_print(utils::LogLevel::Info, "Command: {}", cmd);
         }
         const auto cmd_result { utils::execute_command(
             cmd.c_str(), false, verbose, cfg.get_build_dir() / "log.txt"

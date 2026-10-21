@@ -914,7 +914,7 @@ std::optional<cfg::Config> interactive_mode(std::istream& input_stream,
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                 cfg.build_types[num_build_types] =
                     // clang-format on
-                    cfg::build_type_from_str(build_type).value();
+                    cfg::build_type_from_str(build_type);
                 if (verbose) {
                     std::println("build type added: {}", build_type);
                 }

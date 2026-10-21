@@ -6,7 +6,7 @@ target_sources(
   build.cpp
   check.cpp
   clean.cpp
-  deps.cpp
+  dep.cpp
   enums.cpp
   fmt.cpp
   help.cpp

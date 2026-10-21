@@ -6,6 +6,7 @@
 #include <span>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 
 #include "src/cfg//enums.hpp"
 #include "src/cfg/config.hpp"
@@ -80,6 +81,7 @@ void dep(std::span<std::string_view> args) {
     }
 
     bool verbose { cfg.is_verbose_enabled() };
+    std::vector<std::string_view> refresh_args { "-v" };
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     switch (subcommand.value()) {
@@ -122,6 +124,10 @@ void dep(std::span<std::string_view> args) {
                     break;
                 case cfg::PackageManager::Vcpkg: break;
             }
+            if (!verbose) {
+                refresh_args.clear();
+            }
+            refresh(refresh_args);
             break;
         case Subcommand::Add:
             {
@@ -159,6 +165,10 @@ void dep(std::span<std::string_view> args) {
                         }
                     case cfg::PackageManager::Vcpkg: break;
                 }
+                if (!verbose) {
+                    refresh_args.clear();
+                }
+                refresh(refresh_args);
                 break;
             }
         case Subcommand::Remove:
@@ -194,6 +204,10 @@ void dep(std::span<std::string_view> args) {
                         }
                     case cfg::PackageManager::Vcpkg: break;
                 }
+                if (!verbose) {
+                    refresh_args.clear();
+                }
+                refresh(refresh_args);
                 break;
             }
         case Subcommand::Uninstall:
@@ -216,6 +230,10 @@ void dep(std::span<std::string_view> args) {
                     }
                 case cfg::PackageManager::Vcpkg: break;
             }
+            if (!verbose) {
+                refresh_args.clear();
+            }
+            refresh(refresh_args);
             break;
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

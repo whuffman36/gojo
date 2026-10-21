@@ -77,7 +77,7 @@ TEST(UtilsTest, AppendFileAtLine) {
     EXPECT_NO_THROW(original_file_contents =
                         utils::get_file_contents(test_root_path() / TEST_FILE));
 
-    constexpr std::string_view line_to_match { "Line 3 example" };
+    constexpr std::string_view line_to_match { "Line 3 example\n" };
     constexpr std::string_view contents { "Line 4 example" };
     utils::append_file_at_line(test_root_path() / TEST_FILE, line_to_match,
                                contents);
@@ -93,7 +93,7 @@ TEST(UtilsTest, AppendFileAtLine) {
     EXPECT_TRUE(new_contents.contains("Line 4 example\n"));
     EXPECT_TRUE(new_contents.contains("Line 5 example\n"));
 
-    constexpr std::string_view line_to_match2 { "Line 4 example" };
+    constexpr std::string_view line_to_match2 { "Line 4 example\n" };
     constexpr std::string_view contents2 { "Line 4.5 example" };
     utils::append_file_at_line(test_root_path() / TEST_FILE, line_to_match2,
                                contents2);

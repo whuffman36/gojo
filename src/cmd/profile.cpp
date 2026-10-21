@@ -46,8 +46,8 @@ enum class Subcommand : std::uint8_t {
 std::optional<Subcommand> subcommand_from_str(std::string_view str) {
     static const std::flat_map<std::string_view, Subcommand> map {
         { "create", Subcommand::Create },
-        { "List", Subcommand::List },
-        { "Show", Subcommand::Show },
+        { "list", Subcommand::List },
+        { "show", Subcommand::Show },
         { "delete", Subcommand::Delete },
     };
 
@@ -94,9 +94,6 @@ void profile(std::span<std::string_view> args) {
                         "gojo profile create: too many arguments"
                     };
                 }
-                // clang tidy doesn't like the use of unchecked access in
-                // containers. There is literally no other way to access
-                // std::span in C++23.
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                 const std::string_view name { args[1] };
                 cfg::Config::this_project().to_file(utils::get_profiles_dir() /
@@ -130,10 +127,6 @@ void profile(std::span<std::string_view> args) {
                         "gojo profile show: too many arguments"
                     };
                 }
-
-                // clang tidy doesn't like the use of unchecked access in
-                // containers. There is literally no other way to access
-                // std::span in C++23.
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                 const std::string_view name { args[1] };
                 std::string profile_contents {};
@@ -160,10 +153,6 @@ void profile(std::span<std::string_view> args) {
                     "gojo profile delete: too many arguments"
                 };
             }
-
-            // clang tidy doesn't like the use of unchecked access in
-            // containers. There is literally no other way to access std::span
-            // in C++23.
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
             const std::string_view name { args[1] };
             if (name == "all") {

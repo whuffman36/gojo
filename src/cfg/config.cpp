@@ -66,12 +66,12 @@ toml::array split_string(const std::string& str) {
 
     for (std::size_t idx { 0 }; idx < str.size(); ++idx) {
         if (str.at(idx) == ' ') {
-            array.emplace_back(str.substr(start_idx, idx));
-            start_idx = idx;
+            array.emplace_back(str.substr(start_idx, idx - start_idx));
+            start_idx = idx + 1;
         }
     }
     if (start_idx != str.size() - 1) {
-        array.emplace_back(str.substr(start_idx, str.size()));
+        array.emplace_back(str.substr(start_idx, str.size() - start_idx));
     }
     if (array.empty()) {
         array.emplace_back(str);
