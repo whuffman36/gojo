@@ -159,6 +159,7 @@ const std::string_view to_str(const PackageManager package_manager);
 // Format Style
 enum class FormatStyle : std::uint8_t {
     Custom,
+    Gojo,
     Google,
     Llvm,
     Chromium,
@@ -168,7 +169,7 @@ enum class FormatStyle : std::uint8_t {
     Gnu,
 };
 
-constexpr std::uint8_t FORMAT_STYLE_OPTIONS { 8 };
+constexpr std::uint8_t FORMAT_STYLE_OPTIONS { 9 };
 
 std::optional<FormatStyle> fromat_style_from_str(std::string_view str);
 

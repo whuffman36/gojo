@@ -349,7 +349,8 @@ std::string hello_world();
             cfg.name,                   // {0}
             cfg.get_header_extension()  // {1}
         );
-    } else if (cfg.language == cfg::Language::C) {
+    }
+    else if (cfg.language == cfg::Language::C) {
         str = std::format(
             R"(#ifndef {0}_{0}_{1}
 #define {0}_{0}_{1}
@@ -390,7 +391,8 @@ int main() {{
 )",
                     cfg.name, cfg.get_header_extension()
                 );
-            } else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
+            }
+            else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
                 str = std::format(
                     R"(#include <gtest/gtest.h>
 
@@ -421,7 +423,8 @@ int main(void) {{
 )",
                     cfg.name, cfg.get_header_extension()
                 );
-            } else if (cfg.test_framework == cfg::TestFramework::Unity) {
+            }
+            else if (cfg.test_framework == cfg::TestFramework::Unity) {
                 str = std::format(
                     R"(#include <unity.h>
 
@@ -461,7 +464,8 @@ int main() {
   return 0;
 }
 )";
-            } else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
+            }
+            else if (cfg.test_framework == cfg::TestFramework::GoogleTest) {
                 str =
                     R"(#include <gtest/gtest.h>
 
@@ -489,7 +493,8 @@ int main(void) {
     return 0;
 }
 )";
-            } else if (cfg.test_framework == cfg::TestFramework::Unity) {
+            }
+            else if (cfg.test_framework == cfg::TestFramework::Unity) {
                 str =
                     R"(#include <unity.h>
 
@@ -628,7 +633,8 @@ std::string conanfile(const cfg::Config& cfg) {
     if (cfg.is_testing_enabled()) {
         if (cfg.language == cfg::Language::Cpp) {
             reqs = "self.requires(\"gtest/1.17.0\")";
-        } else if (cfg.language == cfg::Language::C) {
+        }
+        else if (cfg.language == cfg::Language::C) {
             reqs = "self.requires(\"unity/2.6.0\")";
         }
     }
@@ -688,22 +694,26 @@ class {0}Recipe(ConanFile):
                     std::println("\nskipping...");                           \
                 }                                                            \
                 success = true;                                              \
-            } else if (parsed_input > (num_options)) {                       \
+            }                                                                \
+            else if (parsed_input > (num_options)) {                         \
                 /* Invalid option. */                                        \
                 utils::gojo_print(                                           \
                     utils::LogLevel::Error,                                  \
                     "option must be one of the numbers in the list above"    \
                 );                                                           \
                 success = false;                                             \
-            } else {                                                         \
+            }                                                                \
+            else {                                                           \
                 cfg.field_name = static_cast<option_type>(parsed_input - 1); \
                 success = true;                                              \
             }                                                                \
-        } catch (const std::invalid_argument& e) {                           \
+        }                                                                    \
+        catch (const std::invalid_argument& e) {                             \
             utils::gojo_print(utils::LogLevel::Error,                        \
                               "option must be an integer");                  \
             success = false;                                                 \
-        } catch (const std::out_of_range& e) {                               \
+        }                                                                    \
+        catch (const std::out_of_range& e) {                                 \
             utils::gojo_print(                                               \
                 utils::LogLevel::Error,                                      \
                 "option must be one of the numbers in the list above"        \
@@ -739,20 +749,24 @@ class {0}Recipe(ConanFile):
                     std::println("\nskipping...");                           \
                 }                                                            \
                 success = true;                                              \
-            } else if (parsed_input > 2) {                                   \
+            }                                                                \
+            else if (parsed_input > 2) {                                     \
                 /* Invalid option. */                                        \
                 utils::gojo_print(utils::LogLevel::Error,                    \
                                   "option must be 0, 1, or 2");              \
                 success = false;                                             \
-            } else {                                                         \
+            }                                                                \
+            else {                                                           \
                 cfg.field_name = parsed_input == 1;                          \
                 success = true;                                              \
             }                                                                \
-        } catch (const std::invalid_argument& e) {                           \
+        }                                                                    \
+        catch (const std::invalid_argument& e) {                             \
             utils::gojo_print(utils::LogLevel::Error,                        \
                               "option must be an integer");                  \
             success = false;                                                 \
-        } catch (const std::out_of_range& e) {                               \
+        }                                                                    \
+        catch (const std::out_of_range& e) {                                 \
             utils::gojo_print(utils::LogLevel::Error,                        \
                               "option must be 0, 1, or 2");                  \
             success = false;                                                 \
@@ -775,7 +789,8 @@ class {0}Recipe(ConanFile):
                 std::println("\nskipping...");                    \
             }                                                     \
             success = true;                                       \
-        } else {                                                  \
+        }                                                         \
+        else {                                                    \
             cfg.field_name = input;                               \
             if (verbose) {                                        \
                 std::println("\nentered: {}", input);             \
@@ -798,17 +813,20 @@ std::optional<cfg::Config> interactive_mode(std::istream& input_stream,
         std::getline(input_stream, input);
         if (input == "q") {
             return std::nullopt;
-        } else if (input.empty()) {
+        }
+        else if (input.empty()) {
             utils::gojo_print(utils::LogLevel::Error,
                               "Project name is a required field");
             success = false;
             break;
-        } else if (input.contains(' ')) {
+        }
+        else if (input.contains(' ')) {
             utils::gojo_print(utils::LogLevel::Error,
                               "Project name must not contain spaces");
             success = false;
             break;
-        } else {
+        }
+        else {
             cfg.name = input;
             if (verbose) {
                 std::println("\nentered: {}", input);
@@ -909,7 +927,8 @@ std::optional<cfg::Config> interactive_mode(std::istream& input_stream,
                                   "build type not recognized: {}", build_type);
                 success = false;
                 break;
-            } else {
+            }
+            else {
                 // clang-format off
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                 cfg.build_types[num_build_types] =
@@ -940,16 +959,21 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args,
     for (const auto arg : args) {
         if (arg == "--verbose" || arg == "-v") {
             cfg.verbose = true;
-        } else if (arg == "--interactive" || arg == "-i") {
+        }
+        else if (arg == "--interactive" || arg == "-i") {
             return interactive_mode(input, cfg.is_verbose_enabled());
-        } else if (arg == "--lib") {
+        }
+        else if (arg == "--lib") {
             cfg.target = cfg::Target::Library;
-        } else if (arg.starts_with("--lang=")) {
+        }
+        else if (arg.starts_with("--lang=")) {
             if (arg.ends_with('c')) {
                 cfg.language = cfg::Language::C;
-            } else if (arg.ends_with("c++")) {
+            }
+            else if (arg.ends_with("c++")) {
                 cfg.language = cfg::Language::Cpp;
-            } else {
+            }
+            else {
                 constexpr std::string_view fmt_str {
                     "gojo init --lang: argument not recognized: {}\n"
                     "\targument must be 'c' or 'c++'"
@@ -961,9 +985,11 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args,
                     std::format(fmt_str, arg.substr(lang_arg_len))
                 };
             }
-        } else if (arg == "--tests") {
+        }
+        else if (arg == "--tests") {
             cfg.testing_enabled = true;
-        } else if (arg.starts_with("--profile=")) {
+        }
+        else if (arg.starts_with("--profile=")) {
             // length of "--profile=".
             constexpr size_t profile_arg_len { 10 };
             const std::string_view profile_name { arg.substr(profile_arg_len) };
@@ -971,14 +997,17 @@ std::optional<cfg::Config> parse_arguments(std::span<std::string_view> args,
             cfg = cfg::Config::from_file(utils::get_profiles_dir() /
                                          profile_name);
             cfg.name = tmp_name;
-        } else if (arg == "--help") {
+        }
+        else if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return std::nullopt;
-        } else if (arg.starts_with("--") || arg.starts_with('-')) {
+        }
+        else if (arg.starts_with("--") || arg.starts_with('-')) {
             throw std::runtime_error {
                 std::format("gojo init: option not recognized: {}", arg)
             };
-        } else {
+        }
+        else {
             cfg.name = arg;
             if (cfg.name.contains(' ')) {
                 throw std::runtime_error {
@@ -1084,11 +1113,10 @@ void init(std::span<std::string_view> args, std::istream& input) {
     // init conan
     if (cfg.package_manager.has_value()) {
         switch (cfg.package_manager.value()) {
-            case cfg::PackageManager::Conan:
-                {
-                    conan::install(cfg, cfg.is_verbose_enabled());
-                    break;
-                }
+            case cfg::PackageManager::Conan: {
+                conan::install(cfg, cfg.is_verbose_enabled());
+                break;
+            }
             case cfg::PackageManager::Vcpkg: break;
         }
     }

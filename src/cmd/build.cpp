@@ -72,22 +72,29 @@ void build(std::span<std::string_view> args) {
     for (const auto arg : args) {
         if (arg == "--release") {
             build_type = cfg::BuildType::Release;
-        } else if (arg == "--debug") {
+        }
+        else if (arg == "--debug") {
             build_type = cfg::BuildType::Debug;
-        } else if (arg == "--tests") {
+        }
+        else if (arg == "--tests") {
             testing_enabled = true;
-        } else if (arg == "--no-tests") {
+        }
+        else if (arg == "--no-tests") {
             testing_enabled = false;
-        } else if (arg == "--verbose" || arg == "-v") {
+        }
+        else if (arg == "--verbose" || arg == "-v") {
             verbose = true;
-        } else if (arg.starts_with("--target=")) {
+        }
+        else if (arg.starts_with("--target=")) {
             // Length of "--target="
             constexpr std::size_t target_arg_len { 9 };
             target = arg.substr(target_arg_len);
-        } else if (arg == "--help") {
+        }
+        else if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
-        } else {
+        }
+        else {
             throw std::runtime_error {
                 std::format("gojo build: argument not recognized: {}", arg)
             };
@@ -118,7 +125,8 @@ void build(std::span<std::string_view> args) {
                 exists_in_dep_build_types =
                     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
                     cfg.build_types.at(idx).value() == build_type;
-            } else {
+            }
+            else {
                 empty_idx = idx;
             }
         }

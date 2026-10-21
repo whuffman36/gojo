@@ -76,17 +76,20 @@ void fmt(std::span<std::string_view> args) {
         if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
             return;
-        } else if (arg.starts_with("--use=")) {
+        }
+        else if (arg.starts_with("--use=")) {
             constexpr std::size_t arg_len { 6 };
             copy_format_file(utils::get_root_dir() / ".clang-format",
                              get_formats_dir() / arg.substr(arg_len));
             break;
-        } else if (arg.starts_with("--save-as=")) {
+        }
+        else if (arg.starts_with("--save-as=")) {
             constexpr std::size_t arg_len { 10 };
             copy_format_file(get_formats_dir() / arg.substr(arg_len),
                              utils::get_root_dir() / ".clang-format");
             return;
-        } else {
+        }
+        else {
             fmt_args = args_to_string(args);
             // Add space to the beginning for formatting.
             fmt_args.insert(fmt_args.begin(), ' ');
@@ -98,9 +101,17 @@ void fmt(std::span<std::string_view> args) {
     std::string style {};
     if (cfg.clang_format_style.has_value()) {
         if (cfg.clang_format_style.value() == cfg::FormatStyle::Custom) {
-            style = " style=file";
-        } else {
-            style = " style=";
+            style = " -style=file";
+        }
+        else if (cfg.clang_format_style.value() == cfg::FormatStyle::Gojo) {
+            style = std::format(
+                " -style=file:{}-{}",
+                (utils::get_home_dir() / ".gojo" / "formats" / "gojo").string(),
+                utils::to_lower(cfg::to_str(cfg.language))
+            );
+        }
+        else {
+            style = " -style=";
             style.append(cfg::to_str(cfg.clang_format_style.value()));
         }
     }

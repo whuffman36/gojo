@@ -58,7 +58,8 @@ void run(std::span<std::string_view> args) {
         cmd = std::format("./build/src/{}/{} {}",
                           cfg::to_str(cfg.get_build_type()), cfg.name,
                           args_to_string(args));
-    } else {
+    }
+    else {
         cmd = std::format("./build/{}/src/{} {}",
                           cfg::to_str(cfg.get_build_type()), cfg.name,
                           args_to_string(args));

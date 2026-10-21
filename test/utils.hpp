@@ -17,8 +17,11 @@ constexpr std::string_view CONFIG_FULL { "config_full.toml" };
 const std::filesystem::path get_assets_path() {
     // This code is run from <PROJECT_ROOT>/build/Debug/test
     // The assets path is <PROJECT_ROOT>/test/assets
-    static const std::filesystem::path ASSETS_PATH { "../../../test/assets" };
-    return std::filesystem::absolute(ASSETS_PATH);
+    static const std::filesystem::path ASSETS_PATH {
+        std::filesystem::absolute("../../../test/assets")
+    };
+    // return std::filesystem::absolute(ASSETS_PATH);
+    return ASSETS_PATH;
 }
 
 const std::filesystem::path get_config(const std::filesystem::path filepath) {
@@ -37,7 +40,8 @@ bool init_test_gojo_project(const std::filesystem::path filepath,
     std::filesystem::current_path(filepath);
     try {
         cmd::init(args);
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;
     }
@@ -57,7 +61,8 @@ bool create_test_gojo_profile(const cfg::Config& cfg) {
 
     try {
         cfg.to_file(utils::get_profiles_dir() / "test");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;
     }
@@ -74,7 +79,8 @@ bool create_test_gojo_profile() {
     try {
         cfg::Config::from_file(get_config(CONFIG_MIN))
             .to_file(utils::get_profiles_dir() / "test");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         std::println("{}", e.what());
         return false;
     }

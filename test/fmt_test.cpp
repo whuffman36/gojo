@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 
+#include "src/cfg/config.hpp"
+#include "src/cfg/enums.hpp"
 #include "src/cmd/commands.hpp"
 #include "src/utils.hpp"
 #include "test/utils.hpp"
@@ -109,12 +111,40 @@ TEST(CommandsTest, FmtTestsLibC) {
     EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
 }
 
+TEST(CommandsTest, FmtTestGojoStyle) {
+    std::vector<std::string_view> args { "format" };
+    ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
+
+    cfg::Config cfg {};
+    ASSERT_NO_THROW(cfg = cfg::Config::from_file(test_root_path() / "format" /
+                                                 "gojo.toml"));
+    cfg.clang_format_style = cfg::FormatStyle::Gojo;
+    ASSERT_NO_THROW(cfg.to_file(test_root_path() / "format" / "gojo.toml"));
+    std::filesystem::create_directories(utils::get_home_dir() / ".gojo" /
+                                        "formats");
+
+    if (!std::filesystem::exists(utils::get_home_dir() / ".gojo" / "formats" /
+                                 "gojo-c++")) {
+        const auto str { utils::get_file_contents(get_assets_path() /
+                                                  "formats" / "gojo-cpp") };
+        std::ofstream gojo_format_file { utils::get_home_dir() / ".gojo" /
+                                         "formats" / "gojo-c++" };
+        ASSERT_TRUE(gojo_format_file.is_open());
+        gojo_format_file << str;
+    }
+
+    args.clear();
+    EXPECT_NO_THROW(cmd::fmt(args));
+
+    EXPECT_TRUE(cleanup_test_gojo_project(test_root_path()));
+}
+
 TEST(CommandsTest, FmtUse) {
     std::vector<std::string_view> args { "format" };
     ASSERT_TRUE(init_test_gojo_project(test_root_path(), args));
 
-    ASSERT_TRUE(std::filesystem::create_directories(utils::get_home_dir() /
-                                                    ".gojo" / "formats"));
+    std::filesystem::create_directories(utils::get_home_dir() / ".gojo" /
+                                        "formats");
     std::ofstream src { utils::get_home_dir() / ".gojo" / "formats" / "test" };
     ASSERT_TRUE(src.is_open());
 

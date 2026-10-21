@@ -109,19 +109,26 @@ Profile Profile::from_file(std::string_view profile_name) {
 
         if (label == "arch") {
             profile.arch = value;
-        } else if (label == "build_type") {
+        }
+        else if (label == "build_type") {
             profile.build_type = value;
-        } else if (label == "compiler") {
+        }
+        else if (label == "compiler") {
             profile.compiler = value;
-        } else if (label == "compiler.cppstd" || label == "compiler.cstd") {
+        }
+        else if (label == "compiler.cppstd" || label == "compiler.cstd") {
             profile.std = value;
-        } else if (label == "compiler.libcxx") {
+        }
+        else if (label == "compiler.libcxx") {
             profile.lib = value;
-        } else if (label == "compiler.version") {
+        }
+        else if (label == "compiler.version") {
             profile.compiler_version = value;
-        } else if (label == "os") {
+        }
+        else if (label == "os") {
             profile.os = value;
-        } else {
+        }
+        else {
             // Not a field that we need to care about, but we should still
             // copy it over to the profile for this project.
             profile.other_settings.append(std::format("{}={}\n", label, value));

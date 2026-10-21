@@ -114,8 +114,9 @@ void dep(std::span<std::string_view> args) {
                 throw std::runtime_error { std::format(
                     "gojo dep install: argument not recognized: {}", args[1]
                 ) };
-            } else if (args.size() > 1 &&
-                       (args[1] == "--verbose" || args[1] == "-v")) {
+            }
+            else if (args.size() > 1 &&
+                     (args[1] == "--verbose" || args[1] == "-v")) {
                 verbose = true;
             }
             switch (cfg.package_manager.value()) {
@@ -129,87 +130,75 @@ void dep(std::span<std::string_view> args) {
             }
             refresh(refresh_args);
             break;
-        case Subcommand::Add:
-            {
-                if (args.size() < 2) {
-                    throw std::runtime_error {
-                        "gojo dep add: missing argument"
-                    };
-                }
-                if (args.size() > 3) {
-                    throw std::runtime_error {
-                        "gojo dep add: too many arguments"
-                    };
-                }
-                std::string_view version { "latest" };
-                if (args.size() == 3) {
-                    version = args[2];
-                }
-                switch (cfg.package_manager.value()) {
-                    case cfg::PackageManager::Conan:
-                        {
-                            std::filesystem::path conanfile {
-                                utils::get_root_dir() / "conanfile.py"
-                            };
-                            if (!std::filesystem::exists(conanfile)) {
-                                conanfile =
-                                    utils::get_root_dir() / "conanfile.txt";
-                            }
-                            if (!std::filesystem::exists(conanfile)) {
-                                throw std::runtime_error { std::format(
-                                    "file not found: {}", conanfile.string()
-                                ) };
-                            }
-                            conan::add(conanfile, args[1], version);
-                            break;
-                        }
-                    case cfg::PackageManager::Vcpkg: break;
-                }
-                if (!verbose) {
-                    refresh_args.clear();
-                }
-                refresh(refresh_args);
-                break;
+        case Subcommand::Add: {
+            if (args.size() < 2) {
+                throw std::runtime_error { "gojo dep add: missing argument" };
             }
-        case Subcommand::Remove:
-            {
-                if (args.size() < 2) {
-                    throw std::runtime_error {
-                        "gojo dep remove: missing argument"
-                    };
+            if (args.size() > 3) {
+                throw std::runtime_error { "gojo dep add: too many arguments" };
+            }
+            std::string_view version { "latest" };
+            if (args.size() == 3) {
+                version = args[2];
+            }
+            switch (cfg.package_manager.value()) {
+                case cfg::PackageManager::Conan: {
+                    std::filesystem::path conanfile { utils::get_root_dir() /
+                                                      "conanfile.py" };
+                    if (!std::filesystem::exists(conanfile)) {
+                        conanfile = utils::get_root_dir() / "conanfile.txt";
+                    }
+                    if (!std::filesystem::exists(conanfile)) {
+                        throw std::runtime_error { std::format(
+                            "file not found: {}", conanfile.string()
+                        ) };
+                    }
+                    conan::add(conanfile, args[1], version);
+                    break;
                 }
-                if (args.size() > 2) {
-                    throw std::runtime_error {
-                        "gojo dep remove: too many arguments"
-                    };
-                }
+                case cfg::PackageManager::Vcpkg: break;
+            }
+            if (!verbose) {
+                refresh_args.clear();
+            }
+            refresh(refresh_args);
+            break;
+        }
+        case Subcommand::Remove: {
+            if (args.size() < 2) {
+                throw std::runtime_error {
+                    "gojo dep remove: missing argument"
+                };
+            }
+            if (args.size() > 2) {
+                throw std::runtime_error {
+                    "gojo dep remove: too many arguments"
+                };
+            }
 
-                switch (cfg.package_manager.value()) {
-                    case cfg::PackageManager::Conan:
-                        {
-                            std::filesystem::path conanfile {
-                                utils::get_root_dir() / "conanfile.py"
-                            };
-                            if (!std::filesystem::exists(conanfile)) {
-                                conanfile =
-                                    utils::get_root_dir() / "conanfile.txt";
-                            }
-                            if (!std::filesystem::exists(conanfile)) {
-                                throw std::runtime_error { std::format(
-                                    "file not found: {}", conanfile.string()
-                                ) };
-                            }
-                            conan::remove(conanfile, args[1]);
-                            break;
-                        }
-                    case cfg::PackageManager::Vcpkg: break;
+            switch (cfg.package_manager.value()) {
+                case cfg::PackageManager::Conan: {
+                    std::filesystem::path conanfile { utils::get_root_dir() /
+                                                      "conanfile.py" };
+                    if (!std::filesystem::exists(conanfile)) {
+                        conanfile = utils::get_root_dir() / "conanfile.txt";
+                    }
+                    if (!std::filesystem::exists(conanfile)) {
+                        throw std::runtime_error { std::format(
+                            "file not found: {}", conanfile.string()
+                        ) };
+                    }
+                    conan::remove(conanfile, args[1]);
+                    break;
                 }
-                if (!verbose) {
-                    refresh_args.clear();
-                }
-                refresh(refresh_args);
-                break;
+                case cfg::PackageManager::Vcpkg: break;
             }
+            if (!verbose) {
+                refresh_args.clear();
+            }
+            refresh(refresh_args);
+            break;
+        }
         case Subcommand::Uninstall:
             if (args.size() < 2) {
                 throw std::runtime_error {
@@ -223,11 +212,10 @@ void dep(std::span<std::string_view> args) {
             }
 
             switch (cfg.package_manager.value()) {
-                case cfg::PackageManager::Conan:
-                    {
-                        conan::uninstall(args[1]);
-                        break;
-                    }
+                case cfg::PackageManager::Conan: {
+                    conan::uninstall(args[1]);
+                    break;
+                }
                 case cfg::PackageManager::Vcpkg: break;
             }
             if (!verbose) {

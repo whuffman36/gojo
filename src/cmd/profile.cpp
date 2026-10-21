@@ -82,66 +82,62 @@ void profile(std::span<std::string_view> args) {
     }
 
     switch (subcommand.value()) {
-        case Subcommand::Create:
-            {
-                if (args.size() == 1) {
-                    throw std::runtime_error {
-                        "gojo profile create: missing name argument"
-                    };
-                }
-                if (args.size() > 2) {
-                    throw std::runtime_error {
-                        "gojo profile create: too many arguments"
-                    };
-                }
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-                const std::string_view name { args[1] };
-                cfg::Config::this_project().to_file(utils::get_profiles_dir() /
-                                                    name);
-                break;
+        case Subcommand::Create: {
+            if (args.size() == 1) {
+                throw std::runtime_error {
+                    "gojo profile create: missing name argument"
+                };
             }
-        case Subcommand::List:
-            {
-                if (args.size() > 1) {
-                    throw std::runtime_error {
-                        "gojo profile list: too many arguments"
-                    };
-                }
+            if (args.size() > 2) {
+                throw std::runtime_error {
+                    "gojo profile create: too many arguments"
+                };
+            }
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+            const std::string_view name { args[1] };
+            cfg::Config::this_project().to_file(utils::get_profiles_dir() /
+                                                name);
+            break;
+        }
+        case Subcommand::List: {
+            if (args.size() > 1) {
+                throw std::runtime_error {
+                    "gojo profile list: too many arguments"
+                };
+            }
 
-                for (const auto& profile : std::filesystem::directory_iterator {
-                         utils::get_profiles_dir() }) {
-                    utils::gojo_print(utils::LogLevel::Info, "{}",
-                                      profile.path().filename().string());
-                }
-                break;
-            }
-        case Subcommand::Show:
-            {
-                if (args.size() == 1) {
-                    throw std::runtime_error {
-                        "gojo profile show: missing name argument"
-                    };
-                }
-                if (args.size() > 2) {
-                    throw std::runtime_error {
-                        "gojo profile show: too many arguments"
-                    };
-                }
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-                const std::string_view name { args[1] };
-                std::string profile_contents {};
-                if (name == "current") {
-                    profile_contents =
-                        utils::get_file_contents(utils::get_config_path());
-                } else {
-                    profile_contents =
-                        utils::get_file_contents(utils::get_profiles_dir() /
-                                                 name);
-                }
+            for (const auto& profile : std::filesystem::directory_iterator {
+                     utils::get_profiles_dir() }) {
                 utils::gojo_print(utils::LogLevel::Info, "{}",
-                                  profile_contents);
-                break;
+                                  profile.path().filename().string());
             }
+            break;
+        }
+        case Subcommand::Show: {
+            if (args.size() == 1) {
+                throw std::runtime_error {
+                    "gojo profile show: missing name argument"
+                };
+            }
+            if (args.size() > 2) {
+                throw std::runtime_error {
+                    "gojo profile show: too many arguments"
+                };
+            }
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+            const std::string_view name { args[1] };
+            std::string profile_contents {};
+            if (name == "current") {
+                profile_contents =
+                    utils::get_file_contents(utils::get_config_path());
+            }
+            else {
+                profile_contents =
+                    utils::get_file_contents(utils::get_profiles_dir() / name);
+            }
+            utils::gojo_print(utils::LogLevel::Info, "{}", profile_contents);
+            break;
+        }
         case Subcommand::Delete:
             if (args.size() == 1) {
                 throw std::runtime_error {
@@ -158,7 +154,8 @@ void profile(std::span<std::string_view> args) {
             if (name == "all") {
                 std::filesystem::remove_all(utils::get_profiles_dir());
                 std::filesystem::create_directory(utils::get_profiles_dir());
-            } else {
+            }
+            else {
                 if (!std::filesystem::remove(utils::get_profiles_dir() /
                                              name)) {
                     throw std::runtime_error { std::format(

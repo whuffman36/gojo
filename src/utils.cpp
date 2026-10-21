@@ -131,7 +131,8 @@ CommandResult execute_command(
         // If this code runs, it means execvp failed and this child process
         // should be killed.
         std::exit(EXIT_FAILURE);
-    } else {
+    }
+    else {
         // Parent process
         // Close write end of the pipe since this process only reads from the
         // child.
@@ -149,7 +150,8 @@ CommandResult execute_command(
                         read(pipefd.at(0), buffer.data(), BUFFER_SIZE)) > 0) {
                 gojo_print(LogLevel::Info, "{}", buffer.data());
             }
-        } else {
+        }
+        else {
             if (!logfile.has_value() && !capture_output) {
                 gojo_print(LogLevel::Warning, "no logfile to write to");
             }
@@ -164,7 +166,8 @@ CommandResult execute_command(
                     output.append(buffer.data(),
                                   static_cast<std::size_t>(bytes_read));
                 }
-            } else {
+            }
+            else {
                 while ((bytes_read = read(pipefd.at(0), buffer.data(),
                                           BUFFER_SIZE)) > 0) {
                     gojo_log(logfile.value_or("/dev/null"), buffer.data(),
@@ -187,11 +190,13 @@ CommandResult execute_command(
             if (WEXITSTATUS(status) == EXIT_SUCCESS) {
                 // process exited in failure state
                 return CommandResult { .output = output, .success = true };
-            } else {
+            }
+            else {
                 // Unknown exit code...
                 return CommandResult { .output = output, .success = false };
             }
-        } else {
+        }
+        else {
             // Process was killed or stopped
             return CommandResult { .output = output, .success = false };
         }
