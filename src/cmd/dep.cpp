@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <flat_map>
@@ -139,7 +140,13 @@ void dep(std::span<std::string_view> args) {
             }
             std::string_view version { "latest" };
             if (args.size() == 3) {
-                version = args[2];
+                if (!args[2].starts_with("--version=")) {
+                    throw std::runtime_error {
+                        "gojo dep add: argument not recognized"
+                    };
+                }
+                constexpr std::size_t version_arg_len { 10 };
+                version = args[2].substr(version_arg_len);
             }
             switch (cfg.package_manager.value()) {
                 case cfg::PackageManager::Conan: {

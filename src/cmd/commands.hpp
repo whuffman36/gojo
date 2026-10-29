@@ -45,6 +45,8 @@ void dep(std::span<std::string_view> args);
 
 void profile(std::span<std::string_view> args);
 
+void update(std::span<std::string_view> args);
+
 void info();
 
 void help();

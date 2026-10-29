@@ -3,6 +3,13 @@
 # Exit on error.
 set -e
 
+VERSION="v0.1.5"
+CURL_OPTIONS="--proto '=https' --tlsv1.2 -sSf -L"
+INSTALL_LINK="https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install"
+REPO="https://github.com/whuffman36/gojo"
+GOJO_DIR="${HOME}/.gojo"
+GOJO_BIN_DIR="${GOJO_DIR}/bin"
+
 MAGENTA="\033[1;35m"
 GREEN="\033[1;32m"
 YELLOW="\033[1;33m"
@@ -10,22 +17,22 @@ CLEAR="\033[0m"
 
 
 info() {
-    printf "%b%s%b\n\n" "$MAGENTA" "$1" "$CLEAR"
+    printf "%b%s%b\n\n" "${MAGENTA}" "$1" "${CLEAR}"
 }
 
 
 success() {
-    printf "%b%s%b\n\n" "$GREEN" "$1" "$CLEAR"
+    printf "%b%s%b\n\n" "${GREEN}" "$1" "${CLEAR}"
 }
 
 
 warn() {
-    printf "%b[WARNING]: %s%b\n\n" "$YELLOW" "$1" "$CLEAR"
+    printf "%b[WARNING]: %s%b\n\n" "${YELLOW}" "$1" "${CLEAR}" >&2
 }
 
 
 error() {
-    printf "%b[ERROR]: %s%b\n\n" "$RED" "$1" "$CLEAR"
+    printf "%b[ERROR]: %s%b\n\n" "${RED}" "$1" "${CLEAR}" >&2
     exit 1
 }
 
@@ -49,7 +56,7 @@ check_sudo() {
 
 
 detect_os() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ "${OSTYPE}" == "darwin"* ]]; then
         OS="macos"
         PRINTOS="macOS"
         return
@@ -134,12 +141,17 @@ install_gojo() {
 
     info "Installing gojo from github..."
     # Download latest release from github into ~/.gojo/bin
-    curl --proto '=https' --tlsv1.2 -sSf -L "https://github.com/whuffman36/gojo/releases/download/v0.1.5/gojo-${ROS}-${ARCH}" > "$HOME/.gojo/bin/gojo"
+    curl ${CURL_OPTIONS} "${REPO}/releases/download/${VERSION}/gojo-${ROS}-${ARCH}" > "${GOJO_BIN_DIR}/gojo"
     
     # Set binary to be executable
-    chmod +x "$HOME/.gojo/bin/gojo"
+    chmod +x "${GOJO_BIN_DIR}/gojo"
 
     # Download gojo-update from github into ~/.gojo/bin
+    if [[ ! -f "${GOJO_BIN_DIR}/gojo-upgrade" ]]; then
+        curl ${CURL_OPTIONS} "${INSTALL_LINK}/gojo-upgrade" > "${GOJO_BIN_DIR}/gojo-upgrade"
+        # Set binary to be executable
+        chmod +x "${GOJO_BIN_DIR}/gojo-upgrade"
+    fi
 }
 
 
@@ -163,10 +175,10 @@ install_macos() {
     install_gojo
 
     # Add ~/.gojo/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> "$HOME/.zshrc"
+    echo "export PATH=\"\$PATH:${GOJO_BIN_DIR}\"" >> "${HOME}/.zshrc"
 
     success "gojo has successfully been installed!"
-    printf "run '%bsource ~/.zshrc%b' in your terminal to use it,\nor start a new terminal session.\n\n" "$YELLOW" "$CLEAR"
+    printf "run '%bsource ~/.zshrc%b' in your terminal to use it,\nor start a new terminal session.\n\n" "${YELLOW}" "${CLEAR}"
 }
 
 
@@ -187,7 +199,7 @@ install_debian() {
         build-essential
 
     pipx ensurepath
-    source "$HOME/.bashrc"
+    source "${HOME}/.bashrc"
 
     pipx install conan
 
@@ -196,10 +208,10 @@ install_debian() {
     install_gojo
 
     # Add ~/.gojo/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> "$HOME/.bashrc"
+    echo "export PATH=\"\$PATH:${GOJO_BIN_DIR}\"" >> "${HOME}/.bashrc"
 
     success "gojo has successfully been installed!"
-    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "$YELLOW" "$CLEAR"
+    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "${YELLOW}" "${CLEAR}"
 }
 
 
@@ -217,7 +229,7 @@ install_fedora() {
         gcc-c++
 
     pipx ensurepath
-    source "$HOME/.bashrc"
+    source "${HOME}/.bashrc"
 
     pipx install conan
 
@@ -226,10 +238,10 @@ install_fedora() {
     install_gojo
 
     # Add ~/.gojo/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> "$HOME/.bashrc"
+    echo "export PATH=\"\$PATH:${GOJO_BIN_DIR}\"" >> "$HOME/.bashrc"
 
     success "gojo has successfully been installed!"
-    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "$YELLOW" "$CLEAR"
+    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "${YELLOW}" "${CLEAR}"
 }
 
 
@@ -263,7 +275,7 @@ install_centos() {
             gcc-c++
 
         pipx ensurepath
-        source "$HOME/.bashrc"
+        source "${HOME}/.bashrc"
 
         pipx install conan
     else
@@ -275,10 +287,10 @@ install_centos() {
     install_gojo
 
     # Add ~/.gojo/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> "$HOME/.bashrc"
+    echo "export PATH=\"\$PATH:${GOJO_BIN_DIR}\"" >> "${HOME}/.bashrc"
 
     success "gojo has successfully been installed!"
-    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "$YELLOW" "$CLEAR"
+    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "${YELLOW}" "${CLEAR}"
 }
 
 
@@ -295,7 +307,7 @@ install_arch() {
         base-devel
 
     pipx ensurepath
-    source "$HOME/.bashrc"
+    source "${HOME}/.bashrc"
 
     pipx install conan
 
@@ -304,24 +316,24 @@ install_arch() {
     install_gojo
 
     # Add ~/.gojo/bin to PATH
-    echo "export PATH=\"\$PATH:\$HOME/.gojo/bin/\"" >> "$HOME/.bashrc"
+    echo "export PATH=\"\$PATH:${GOJO_BIN_DIR}\"" >> "${HOME}/.bashrc"
 
     success "gojo has successfully been installed!"
-    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "$YELLOW" "$CLEAR"
+    printf "run '%bsource ~/.bashrc%b' in your terminal to use it,\nor start a new terminal session.\n\n", "${YELLOW}" "${CLEAR}"
 }
 
 
 main() {
     # Create directories in the user's home directory.
-    mkdir -p "$HOME/.gojo"
-    mkdir -p "$HOME/.gojo/profiles"
-    mkdir -p "$HOME/.gojo/formats"
-    curl --proto '=https' --tlsv1.2 -sSf -L https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install/gojo-c-format > "$HOME/.gojo/formats/gojo-c"
-    curl --proto '=https' --tlsv1.2 -sSf -L https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install/gojo-cpp-format > "$HOME/.gojo/formats/gojo-c++"
-    mkdir -p "$HOME/.gojo/bin"
+    mkdir -p "${GOJO_DIR}"
+    mkdir -p "${GOJO_DIR}/profiles"
+    mkdir -p "${GOJO_DIR}/formats"
+    curl ${CURL_OPTIONS} "${INSTALL_LINK}/gojo-c-format" > "${GOJO_DIR}/formats/gojo-c"
+    curl ${CURL_OPTIONS} "${INSTALL_LINK}/gojo-cpp-format" > "${GOJO_DIR}/formats/gojo-c++"
+    mkdir -p "${GOJO_BIN_DIR}"
 
     detect_os
-    info "$PRINTOS detected"
+    info "${PRINTOS} detected"
 
     case "$OS" in
         macos)

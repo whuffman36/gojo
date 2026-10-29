@@ -17,6 +17,7 @@ target_sources(
   refresh.cpp
   run.cpp
   test.cpp
+  update.cpp
 )
 
 target_include_directories(
