@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Exit on error.
+set -e
+
+CURL_OPTIONS="--proto '=https' --tlsv1.2 -sSf -L"
+INSTALL_LINK="https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install"
+
+VERSION_NEWEST=$(curl ${CURL_OPTIONS} "${INSTALL_LINK}/version.txt")
+VERSION_CURRENT=$(gojo --version)
+
+if [[ "${VERSION_CURRENT}" == "${VERSION_NEWEST}" ]]; then
+    printf "gojo is already up to date!\n"
+    exit 0
+fi
+
+# Donwload gojo again
+printf "upgrading gojo to version ${VERSION_NEWEST}...\n"
+curl ${CURL_OPTIONS} "${INSTALL_LINK}/install.sh" | sh 1> /dev/null
+
+if [[ $? -eq 0 ]]; then
+    printf "gojo upgraded successfully\n"
+    exit 0
+else
+    printf "failed to upgrade gojo\n"
+    exit 1
+fi

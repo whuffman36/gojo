@@ -22,6 +22,7 @@ enum class Command : std::uint8_t {
     Info,
     Help,
     Version,
+    Update,
 };
 
 std::optional<Command> command_from_str(std::string_view str);

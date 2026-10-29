@@ -11,21 +11,31 @@
 
 /*
 TODO:
-* Create gojo package system
-    - gojo install to take current binary or library available in system
-    - Binary just compiles and moves the executable to ~/.gojo/bin
-    - Library:
-        - compiles
-        - moves everything under include/ to ~/.gojo/include/<project.name>/
-        - moves created lib files to ~/.gojo/lib/<project.name>/
 
 * test failure states (bad commands/arguments/options)
     - create unique std::exception types for better error specialization
+
+* Fix ubuntu mirrors not finding right links
+
+* Write script to test install
+
+* Update documentation + help strings
+
+* Update code comments
+
+* Update version
+    - change VERSION_STRING in src/gojo.cpp
+    - change VERSION in install/install.sh
+    - change install/version.txt
+    - add tag to git commit
+
+* gojo update command to update gojo-upgrade script
+    - also update any gojo packages in the future
 */
 
 namespace {
 
-constexpr std::string_view VERSION_STRING { "gojo version 0.1.5" };
+constexpr std::string_view VERSION_STRING { "v0.1.5" };
 
 constexpr std::string_view WIN {
     R"({2}
@@ -116,6 +126,7 @@ int main(int argc, const char* argv[]) {
             case cmd::Command::Refresh: cmd::refresh(command_args); break;
             case cmd::Command::Dep: cmd::dep(command_args); break;
             case cmd::Command::Profile: cmd::profile(command_args); break;
+            case cmd::Command::Update: cmd::update(command_args); break;
             case cmd::Command::Info: cmd::info(); break;
             case cmd::Command::Help: cmd::help(); break;
             case cmd::Command::Version:
