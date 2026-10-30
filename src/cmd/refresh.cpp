@@ -13,7 +13,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}refresh{0} {4}[options]{0}
+  gojo {2}refresh{0} {3}[options]{0}
 
 {1}Summary:{0}
   Read the .gojo config file located at the root of the project and reconfigure
@@ -29,7 +29,7 @@ constexpr std::string_view HELP {
     - 'testing enabled'
 
 {1}Options:{0}
-  {4}--profile=<name>{0}   Configure the project with an existing gojo profile.
+  {3}--profile=<name>{0}   Configure the project with an existing gojo profile.
                      The profile must exist.
 )"
 };

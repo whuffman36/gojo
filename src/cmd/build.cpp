@@ -16,7 +16,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}build{0} {4}[options]{0}
+  gojo {2}build{0} {3}[options]{0}
 
 {1}Summary:{0}
   Compile the project. By default, all targets are built in debug mode using
@@ -24,7 +24,7 @@ constexpr std::string_view HELP {
   project.
 
 {1}Options:{0}
-  {4}--release{0}         Compile the project with all compiler optimizations
+  {3}--release{0}         Compile the project with all compiler optimizations
                     enabled, namely -03. If the project is currently set
                     to debug mode, it will be reconfigured before
                     compilation. If the project is already in release mode,
@@ -33,27 +33,27 @@ constexpr std::string_view HELP {
                     overidden with specific compiler flags set in the
                     .gojo config file of the project.
 
-  {4}--debug{0}           Compile the project with debug symbols and zero
+  {3}--debug{0}           Compile the project with debug symbols and zero
                     compiler optimizations enabled. If the project is
                     currently set to release mode, it will be reconfigured
                     before compilation. If the project is already in debug
                     mode, this option has no effect.
 
-  {4}--tests{0}           Enable testing in the project and compile unit tests
+  {3}--tests{0}           Enable testing in the project and compile unit tests
                     along with the source code. If the project currently
                     does not have testing enabled, it will be reconfigured
                     before compilation. If the project already has testing
                     enabled, this option has no effect.
 
-  {4}--no-tests{0}        Disable testing in the project and omit unit tests from
+  {3}--no-tests{0}        Disable testing in the project and omit unit tests from
                     the compilation process. If the project currently has
                     testing enabled, it will be reconfigured before
                     compilation. If the project currently does not have
                     testing enabled, this option has no effect.
 
-  {4}--clean{0}           Clean the build artifacts and caches before compilation.
+  {3}--clean{0}           Clean the build artifacts and caches before compilation.
 
-  {4}--target=<target>{0} Compile only a specific target instead of the whole
+  {3}--target=<target>{0} Compile only a specific target instead of the whole
                     project.
 )"
 };

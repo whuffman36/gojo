@@ -13,7 +13,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}run{0} {4}[options]{0}
+  gojo {2}run{0} {3}[options]{0}
 
 {1}Summary:{0}
   Run the compiled executable produced by the project. A call to 'gojo build'

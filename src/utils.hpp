@@ -20,11 +20,9 @@
 // {0} CLEAR
 // {1} MAGENTA_BOLD
 // {2} MAGENTA
-// {3} YELLOW
-// {4} CYAN
-#define INFO_COLORS                                                   \
-    utils::CLEAR, utils::MAGENTA_BOLD, utils::MAGENTA, utils::YELLOW, \
-        utils::CYAN
+// {3} CYAN
+#define INFO_COLORS                                                \
+    utils::CLEAR, utils::MAGENTA_BOLD, utils::MAGENTA, utils::CYAN \
 
 namespace utils {
 
