@@ -16,7 +16,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}fmt{0} {4}[options]{0}
+  gojo {2}fmt{0} {3}[options]{0}
 
 {1}Summary:{0}
   Format the project using clang-format. By default, this command uses the
@@ -26,7 +26,7 @@ constexpr std::string_view HELP {
   and override any settings in the .clang-format file. By default, code is
   auto formatted and changed in-place according the rules laid out in the
   .clang-format file. More information on clang-format can be found here:
-  {4}https://clang.llvm.org/docs/ClangFormat.html{0}
+  {3}https://clang.llvm.org/docs/ClangFormat.html{0}
 
 {1}Options:{0}
   Any options supplied to this command are forwarded to clang-format and

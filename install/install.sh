@@ -195,6 +195,7 @@ install_debian() {
         clang-tidy \
         clang-format \
         cppcheck \
+        git \
         pipx \
         build-essential
 
@@ -225,6 +226,7 @@ install_fedora() {
         clang-tools-extra \
         cppcheck \
         gcc \
+        git \
         pipx \
         gcc-c++
 
@@ -271,6 +273,7 @@ install_centos() {
             clang-tools-extra \
             cppcheck \
             gcc \
+            git \
             pipx \
             gcc-c++
 
@@ -303,6 +306,7 @@ install_arch() {
         cmake \
         clang \
         cppcheck \
+        git \
         python-pipx \
         base-devel
 

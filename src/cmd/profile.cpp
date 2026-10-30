@@ -16,22 +16,22 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}profile{0} {4}[options]{0}
+  gojo {2}profile{0} {3}[options]{0}
 
 {1}Summary:{0}
   Manage global gojo profiles. Some options require arguemnts to work. Profiles
   are stored in ~/.gojocli/profiles as .gojo config files.
 
 {1}Options{0}
-  {4}create{0} {3}<name>{0}    Create a new gojo profile with the specified
+  {3}create{0} {3}<name>{0}    Create a new gojo profile with the specified
                    name. The name arguemnt is required.
 
-  {4}list{0}             List all of the current gojo profiles found in
+  {3}list{0}             List all of the current gojo profiles found in
                    the system.
 
-  {4}show{0} {3}<name>{0}      Show the gojo profile with the specified name.
+  {3}show{0} {3}<name>{0}      Show the gojo profile with the specified name.
 
-  {4}delete{0} {3}<name>{0}    Delete a gojo profile with the specified name.
+  {3}delete{0} {3}<name>{0}    Delete a gojo profile with the specified name.
                    specify 'all' to delete all gojo profiles.
 )"
 };

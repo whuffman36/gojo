@@ -15,7 +15,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}test{0} {4}[options]{0}
+  gojo {2}test{0} {3}[options]{0}
 
 {1}Summary:{0}
   Run unit tests in the project. Tests must be enabled in the .gojo config
@@ -23,7 +23,7 @@ constexpr std::string_view HELP {
   running this command.
 
 {1}Options:{0}
-  {4}--target=<target>{0} Test only a specific target intead of all unit tests.
+  {3}--target=<target>{0} Test only a specific target intead of all unit tests.
 )"
 };
 

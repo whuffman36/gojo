@@ -43,7 +43,7 @@ the link to the github repo at the end of this file.
 .gojo config files are meant to be placed at the root of your gojo project and
 consist of several fields that are used to simplify common processes such as
 building, testing, and analyzing your codebase. To see a blank .gojo config
-file, you can use {1}gojo{0} {4}template{0}.
+file, you can use {1}gojo{0} {3}template{0}.
 
 Hopefully most of the fields in the config file are self-explanatory,
 especially if you already have experience working with C, C++, and some of its
@@ -60,18 +60,18 @@ open source toolchains. Below is an explanation of each field:
     you change this field after project creation, you will need to edit the
     file(s) of your meta build system to reflect the change, and you will also
     need to reconfigure your build system (which can be done with
-    {1}gojo{0} {4}refresh{0}).
+    {1}gojo{0} {3}refresh{0}).
 
   - {2}project root directory{0}
     This is the path of the project root directory. This value should only be
     modified if the rest of the project structure remains intact, as gojo uses
     this value to find all relevant project files. If this value is changed,
     you will need to reconfigure your build system with
-    {1}gojo{0} {4}refresh{0}.
+    {1}gojo{0} {3}refresh{0}.
 
   - {2}executable name{0}
     This is the name of the executable that will be run when calling
-    {1}gojo{0} {4}run{0}. This field is only relevant for
+    {1}gojo{0} {3}run{0}. This field is only relevant for
     binary projects, and has no effect for library projects. Additionally,
     changing this value does not require you to reconfigure the project. By
     default, gojo searches for the executable in either
@@ -132,7 +132,7 @@ open source toolchains. Below is an explanation of each field:
     This field tells gojo which generator to use with the meta build system
     declared in the {2}build system{0} field. For a full list of acceptable
     generators, see
-    {4}https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html{0}
+    {3}https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html{0}
     The project must be reconfigured if this value changes.
 
   - {2}multi-config generator{0}
@@ -161,7 +161,7 @@ open source toolchains. Below is an explanation of each field:
     The project must be reconfigured if this value is changed. If you have not
     built your dependencies with the build type you changed to, you will need
     to install and/or build them again as well. It is recommended to use the
-    build_types=<> option when running {1}gojo{0} {4}install{0} to install
+    build_types=<> option when running {1}gojo{0} {3}install{0} to install
     your dependencies with every build type that you want to use so that you
     install them up front instead of when switching to a new build type for
     the first time.
@@ -169,7 +169,7 @@ open source toolchains. Below is an explanation of each field:
   - {2}package manager{0}
     This field determines if your project is using a package manager. If no
     package manager is used, this value is set to '{3}none{0}'. The command
-    {1}gojo{0} {4}install{0} has no effect if no package manager is used.
+    {1}gojo{0} {3}install{0} has no effect if no package manager is used.
 
   - {2}dependency build types{0}
     This field determines the build type(s) that your dependendencies should
@@ -198,7 +198,7 @@ open source toolchains. Below is an explanation of each field:
     file in the project root directory outlining all of the format rules,
     which you can tweak to your preferences. If this value is set to '{3}custom{0}',
     then the .clang-format file remains empty. This value is ignored if any
-    arguments are passed to {1}gojo{0} {4}fmt{0}.
+    arguments are passed to {1}gojo{0} {3}fmt{0}.
 
   - {2}clangd enabled{0}
     This field tells gojo whether or not your project is using clangd as your
@@ -211,38 +211,38 @@ open source toolchains. Below is an explanation of each field:
     to statically analyze your code. If it is enabled, a .clang-tidy file is
     created in the project root directory allowing you to customize the
     analyzer. This value also determines if clang-tidy is run during the
-    {1}gojo{0} {4}check{0} command. If clang-tidy and cppcheck are both
+    {1}gojo{0} {3}check{0} command. If clang-tidy and cppcheck are both
     disabled, that command has no effect.
 
   - {2}clang-tidy arguments{0}
     This field is forwarded directly to clang-tidy when running the
-    {1}gojo{0} {4}check{0} command. You can see a list of valid
-    clang-tidy arguments here: {4}https://clang.llvm.org/extra/clang-tidy/{0}
+    {1}gojo{0} {3}check{0} command. You can see a list of valid
+    clang-tidy arguments here: {3}https://clang.llvm.org/extra/clang-tidy/{0}
 
   - {2}cppcheck enabled{0}
     This field tells gojo whether or not your project is using cppcheck
     to statically analyze your code. If it is enabled, cppcheck will run
     using the values defined in {2}cppcheck enabled checks{0} and
     {2}cppcheck arguments{0} to run static analysis checks on your project in
-    the {1}gojo{0} {4}check{0} command. If cppcheck and clang-tidy are both
+    the {1}gojo{0} {3}check{0} command. If cppcheck and clang-tidy are both
     disabled, the check command has no effect.
 
   - {2}cppcheck enabled checks{0}
     This field tells cppcheck which static analysis checks to run when using
-    the {1}gojo{0} {4}check{0} command. You can find a list of available checks
-    here: {4}https://linux.die.net/man/1/cppcheck{0}
+    the {1}gojo{0} {3}check{0} command. You can find a list of available checks
+    here: {3}https://linux.die.net/man/1/cppcheck{0}
 
   - {2}cppcheck arguments{0}
     This field is forwarded directly to cppcheck when running the
-    {1}gojo{0} {4}check{0} command. You can see a list of available cppcheck
-    arguments here: {4}https://linux.die.net/man/1/cppcheck{0}
+    {1}gojo{0} {3}check{0} command. You can see a list of available cppcheck
+    arguments here: {3}https://linux.die.net/man/1/cppcheck{0}
     Note that the '--enable=' flag corresponds to {2}cppcheck enabled checks{0} in
     the .gojo config file and should not be duplicated here.
 
   - {2}testing enabled{0}
     This field tells gojo whether to build your project's unit tests. If
     testing is not enabled, unit tests are not built and
-    {1}gojo{0} {4}test{0} has no effect. The project must be reconfigured
+    {1}gojo{0} {3}test{0} has no effect. The project must be reconfigured
     if this value changes.
 
   - {2}testing framework{0}
@@ -260,16 +260,16 @@ Because gojo works by reading and writing to a .gojo config file, most of the
 settings in a project can be saved and reused for future projects. Gojo allows
 you to store these configurations in gojo profiles, located in
 ~/.gojocli/profiles. Using an existing gojo profile, you can create a new
-project with the {1}gojo{0} {4}init --profile=<name>{0} command, create a profile
-from your current project settings with the {1}gojo{0} {4}profile create{0}
-command, or see your current profiles with the {1}gojo{0} {4}profile list{0}
+project with the {1}gojo{0} {3}init --profile=<name>{0} command, create a profile
+from your current project settings with the {1}gojo{0} {3}profile create{0}
+command, or see your current profiles with the {1}gojo{0} {3}profile list{0}
 command. Using gojo profiles should make project setup even faster, assuming
 you want to use many of the same settings as a previous project.
 
 {1}Questions, Concerns, Bugs, and Contributions{0}
 You can submit any bugs, questions, or other issues at the gojo github
 repository, as well as become a contributor:
-{4}https://github.com/gojocli/gojo{0}
+{3}https://github.com/gojocli/gojo{0}
 )"
 };
 

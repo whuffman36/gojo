@@ -12,7 +12,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}new{0} {3}<name>{0} {3}<path>{0} {4}[options]{0}
+  gojo {2}new{0} {3}<name>{0} {3}<path>{0} {3}[options]{0}
 
 {1}Summary:{0}
   Create a new gojo project in the current directory. A name arguemnt
@@ -24,24 +24,24 @@ constexpr std::string_view HELP {
   {3}name{0}            Name of the gojo project to be created.
 
 {1}Options:{0}
-  {4}--file | -f{0}       Create a new gojo project using a .gojo config
+  {3}--file | -f{0}       Create a new gojo project using a .gojo config
                     file located in the current directory. This option
                     syngergizes well with 'gojo template'. All other
                     arguments and options are ignored when using --file,
                     including <name>. This command will fail if no .gojo
                     config file is found in the current directory.
 
-  {4}-i{0}                Create a new gojo project by answering several
+  {3}-i{0}                Create a new gojo project by answering several
                     interactive prompts. All other arguments and options
                     are ignored when using -i, including <name>.
 
-  {4}--lib{0}             Set the project to be a library. By default, a new
+  {3}--lib{0}             Set the project to be a library. By default, a new
                     gojo project is a binary executable.
 
-  {4}--lang=<c|c++>{0}    Set the language of the project. The language options
+  {3}--lang=<c|c++>{0}    Set the language of the project. The language options
                     are 'c' or 'c++'. By default, a new gojo project is C++.
 
-  {4}--profile=<name>{0}  Create a new gojo project from an existing profile.
+  {3}--profile=<name>{0}  Create a new gojo project from an existing profile.
                     The profile must exist. When combining this option with
                     options, this one must come first, ie
                     gojo init --profile=default --lib

@@ -19,7 +19,7 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}dep{0} {4}[options]{0}
+  gojo {2}dep{0} {3}[options]{0}
 
 {1}Summary:{0}
   TODO
@@ -95,9 +95,6 @@ void dep(std::span<std::string_view> args) {
 
             switch (cfg.package_manager.value()) {
                 case cfg::PackageManager::Conan:
-                    // clang tidy doesn't like the use of unchecked access in
-                    // containers. There is literally no other way to access
-                    // std::span in C++23.
                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                     conan::search(args[1]);
                     break;

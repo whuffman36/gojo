@@ -12,16 +12,16 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}update{0} {4}[options]{0}
+  gojo {2}update{0} {3}[options]{0}
 
 {1}Summary:{0}
   TODO
 
 {1}Options:{0}
-  {4}--help{0}   Configure the project with an existing gojo profile.
+  {3}--help{0}   Configure the project with an existing gojo profile.
                      The profile must exist.
 
-  {4}--verbose | -v
+  {3}--verbose | -v
 )"
 };
 
