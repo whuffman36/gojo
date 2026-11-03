@@ -30,7 +30,7 @@ TODO:
 
 namespace {
 
-constexpr std::string_view VERSION_STRING { "v0.1.5" };
+constexpr std::string_view VERSION_STRING { "v0.2.0" };
 
 constexpr std::string_view WIN {
     R"(
