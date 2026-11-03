@@ -4,7 +4,7 @@
 set -e
 
 VERSION="v0.2.0"
-CURL_OPTIONS="--proto '=https' --tlsv1.2 -sSf -L"
+CURL_OPTIONS="--proto =https --tlsv1.2 -sSf -L"
 INSTALL_LINK="https://raw.githubusercontent.com/whuffman36/gojo/refs/heads/main/install"
 REPO="https://github.com/whuffman36/gojo"
 GOJO_DIR="${HOME}/.gojo"
