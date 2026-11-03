@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include "src/utils.hpp"
 
 #include <array>
@@ -78,6 +82,34 @@ std::vector<char*> split_args(const char* const args_str) {
     args_vec.push_back(nullptr);
 
     return args_vec;
+}
+
+void gojo_log(const std::filesystem::path& destination, const char* content,
+              std::size_t content_size) {
+    const std::filesystem::path parent { destination.parent_path() };
+    if (!parent.empty()) {
+        std::error_code error;
+        std::filesystem::create_directories(parent, error);
+        if (error) {
+            utils::gojo_print(utils::LogLevel::Warning,
+                              "failed to create log directory: {}",
+                              parent.string());
+            return;
+        }
+    }
+    std::ofstream destination_file { destination,
+                                     std::ios::app | std::ios::binary };
+    if (!destination_file.is_open()) {
+        utils::gojo_print(utils::LogLevel::Warning,
+                          "failed to open log file: {}", destination.string());
+        return;
+    }
+
+    destination_file.write(content, static_cast<std::streamsize>(content_size));
+    if (!destination_file) {
+        utils::gojo_print(utils::LogLevel::Warning,
+                          "failed to write log file: {}", destination.string());
+    }
 }
 
 }  // namespace
@@ -265,33 +297,6 @@ std::string to_lower(std::string_view str) {
         lower.push_back(static_cast<char>(std::tolower(static_cast<int>(c))));
     }
     return lower;
-}
-
-void gojo_log(const std::filesystem::path& destination, const char* content,
-              std::size_t content_size) {
-    const std::filesystem::path parent { destination.parent_path() };
-    if (!parent.empty()) {
-        std::error_code error;
-        std::filesystem::create_directories(parent, error);
-        if (error) {
-            gojo_print(LogLevel::Warning, "failed to create log directory: {}",
-                       parent.string());
-            return;
-        }
-    }
-    std::ofstream destination_file { destination,
-                                     std::ios::app | std::ios::binary };
-    if (!destination_file.is_open()) {
-        gojo_print(LogLevel::Warning, "failed to open log file: {}",
-                   destination.string());
-        return;
-    }
-
-    destination_file.write(content, static_cast<std::streamsize>(content_size));
-    if (!destination_file) {
-        gojo_print(LogLevel::Warning, "failed to write log file: {}",
-                   destination.string());
-    }
 }
 
 const std::filesystem::path get_root_dir() {

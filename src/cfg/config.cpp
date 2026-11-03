@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include "src/cfg/config.hpp"
 
 #include <cstddef>
@@ -707,6 +711,9 @@ void Config::to_file(const std::filesystem::path& file) const {
     // I want the tables to have a specific order in the file so I have to print
     // it manually.
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    cfg_stream
+        << "# Gojo CLI - See https://github.com/whuffman36/gojo for more\n"
+        << "# Run 'gojo info' to see a tutorial\n\n";
     cfg_stream << '[' << PROJECT << "]\n" << table[PROJECT] << "\n";
     if (!table[BUILD].as_table()->empty()) {
         cfg_stream << "\n[" << BUILD << "]\n" << table[BUILD] << "\n";

@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
@@ -15,11 +19,7 @@ TODO:
 * test failure states (bad commands/arguments/options)
     - create unique std::exception types for better error specialization
 
-* Write script to test install
-
-* Update documentation + help strings
-
-* Remove over the top color in print messages
+* Fix toml output to be in desired order
 
 * Update version
     - change VERSION_STRING in src/gojo.cpp

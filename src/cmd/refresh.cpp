@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <format>
 #include <span>
 #include <stdexcept>
@@ -13,24 +17,14 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}refresh{0} {3}[options]{0}
+    gojo {2}refresh{0} [options]
 
 {1}Summary:{0}
-  Read the .gojo config file located at the root of the project and reconfigure
-  the project. This command is necessary when changing the following fields in
-  the .gojo config file:
-
-    - 'language standard'
-    - 'gnu extensions'
-    - 'compiler'
-    - 'compiler flags'
-    - 'generator'
-    - 'build type'
-    - 'testing enabled'
+    Clean the build directory and reconfigure the project from scratch.
 
 {1}Options:{0}
-  {3}--profile=<name>{0}   Configure the project with an existing gojo profile.
-                     The profile must exist.
+  --verbose, -v         Allow the output from the build system to be forwarded
+                        to standard output.
 )"
 };
 

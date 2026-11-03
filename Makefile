@@ -55,8 +55,8 @@ clean:
 	@rm -rf build
 	@mkdir -p build
 
-search:
-	grep -rnw '.' -e '$(PATTERN)'
+search-src:
+	grep -rnw 'src/' -e '$(PATTERN)'
 
 # Fuck it just put it in both bash and zsh rc files
 install: install-rel

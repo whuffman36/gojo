@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -19,13 +23,37 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}dep{0} {3}[options]{0}
+    gojo {2}dep{0} {3}<arg>{0} [options]
 
 {1}Summary:{0}
-  TODO
+    Manage third party dependencies for a project. This command has no effect
+    if there is no package manager set in the gojo.toml config file.
+
+{1}Arguments:{0}
+    {3}search{0} <name>               Search the current package manager's repositories
+                                for the specified package.
+
+    {3}install{0}                     Install and compile the packages defined in the current
+        [--verbose]             project's package manager config file.
+
+    {3}add{0} <name>                  Add the specified package to the current project's
+        [--version=<version>]   package manager config file.
+
+    {3}remove{0} <name>               Remove the specified package from the current project's
+                                package manager config file.
+
+    {3}uninstall{0} <name>            Remove the specified package from the current system.
 
 {1}Options:{0}
-  TODO
+    --verbose, -v               Option for install only. Allow output from
+                                the current package manager to be forwarded to
+                                standard output.
+
+    --version=<version          Option for add only. Add a specific version of a
+                                dependency to the config file of the current
+                                package manager. If no version is give, the
+                                latest version is used. The string "latest" is
+                                also accepted.
 )"
 };
 
@@ -78,7 +106,9 @@ void dep(std::span<std::string_view> args) {
 
     cfg::Config cfg { cfg::Config::this_project() };
     if (!cfg.package_manager.has_value()) {
-        throw std::runtime_error { "gojo dep: no package manager enabled" };
+        utils::gojo_print(utils::LogLevel::Warning,
+                          "gojo dep: no package manager enabled");
+        return;
     }
 
     bool verbose { cfg.is_verbose_enabled() };
@@ -87,6 +117,11 @@ void dep(std::span<std::string_view> args) {
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     switch (subcommand.value()) {
         case Subcommand::Search:
+            if (args.size() < 2) {
+                throw std::runtime_error {
+                    "gojo dep search: package not specified"
+                };
+            }
             if (args.size() > 2) {
                 throw std::runtime_error {
                     "gojo dep search: too many arguments"
@@ -130,7 +165,9 @@ void dep(std::span<std::string_view> args) {
             break;
         case Subcommand::Add: {
             if (args.size() < 2) {
-                throw std::runtime_error { "gojo dep add: missing argument" };
+                throw std::runtime_error {
+                    "gojo dep add: missing name argument"
+                };
             }
             if (args.size() > 3) {
                 throw std::runtime_error { "gojo dep add: too many arguments" };
@@ -171,7 +208,7 @@ void dep(std::span<std::string_view> args) {
         case Subcommand::Remove: {
             if (args.size() < 2) {
                 throw std::runtime_error {
-                    "gojo dep remove: missing argument"
+                    "gojo dep remove: missing name argument"
                 };
             }
             if (args.size() > 2) {
@@ -206,7 +243,7 @@ void dep(std::span<std::string_view> args) {
         case Subcommand::Uninstall:
             if (args.size() < 2) {
                 throw std::runtime_error {
-                    "gojo dep uninstall: missing argument"
+                    "gojo dep uninstall: missing name argument"
                 };
             }
             if (args.size() > 2) {

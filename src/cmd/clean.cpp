@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <filesystem>
 #include <format>
 #include <span>
@@ -12,19 +16,15 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}clean{0} {3}[options]{0}
+    gojo {2}clean{0} [options]
 
 {1}Summary:{0}
-  Remove build artifacts and/or caches.
+    Remove build directory and optionally any built dependencies.
 
 {1}Options:{0}
-  {3}--deep{0}          Remove all build artifacts and caches from the,
-                  project, while keeping dependencies intact.
-
-  {3}--all{0}           Remove everything from the build directory, including
-                  dependencies. Use this option with caution as it
-                  requires dependencies to be reinstalled and rebuilt,
-                  and the project has to be re-configured.
+    --deps              Remove the built dependencies from the project
+                        from the project directory as well as the build
+                        directory.
 )"
 };
 

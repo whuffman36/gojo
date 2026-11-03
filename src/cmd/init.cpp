@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
@@ -32,39 +36,36 @@ deps)"
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}init{0} {3}<name>{0} {3}[options]{0}
+    gojo {2}init{0} {3}<name>{0} [options]
 
 {1}Summary:{0}
-  Create a new gojo project in the current directory. A name arguemnt
-  is required. If no options are supplied, a default C++ project is
-  created. The settings for a default C++ project can be found in the
-  'gojo info' command.
+    Create a new gojo project in the current working directory. By default,
+    gojo creates a C++ binary without a package manager and testing disabled.
+    The default compiler is chosen by your system.
 
 {1}Arguments:{0}
-  {3}name{0}            Name of the gojo project to be created.
+    {3}name{0}                    Name of the project to be created. This name is also
+                            used as the name of the executable in the gojo run
+                            command and the name of the root CMake project.
 
 {1}Options:{0}
-  {3}--file | -f{0}       Create a new gojo project using a .gojo config
-                    file located in the current directory. This option
-                    syngergizes well with 'gojo template'. All other
-                    arguments and options are ignored when using --file,
-                    including <name>. This command will fail if no .gojo
-                    config file is found in the current directory.
+    --verbose, -v           Allow the output from the build system and package
+                            manager to be forwarded to standard output.
 
-  {3}-i{0}                Create a new gojo project by answering several
-                    interactive prompts. All other arguments and options
-                    are ignored when using -i, including <name>.
+    --interactive, -i       Create a new gojo project by answering config
+                            questions one at a time.
 
-  {3}--lib{0}             Set the project to be a library. By default, a new
-                    gojo project is a binary executable.
+    --file, -f              Create a new gojo project from the gojo.toml config
+                            file in the current working directory.
 
-  {3}--lang=<c|c++>{0}    Set the language of the project. The language options
-                    are 'c' or 'c++'. By default, a new gojo project is C++.
+    --lib                   Set the new gojo project to be a library.
 
-  {3}--profile=<name>{0}  Create a new gojo project from an existing profile.
-                    The profile must exist. When combining this option with
-                    options, this one must come first, ie
-                    gojo init --profile=default --lib
+    --lang=<lang>           Set the gojo project to be written in <lang>
+
+    --profile=<profile>     Create a gojo project from the existing profile
+                            with name <profile>
+
+    --tests                 Set tests to be enabled for the new project.
 )"
 };
 
@@ -81,9 +82,9 @@ endif())";
     }  // if
 
     constexpr std::string_view template_str {
-        R"(cmake_minimum_required(VERSION {0})
+        R"(cmake_minimum_required(VERSION ${{CMAKE_VERSION}})
 
-project({1})
+project({0})
 
 # Export compilation information for
 # clangd, .clang-tidy, .clang-format, and cppcheck
@@ -98,14 +99,13 @@ add_subdirectory(src)
 
 # Add subdirectories here.
 
-{2}
+{1}
 )"
     };  // template_str
 
     return std::format(template_str,
-                       cmake::get_version(),  // {0}
-                       cfg.name,              // {1}
-                       testing_enabled);      // {2}
+                       cfg.name,          // {0}
+                       testing_enabled);  // {1}
 }
 
 std::string cmakelists_src(const cfg::Config& cfg) {
@@ -1133,7 +1133,8 @@ void init(std::span<std::string_view> args, std::istream& input) {
                                cfg.get_build_dir() / "log.txt")
     };
     if (!git_result.success) {
-        utils::gojo_print(utils::LogLevel::Warning, "failed to initialize git repository");
+        utils::gojo_print(utils::LogLevel::Warning,
+                          "failed to initialize git repository");
     }
 
     cfg.to_file(utils::get_config_path());

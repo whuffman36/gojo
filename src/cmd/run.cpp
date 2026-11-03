@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <format>
 #include <span>
 #include <stdexcept>
@@ -13,18 +17,14 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}run{0} {3}[options]{0}
+    gojo {2}run{0} [options]
 
 {1}Summary:{0}
-  Run the compiled executable produced by the project. A call to 'gojo build'
-  must be successfully completed before running this command. This command
-  has no effect if the project is a library. This command uses the 'executable
-  name' field in the .gojo config file of the project in order to find the
-  correct executable to run, and will fail if it cannot find an executable with
-  that name.
+    Compile the project and immediately run the resulting executable. This
+    command has no effect if the project is a library target.
 
 {1}Options:{0}
-  Any options passed to this command will be forwarded to the executable.             
+    Any options passed to this command will be forwarded to the executable.        
 )"
 };
 
@@ -49,7 +49,7 @@ void run(std::span<std::string_view> args) {
         return;
     }
 
-    build(args);
+    build({});
 
     // Can't think of a better way to write this since the format
     // string needs to be constexpr...
