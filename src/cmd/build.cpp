@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cstddef>
 #include <filesystem>
 #include <format>
@@ -16,45 +20,32 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}build{0} {3}[options]{0}
+    gojo {2}build{0} [options]
 
 {1}Summary:{0}
-  Compile the project. By default, all targets are built in debug mode using
-  the compiler flags set in the .gojo config file located at the root of the
-  project.
+    Compile the project using the settings defined in the gojo.toml config
+    file. Some settings can be set or overridden from the command line, such
+    as the build type and whether or not tests are compiled. This command
+    detects if the project needs to be reconfigured before compiling.
 
 {1}Options:{0}
-  {3}--release{0}         Compile the project with all compiler optimizations
-                    enabled, namely -03. If the project is currently set
-                    to debug mode, it will be reconfigured before
-                    compilation. If the project is already in release mode,
-                    this option has no effect. No debug symbol information
-                    is kept when compiled in release mode, unless
-                    overidden with specific compiler flags set in the
-                    .gojo config file of the project.
+    --release           Compile the project and any dependencies with all
+                        compiler optimizations enabled.
 
-  {3}--debug{0}           Compile the project with debug symbols and zero
-                    compiler optimizations enabled. If the project is
-                    currently set to release mode, it will be reconfigured
-                    before compilation. If the project is already in debug
-                    mode, this option has no effect.
+    --debug             Compile the project and anydependencies with debug
+                        symbols and zero compiler optimizations enabled.
 
-  {3}--tests{0}           Enable testing in the project and compile unit tests
-                    along with the source code. If the project currently
-                    does not have testing enabled, it will be reconfigured
-                    before compilation. If the project already has testing
-                    enabled, this option has no effect.
+    --tests             Enable testing in the project and compile unit tests
+                        along with the source code.
 
-  {3}--no-tests{0}        Disable testing in the project and omit unit tests from
-                    the compilation process. If the project currently has
-                    testing enabled, it will be reconfigured before
-                    compilation. If the project currently does not have
-                    testing enabled, this option has no effect.
+    --no-tests          Disable testing in the project and omit unit tests from
+                        the compilation process.
 
-  {3}--clean{0}           Clean the build artifacts and caches before compilation.
+    --verbose, -v       Allow the output from the build system to be forwarded
+                        to standard output.
 
-  {3}--target=<target>{0} Compile only a specific target instead of the whole
-                    project.
+    --target=<target>   Compile only a specific target instead of the whole
+                        project.
 )"
 };
 

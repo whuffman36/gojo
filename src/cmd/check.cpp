@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <filesystem>
 #include <format>
 #include <span>
@@ -14,28 +18,35 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}check{0} {3}[options]{0}
+    gojo {2}check{0} [options]
 
 {1}Summary:{0}
-  Run static analysis checks on the code without building the project. There
-  are two programs used to run static analysis checks, clang-tidy and
-  cppcheck. Both can be enabled or disabled in the .gojo config file located
-  at the root of the project. If neither program is enabled, this command has
-  no effect. clang-tidy can be configured with the .clang-tidy file located
-  at the root of the project, created by 'gojo init' if enabled. Additionally,
-  command line arguments can be supplied in the .gojo config file at the root
-  of the project using the 'clang-tidy arguments' field, which will take
-  precedence over the .clang-tidy file. More information on clang-tidy can be
-  found here: {3}https://clang.llvm.org/extra/clang-tidy/{0}
-  cppcheck can be configured in the .gojo config file located in the root of
-  the project using the 'cppcheck checks enabled' and 'cppcheck arguments'
-  fields. The former decides which checks will be run and the latter is used
-  to pass any command line options to cppcheck. More information on cppcheck
-  can be found here: {3}https://cppcheck.sourceforge.io/manual.html{0}
+    Check the source code with static analysis tools. The static analysis
+    tools used are:
+
+        - clang-tidy
+        - cppcheck
+    
+    These tools can be enabled, disabled, and tuned to custom workflows
+    with several settings in the gojo.toml config file. For clang-tidy,
+    the field checks.clang_tidy_enabled decides if the tool is used at all.
+    Arguments can be passed to clang-tidy with the field
+    checks.clang_tidy_args, which is an array of strings. More about clang-tidy
+    can be found here: {3}https://clang.llvm.org/extra/clang-tidy/{0}
+
+    cppcheck can be enabled with the field checks.cppcheck_enabled. The field
+    checks.cppcheck_checks is an array of strings where each entry is a "check"
+    that is enabled in cppcheck. checks.cppcheck_args is an array where each
+    entry is passed to cppcheck as an argument. To learn more about cppcheck
+    checks and arguments, go here:
+    {3}https://cppcheck.sourceforge.io/manual.html{0}
+
+    By default, no static analysis checks are enabled. This comand has no
+    effect if no checks are enabled.
 
 {1}Options:{0}
-  {3}--verbose | -v{0}  Print all output from the static analyzers enabled
-                  in the project. By default, only errors are printed.
+    --verbose, -v       Allow the output from the static analyzers to be
+                        forwarded to standard output.
 )"
 };
 

@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cstddef>
 #include <format>
 #include <span>
@@ -15,15 +19,16 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}test{0} {3}[options]{0}
+    gojo {2}test{0} [options]
 
 {1}Summary:{0}
-  Run unit tests in the project. Tests must be enabled in the .gojo config
-  file and a call to 'gojo build' must be successfully completed before
-  running this command.
+    Run unit tests for the project. This command has no effect if testing is
+    not enabled.
 
 {1}Options:{0}
-  {3}--target=<target>{0} Test only a specific target intead of all unit tests.
+  --target=<target>     Test only a specific target intead of all unit tests.
+
+  --build               Build the project before running the unit tests.
 )"
 };
 

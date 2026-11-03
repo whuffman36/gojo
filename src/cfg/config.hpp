@@ -1,6 +1,3 @@
-/// @file      src/config.hpp
-/// @brief     Functionality for creating, reading, and writing gojo config
-///            files and gojo profiles.
 /// @author    William Huffman (whuffman36)
 /// @date      2026
 /// @copyright MIT License

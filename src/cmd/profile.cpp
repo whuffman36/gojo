@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cstdint>
 #include <filesystem>
 #include <flat_map>
@@ -16,23 +20,29 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}profile{0} {3}[options]{0}
+    gojo {2}profile{0} [options]
 
 {1}Summary:{0}
-  Manage global gojo profiles. Some options require arguemnts to work. Profiles
-  are stored in ~/.gojocli/profiles as .gojo config files.
+    Manage gojo profiles. Gojo profiles are essentially gojo.toml config files
+    that are stored in ~/.gojo/profiles so they can be shared or resused.
 
-{1}Options{0}
-  {3}create{0} {3}<name>{0}    Create a new gojo profile with the specified
-                   name. The name arguemnt is required.
+{1}Arguments:{0}
+    {3}create{0} <name>               Create a gojo profile from the current
+                                project's gojo.toml config file with the name
+                                <name>.
 
-  {3}list{0}             List all of the current gojo profiles found in
-                   the system.
+    {3}list{0}                        List all gojo profiles that exist on the
+                                current system.
 
-  {3}show{0} {3}<name>{0}      Show the gojo profile with the specified name.
+    {3}show{0} <name>                 Show the contents of the gojo profile with
+                                name <name>. Using the value "current" for
+                                <name> prints the config of the current
+                                project.
 
-  {3}delete{0} {3}<name>{0}    Delete a gojo profile with the specified name.
-                   specify 'all' to delete all gojo profiles.
+    {3}delete{0} <name>               Remove the gojo profile with name <name> from
+                                the current system. Using the value "all" for
+                                <name> removes all gojo profiles from the
+                                current system.
 )"
 };
 

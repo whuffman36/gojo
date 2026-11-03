@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <filesystem>
 #include <format>
 #include <span>
@@ -12,16 +16,16 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}update{0} {3}[options]{0}
+    gojo {2}update{0} [options]
 
 {1}Summary:{0}
-  TODO
+    Install the most recent version of gojo-upgrade, the script used to
+    update gojo. This command exists because gojo cannot replace itself
+    when running.
 
 {1}Options:{0}
-  {3}--help{0}   Configure the project with an existing gojo profile.
-                     The profile must exist.
-
-  {3}--verbose | -v
+  --verbose, -v         Allow the output of the installation process to be
+                        forwarded to standard output.
 )"
 };
 

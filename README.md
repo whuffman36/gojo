@@ -10,7 +10,6 @@ meta meta build system? The idea is to
 
 Gojo is tested on MacOS and Ubuntu, and should work on any Linux distro.
 <br>
-<br>
 
 # Install
 ## Pre-compiled Binary
@@ -74,25 +73,24 @@ $ gojo
 "Throughout Heaven and Earth, I alone am the honored one."
 ```
 <br>
-<br>
 
 ## Build From Source
 Alternatively, you can clone this repo and build gojo from source:
 
 ```console
-$ git clone <insert link here>
+$ git clone https://github.com/whuffman36/gojo.git
 $ cd gojo
 $ make install
 ```
 
 Gojo requires some other dependencies that need to be installed before you can build and run it. Because each system is different, I will leave it up to you to learn how to get each dependency installed on your system:
 
-- CMake
-- Conan
-- clang-tidy (optional)
-- clang-format (optional)
-- cppcheck (optional)
-- git (optional)
+- [CMake](https://cmake.org/)
+- [conan](https://conan.io/)
+- [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) (optional)
+- [clang-format](https://clang.llvm.org/docs/ClangFormat.html) (optional)
+- [cppcheck](https://cppcheck.sourceforge.io/) (optional)
+- [git](https://git-scm.com/) (optional)
 
 Many of these will likely already be on your system if you are a developer. If you choose to omit the dependencies marked as optional above, gojo will still build and run but some functionality will be limited, namely the commands `gojo check` and `gojo fmt`.
 
@@ -104,7 +102,7 @@ Linux:
 $ source ~/.bashrc
 ```
 
-On MacOS (Or any system that uses zsh as the shell):
+MacOS (Or any system that uses zsh as the shell):
 
 ```console
 $ source ~/.zshrc
@@ -150,9 +148,8 @@ $ gojo
 "Throughout Heaven and Earth, I alone am the honored one."
 ```
 <br>
-<br>
 
-# Using Gojo
+# Getting Started
 Start a new project in your current working directory:
 
 ```console
@@ -177,13 +174,16 @@ as well as seeing all of the subcommands, arguemnts, and options for any command
 $ gojo <command> --help
 ```
 
-Finally, you can read about all of the project settings available in the gojo.toml config file with
+If you are new to C or C++, or you just want to learn about the gojo.toml config file, you can use a template to specify every available field:
 
 ```console
-$ gojo info
+$ gojo init <name>
+...
+$ cd <name>
+$ gojo info > gojo.toml
 ```
 
-<br>
+The template contains comments to explain each field along with all possible values, providing useful links to learning resources for the underlying tools that make up gojo.
 <br>
 
 # Contributing

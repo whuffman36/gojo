@@ -2,6 +2,7 @@
 name = "example"
 language = "C++"
 target = "binary"
+verbose = true
 
 [build]
 language_standard = 23

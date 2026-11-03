@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include <cstddef>
 #include <filesystem>
 #include <format>
@@ -16,21 +20,42 @@ namespace {
 
 constexpr std::string_view HELP {
     R"({1}Command:{0}
-  gojo {2}fmt{0} {3}[options]{0}
+    gojo {2}fmt{0} [options]
 
 {1}Summary:{0}
-  Format the project using clang-format. By default, this command uses the
-  .clang-format file found in the root of the project created by 'gojo init'.
-  If no file is found and no options are supplied, this command has no effect.
-  Any options supplied to this command are forwarded directly to clang-format
-  and override any settings in the .clang-format file. By default, code is
-  auto formatted and changed in-place according the rules laid out in the
-  .clang-format file. More information on clang-format can be found here:
-  {3}https://clang.llvm.org/docs/ClangFormat.html{0}
+    Auto format the project source code according to the style chosen. The
+    format style can be set in the gojo.toml config file with the field
+    checks.clang_format_style. The style can be any of the styles provided
+    by clang-format, the gojo style that can be found in ~/.gojo/formats/gojo,
+    or a custom style defined in a .clang-format file at the root of the
+    project. If no style is set, this command has no effect.
+    More information on clang-format can be found here:
+    {3}https://clang.llvm.org/docs/ClangFormat.html{0}
+
+    Custom formats can be created and saved to ~/.gojo/formats, as well as used
+    in other projects.
+
+    The following is a list of all possible values for the field
+    checks.clang_format_style:
+
+        - custom
+        - gojo
+        - google
+        - llvm
+        - chromium
+        - mozilla
+        - webkit
+        - microsoft
+        - gnu
+
+    If the field is set to 'custom', there must be a .clang-format file in the
+    project root.
 
 {1}Options:{0}
-  Any options supplied to this command are forwarded to clang-format and
-  override any rules set in the .clang-format file, if it exists.
+    --use=<format>      Use the format defined in ~/.gojo/formats/<format>.
+
+    --save-as=<name>    Save the format defined in the project root
+                        .clang-format file to ~/.gojo/formats/<name>.
 )"
 };
 
@@ -70,8 +95,6 @@ void copy_format_file(const std::filesystem::path& dest,
 namespace cmd {
 
 void fmt(std::span<std::string_view> args) {
-    std::string fmt_args { " -i" };
-
     for (const auto arg : args) {
         if (arg == "--help") {
             utils::gojo_print(utils::LogLevel::Info, HELP, INFO_COLORS);
@@ -90,10 +113,9 @@ void fmt(std::span<std::string_view> args) {
             return;
         }
         else {
-            fmt_args = args_to_string(args);
-            // Add space to the beginning for formatting.
-            fmt_args.insert(fmt_args.begin(), ' ');
-            break;
+            throw std::runtime_error {
+                std::format("gojo fmt: argument not recognized: {}", arg)
+            };
         }
     }
 
@@ -120,12 +142,11 @@ void fmt(std::span<std::string_view> args) {
         "find {} -type f "
         "-name '*.{}' -o "
         "-name '*.{}' "
-        "-exec clang-format{}{} {{}} +"
+        "-exec clang-format{} -i {{}} +"
     };
     const std::string cmd { std::format(fmt_str, utils::get_root_dir().string(),
                                         cfg.get_header_extension(),
-                                        cfg.get_source_extension(), style,
-                                        fmt_args) };
+                                        cfg.get_source_extension(), style) };
 
     const auto result { utils::execute_command(
         cmd.c_str(), false, true, cfg.get_build_dir() / "log.txt"

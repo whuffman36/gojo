@@ -1,6 +1,3 @@
-/// @file      src/conan.hpp
-/// @brief     Functionality for installing dependencies and managing profiles
-///            through the conan package manager.
 /// @author    William Huffman (whuffman36)
 /// @date      2026
 /// @copyright MIT License

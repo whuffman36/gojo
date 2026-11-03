@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #ifndef GOJO_SRC_CFG_ENUMS_HPP
 #define GOJO_SRC_CFG_ENUMS_HPP
 

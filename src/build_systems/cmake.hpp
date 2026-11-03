@@ -1,5 +1,3 @@
-/// @file      src/cmake.hpp
-/// @brief     Functionality for configuring and building a CMake project.
 /// @author    William Huffman (whuffman36)
 /// @date      2026
 /// @copyright MIT License
@@ -18,12 +16,6 @@ void configure(const cfg::Config& cfg, bool verbose);
 void build(const cfg::Config& cfg, std::string_view target, bool verbose);
 
 void test(const cfg::Config& cfg, std::string_view target);
-
-consteval std::string_view get_version() {
-    // Version 3.31.6 is the default version of cmake on github actions.
-    // Most recent version (July 2026): 4.3.4
-    return "3.28...4.3.4";
-}
 
 }  // namespace cmake
 

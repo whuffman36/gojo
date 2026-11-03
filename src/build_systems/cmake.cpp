@@ -1,3 +1,7 @@
+/// @author    William Huffman (whuffman36)
+/// @date      2026
+/// @copyright MIT License
+
 #include "src/build_systems/cmake.hpp"
 
 #include <chrono>

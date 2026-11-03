@@ -1,5 +1,3 @@
-/// @file      src/commands.hpp
-/// @brief     All the commands available to the user of the gojo CLI API.
 /// @author    William Huffman (whuffman36)
 /// @date      2026
 /// @copyright MIT License
